@@ -5,55 +5,67 @@ struct SupermarketSelectionView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.md) {
-                AppSectionHeader(title: "Choose supermarkets", subtitle: "Pick stores and comparison preferences.")
+            VStack(alignment: .leading, spacing: 14) {
+                BrandHeader(title: "Choose supermarkets", subtitle: "Pick stores and comparison preferences.")
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Basket mode").font(AppTypography.caption).foregroundStyle(AppColors.textSecondary)
-                    Picker("Basket mode", selection: $viewModel.comparisonMode) {
-                        ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
-                            Text(mode.title).tag(mode)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Basket mode")
+                            .font(BrandTypography.caption)
+                            .foregroundStyle(BrandPalette.textSecondary)
+                        Picker("Basket mode", selection: $viewModel.comparisonMode) {
+                            ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
+                                Text(mode.title).tag(mode)
+                            }
                         }
+                        .pickerStyle(.segmented)
                     }
-                    .pickerStyle(.segmented)
                 }
-                .appCardStyle()
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Preferences").font(AppTypography.caption).foregroundStyle(AppColors.textSecondary)
-                    Picker("Brand", selection: $viewModel.brandPreference) {
-                        ForEach(BrandPreference.allCases, id: \.self) { preference in
-                            Text(preference.title).tag(preference)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Preferences")
+                            .font(BrandTypography.caption)
+                            .foregroundStyle(BrandPalette.textSecondary)
+                        Picker("Brand", selection: $viewModel.brandPreference) {
+                            ForEach(BrandPreference.allCases, id: \.self) { preference in
+                                Text(preference.title).tag(preference)
+                            }
                         }
+
+                        Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
+                        Toggle("Organic only", isOn: $viewModel.organicOnly)
                     }
-                    Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
-                    Toggle("Organic only", isOn: $viewModel.organicOnly)
                 }
-                .appCardStyle()
 
                 ForEach(viewModel.supermarkets) { market in
                     Button { viewModel.toggleSelection(for: market) } label: {
                         HStack {
-                            VStack(alignment: .leading) {
-                                Text(market.name).font(.headline)
-                                Text(market.description).font(.caption).foregroundStyle(AppColors.textSecondary)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(market.name).font(BrandTypography.section)
+                                Text(market.description)
+                                    .font(BrandTypography.caption)
+                                    .foregroundStyle(BrandPalette.textSecondary)
                             }
                             Spacer()
                             Image(systemName: viewModel.selectedMarketIDs.contains(market.id) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(viewModel.selectedMarketIDs.contains(market.id) ? AppColors.brandRed : .gray)
+                                .foregroundStyle(viewModel.selectedMarketIDs.contains(market.id) ? BrandPalette.red : BrandPalette.textSecondary)
                         }
                     }
                     .buttonStyle(.plain)
-                    .appCardStyle()
+                    .padding(2)
+                    .background(BrandPalette.cloud.opacity(0.7))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
+                .padding(.horizontal, 8)
 
                 Button("Compare basket") { viewModel.runComparison() }
-                    .buttonStyle(AppPrimaryButtonStyle())
+                    .buttonStyle(BrandPrimaryButtonStyle())
                     .disabled(!viewModel.canCompare)
             }
-            .padding(AppSpacing.md)
+            .padding()
         }
-        .background(AppColors.background.ignoresSafeArea())
+        .brandScreenBackground()
         .navigationTitle("Supermarkets")
     }
 }
