@@ -8,7 +8,7 @@ struct BasketComparisonResultsView: View {
         List {
             summarySection
             supermarketTotalsSection
-            mixedBasketSection
+            selectedBasketSection
             unavailableSection
             saveSection
         }
@@ -19,10 +19,10 @@ struct BasketComparisonResultsView: View {
     private var summarySection: some View {
         Section("Summary") {
             summaryCard(
-                title: "Cheapest mixed basket",
-                value: viewModel.result.mixedBasket.total,
+                title: "Selected strategy",
+                value: viewModel.result.selectedBasket.total,
                 tint: .green,
-                subtitle: "Across \(viewModel.result.mixedBasket.supermarketsUsed.count) supermarkets"
+                subtitle: viewModel.result.comparisonMode.title
             )
 
             if let cheapestSingle = viewModel.result.cheapestSingleStore {
@@ -32,9 +32,6 @@ struct BasketComparisonResultsView: View {
                     tint: .blue,
                     subtitle: cheapestSingle.supermarket.name
                 )
-            } else {
-                Text("No single supermarket could fulfil every intent.")
-                    .foregroundStyle(.secondary)
             }
 
             summaryCard(
@@ -49,7 +46,7 @@ struct BasketComparisonResultsView: View {
                     title: "Savings vs best single-store",
                     value: viewModel.result.savingsVsCheapestSingleStore,
                     tint: .orange,
-                    subtitle: "Mixed basket advantage"
+                    subtitle: "Strategy advantage"
                 )
             }
         }
@@ -60,7 +57,7 @@ struct BasketComparisonResultsView: View {
             ForEach(Array(viewModel.result.supermarketTotals.enumerated()), id: \.element.id) { index, total in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Text("#\(index + 1) \(total.supermarket.name)")
+                        Label(total.supermarket.name, systemImage: "cart")
                             .font(.headline)
                         Spacer()
                         Text(total.total, format: .currency(code: "GBP"))
@@ -68,7 +65,7 @@ struct BasketComparisonResultsView: View {
                     }
 
                     if isCheapestSingleStore(total) {
-                        badge("Best single-store")
+                        badge("Best single-store", tint: .blue)
                     }
 
                     if !total.unavailableItems.isEmpty {
@@ -76,48 +73,77 @@ struct BasketComparisonResultsView: View {
                             .font(.caption)
                             .foregroundStyle(.orange)
                     }
+
+                    Text("Rank #\(index + 1)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 .padding(.vertical, 4)
             }
         }
     }
 
-    private var mixedBasketSection: some View {
-        Section("Cheapest mixed basket") {
-            if viewModel.result.mixedBasket.selections.isEmpty {
+    private var selectedBasketSection: some View {
+        Section(viewModel.result.comparisonMode == .cheapestPossible ? "Cheapest mixed basket" : "Cheapest single-store basket") {
+            if viewModel.result.selectedBasket.selections.isEmpty {
                 Text("No valid product matches were found for this basket.")
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(viewModel.result.mixedBasket.selections) { selection in
+                ForEach(viewModel.result.selectedBasket.selections) { selection in
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("\(selection.intent.userInput) → \(selection.supermarket.name)")
-                            .font(.subheadline.weight(.semibold))
-                        Text(selection.product.name)
-                            .font(.body)
                         HStack {
-                            Text(selection.product.size)
-                                .foregroundStyle(.secondary)
+                            Text("\(selection.intent.quantity)x \(selection.intent.userInput)")
+                                .font(.subheadline.weight(.semibold))
                             Spacer()
                             Text(selection.totalPrice, format: .currency(code: "GBP"))
                                 .fontWeight(.semibold)
                         }
 
-                        HStack(spacing: 8) {
-                            badge(selection.product.isOwnBrand ? "Own Brand" : "Branded")
-                            badge(selection.matchQuality.label)
-                            if selection.product.isPremium {
-                                badge("Premium")
+                        Text(selection.product.name)
+                            .font(.body)
+
+                        HStack {
+                            Text("\(selection.supermarket.name) • \(selection.product.size)")
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            Text("\(selection.product.unitDescription): \(selection.product.unitValue, format: .currency(code: "GBP"))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                badge(selection.product.isOwnBrand ? "Own-brand" : selection.product.brand, tint: .gray)
+                                badge(selection.matchQuality.label, tint: .green)
+                                if selection.product.isPremium {
+                                    badge("Premium", tint: .purple)
+                                }
+                                if selection.product.isOrganic {
+                                    badge("Organic", tint: .mint)
+                                }
+                                badge(selection.supermarket.name, tint: .blue)
+                            }
+                        }
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Why selected")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            ForEach(selection.reasons, id: \.self) { reason in
+                                Text("• \(reason)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
                         }
                     }
-                    .padding(.vertical, 4)
+                    .padding(.vertical, 6)
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
                     Divider()
-                    Text("Mixed total: \(viewModel.result.mixedBasket.total, format: .currency(code: "GBP"))")
+                    Text("Total: \(viewModel.result.selectedBasket.total, format: .currency(code: "GBP"))")
                         .font(.headline)
-                    Text("Uses \(viewModel.result.mixedBasket.supermarketsUsed.count) supermarket(s)")
+                    Text("Uses \(viewModel.result.selectedBasket.supermarketsUsed.count) supermarket(s)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -128,11 +154,11 @@ struct BasketComparisonResultsView: View {
 
     private var unavailableSection: some View {
         Section("Fallback") {
-            if viewModel.result.mixedBasket.unavailableItems.isEmpty {
+            if viewModel.result.selectedBasket.unavailableItems.isEmpty {
                 Text("All intents matched successfully.")
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(viewModel.result.mixedBasket.unavailableItems) { intent in
+                ForEach(viewModel.result.selectedBasket.unavailableItems) { intent in
                     Text("No sensible match found for \(intent.userInput).")
                         .foregroundStyle(.secondary)
                 }
@@ -165,12 +191,13 @@ struct BasketComparisonResultsView: View {
         .padding(.vertical, 6)
     }
 
-    private func badge(_ label: String) -> some View {
+    private func badge(_ label: String, tint: Color) -> some View {
         Text(label)
             .font(.caption2.weight(.semibold))
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color(.secondarySystemBackground))
+            .background(tint.opacity(0.12))
+            .foregroundStyle(tint)
             .clipShape(Capsule())
     }
 

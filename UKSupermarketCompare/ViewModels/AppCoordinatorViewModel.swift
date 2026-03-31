@@ -21,8 +21,13 @@ final class AppCoordinatorViewModel: ObservableObject {
         dataProvider.supermarkets()
     }
 
-    func compare(list: ShoppingList, markets: [Supermarket]) -> BasketOptimisationResult {
-        basketService.optimise(shoppingList: list, supermarkets: markets)
+    func compare(
+        list: ShoppingList,
+        markets: [Supermarket],
+        mode: BasketComparisonMode,
+        preferences: BasketUserPreferences
+    ) -> BasketOptimisationResult {
+        basketService.optimise(shoppingList: list, supermarkets: markets, mode: mode, preferences: preferences)
     }
 
     func openCreateList() {
