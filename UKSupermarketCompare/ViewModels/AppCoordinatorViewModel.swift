@@ -5,24 +5,24 @@ final class AppCoordinatorViewModel: ObservableObject {
 
     let store: ShoppingListStore
     private let dataProvider: SupermarketDataProviding
-    private let basketService: BasketComparing
+    private let basketService: BasketOptimising
 
     init(
         store: ShoppingListStore = ShoppingListStore(),
         dataProvider: SupermarketDataProviding = MockSupermarketDataService(),
-        basketService: BasketComparing? = nil
+        basketService: BasketOptimising? = nil
     ) {
         self.store = store
         self.dataProvider = dataProvider
-        self.basketService = basketService ?? BasketComparisonService(dataProvider: dataProvider)
+        self.basketService = basketService ?? BasketOptimiserService(dataProvider: dataProvider)
     }
 
     func supermarkets() -> [Supermarket] {
         dataProvider.supermarkets()
     }
 
-    func compare(list: ShoppingList, markets: [Supermarket]) -> BasketComparisonResult {
-        basketService.compare(shoppingList: list, supermarkets: markets)
+    func compare(list: ShoppingList, markets: [Supermarket]) -> BasketOptimisationResult {
+        basketService.optimise(shoppingList: list, supermarkets: markets)
     }
 
     func openCreateList() {
@@ -37,7 +37,7 @@ final class AppCoordinatorViewModel: ObservableObject {
         path.append(.supermarketSelection(list))
     }
 
-    func openResults(_ result: BasketComparisonResult) {
+    func openResults(_ result: BasketOptimisationResult) {
         path.append(.comparison(result))
     }
 
