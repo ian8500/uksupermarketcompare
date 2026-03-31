@@ -6,40 +6,54 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                BrandLogoView()
+            VStack(alignment: .leading, spacing: 16) {
+                BrandLogoView(subtitle: "Your grocery savings co-pilot")
                     .padding(.top, 8)
 
                 BrandCard {
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 10) {
                         Text(viewModel.title)
                             .font(BrandTypography.hero)
                             .foregroundStyle(BrandPalette.textPrimary)
                         Text(viewModel.subtitle)
                             .font(BrandTypography.body)
                             .foregroundStyle(BrandPalette.textSecondary)
+
                         HStack(spacing: 8) {
-                            BrandBadge(text: "Groceries")
-                            BrandBadge(text: "Price Compare", tint: BrandPalette.red)
-                            BrandBadge(text: "Save Money", tint: BrandPalette.success)
+                            BrandChip(text: "Live basket planning", tint: BrandPalette.blue)
+                            BrandChip(text: "Store-by-store totals", tint: BrandPalette.red)
                         }
-                        .padding(.top, 4)
                     }
                 }
 
-                VStack(spacing: 12) {
-                    Button("Create Shopping List") {
-                        coordinator.openCreateList()
-                    }
-                    .buttonStyle(BrandPrimaryButtonStyle())
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Get started")
+                            .font(BrandTypography.section)
+                            .foregroundStyle(BrandPalette.navy)
 
-                    Button("View Saved Lists") {
-                        coordinator.openSavedLists()
+                        Button("Create Shopping List") {
+                            coordinator.openCreateList()
+                        }
+                        .buttonStyle(BrandPrimaryButtonStyle())
+
+                        Button("View Saved Lists") {
+                            coordinator.openSavedLists()
+                        }
+                        .buttonStyle(BrandSecondaryButtonStyle())
                     }
-                    .buttonStyle(BrandSecondaryButtonStyle())
                 }
 
-                Spacer(minLength: 12)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How it works")
+                            .font(BrandTypography.section)
+                            .foregroundStyle(BrandPalette.navy)
+                        Text("1. Add groceries. 2. Pick your supermarkets. 3. Compare total cost instantly.")
+                            .font(BrandTypography.body)
+                            .foregroundStyle(BrandPalette.textSecondary)
+                    }
+                }
             }
             .padding()
         }

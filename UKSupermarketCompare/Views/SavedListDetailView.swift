@@ -4,23 +4,24 @@ struct SavedListDetailView: View {
     let shoppingList: ShoppingList
 
     var body: some View {
-        List {
-            Section("List Info") {
-                Text(shoppingList.title)
-                Text(shoppingList.createdAt, style: .date)
-                    .foregroundStyle(.secondary)
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                BrandHeader(title: shoppingList.title, subtitle: "Saved on \(shoppingList.createdAt.formatted(date: .abbreviated, time: .omitted)).")
 
-            Section("Items") {
                 ForEach(shoppingList.items) { item in
-                    HStack {
-                        Text(item.name)
-                        Spacer()
-                        Text("x\(item.quantity)")
+                    BrandCard {
+                        HStack {
+                            Text(item.name)
+                                .font(BrandTypography.body)
+                            Spacer()
+                            BrandBadge(text: "x\(item.quantity)", tint: BrandPalette.red)
+                        }
                     }
                 }
             }
+            .padding()
         }
+        .brandScreenBackground()
         .navigationTitle("Saved List")
     }
 }

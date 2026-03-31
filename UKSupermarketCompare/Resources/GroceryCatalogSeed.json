@@ -6111,5 +6111,4154 @@
     "preferredMatchingTags": [
       "bakery"
     ]
+  },
+  {
+    "id": "catalog-bulgur-wheat",
+    "displayName": "Bulgur Wheat",
+    "genericName": "bulgur wheat",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "bulgur wheat",
+      "bulgur-wheat",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-polenta",
+    "displayName": "Polenta",
+    "genericName": "polenta",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "polenta",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-jasmine-rice",
+    "displayName": "Jasmine Rice",
+    "genericName": "jasmine rice",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "jasmine rice",
+      "jasmine-rice",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-basmati-rice",
+    "displayName": "Basmati Rice",
+    "genericName": "basmati rice",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "basmati rice",
+      "basmati-rice",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-brown-rice",
+    "displayName": "Brown Rice",
+    "genericName": "brown rice",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "brown rice",
+      "brown-rice",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-sushi-rice",
+    "displayName": "Sushi Rice",
+    "genericName": "sushi rice",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "sushi rice",
+      "sushi-rice",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-arborio-rice",
+    "displayName": "Arborio Rice",
+    "genericName": "arborio rice",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "arborio rice",
+      "arborio-rice",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-rice-noodles",
+    "displayName": "Rice Noodles",
+    "genericName": "rice noodles",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "rice noodles",
+      "rice-noodles",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-egg-noodles",
+    "displayName": "Egg Noodles",
+    "genericName": "egg noodles",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "egg noodles",
+      "egg-noodles",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-wholewheat-pasta",
+    "displayName": "Wholewheat Pasta",
+    "genericName": "wholewheat pasta",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "wholewheat pasta",
+      "wholewheat-pasta",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-fusilli-pasta",
+    "displayName": "Fusilli Pasta",
+    "genericName": "fusilli pasta",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fusilli pasta",
+      "fusilli-pasta",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-cannellini-beans",
+    "displayName": "Cannellini Beans",
+    "genericName": "cannellini beans",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cannellini beans",
+      "cannellini-beans",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-black-beans",
+    "displayName": "Black Beans",
+    "genericName": "black beans",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "black beans",
+      "black-beans",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-strawberry-jam",
+    "displayName": "Strawberry Jam",
+    "genericName": "strawberry jam",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "strawberry jam",
+      "strawberry-jam",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-orange-marmalade",
+    "displayName": "Orange Marmalade",
+    "genericName": "orange marmalade",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "orange marmalade",
+      "orange-marmalade",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-maple-syrup",
+    "displayName": "Maple Syrup",
+    "genericName": "maple syrup",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "maple syrup",
+      "maple-syrup",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-cornflakes",
+    "displayName": "Cornflakes",
+    "genericName": "cornflakes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cornflakes",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-weetabix",
+    "displayName": "Weetabix",
+    "genericName": "weetabix",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "weetabix",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-rich-tea-biscuits",
+    "displayName": "Rich Tea Biscuits",
+    "genericName": "rich tea biscuits",
+    "category": "snacks",
+    "subcategory": "snacks",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "rich tea biscuits",
+      "rich-tea-biscuits",
+      "snacks"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "snacks",
+      "snacks"
+    ]
+  },
+  {
+    "id": "catalog-salted-crisps",
+    "displayName": "Salted Crisps",
+    "genericName": "salted crisps",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "salted crisps",
+      "salted-crisps",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-ready-salted-crisps",
+    "displayName": "Ready Salted Crisps",
+    "genericName": "ready salted crisps",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ready salted crisps",
+      "ready-salted-crisps",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-trail-mix",
+    "displayName": "Trail Mix",
+    "genericName": "trail mix",
+    "category": "snacks",
+    "subcategory": "snacks",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "trail mix",
+      "trail-mix",
+      "snacks"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "snacks",
+      "snacks"
+    ]
+  },
+  {
+    "id": "catalog-dark-chocolate",
+    "displayName": "Dark Chocolate",
+    "genericName": "dark chocolate",
+    "category": "snacks",
+    "subcategory": "snacks",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "dark chocolate",
+      "dark-chocolate",
+      "snacks"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "snacks",
+      "snacks"
+    ]
+  },
+  {
+    "id": "catalog-milk-chocolate",
+    "displayName": "Milk Chocolate",
+    "genericName": "milk chocolate",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "milk chocolate",
+      "milk-chocolate",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-strawberry-yogurt",
+    "displayName": "Strawberry Yogurt",
+    "genericName": "strawberry yogurt",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "strawberry yogurt",
+      "strawberry-yogurt",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-cheddar-cheese",
+    "displayName": "Cheddar Cheese",
+    "genericName": "cheddar cheese",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cheddar cheese",
+      "cheddar-cheese",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-mature-cheddar",
+    "displayName": "Mature Cheddar",
+    "genericName": "mature cheddar",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "mature cheddar",
+      "mature-cheddar",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-feta-cheese",
+    "displayName": "Feta Cheese",
+    "genericName": "feta cheese",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "feta cheese",
+      "feta-cheese",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-margarine",
+    "displayName": "Margarine",
+    "genericName": "margarine",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "margarine",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sour-cream",
+    "displayName": "Sour Cream",
+    "genericName": "sour cream",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "sour cream",
+      "sour-cream",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-free-range-eggs",
+    "displayName": "Free Range Eggs",
+    "genericName": "free range eggs",
+    "category": "dairy",
+    "subcategory": "chilled",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "free range eggs",
+      "free-range-eggs",
+      "dairy",
+      "chilled"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "dairy",
+      "chilled"
+    ]
+  },
+  {
+    "id": "catalog-wholegrain-mustard",
+    "displayName": "Wholegrain Mustard",
+    "genericName": "wholegrain mustard",
+    "category": "cupboard",
+    "subcategory": "condiments",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "wholegrain mustard",
+      "wholegrain-mustard",
+      "cupboard",
+      "condiments"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "condiments"
+    ]
+  },
+  {
+    "id": "catalog-mint-sauce",
+    "displayName": "Mint Sauce",
+    "genericName": "mint sauce",
+    "category": "cupboard",
+    "subcategory": "condiments",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "mint sauce",
+      "mint-sauce",
+      "cupboard",
+      "condiments"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "condiments"
+    ]
+  },
+  {
+    "id": "catalog-barbecue-sauce",
+    "displayName": "Barbecue Sauce",
+    "genericName": "barbecue sauce",
+    "category": "cupboard",
+    "subcategory": "condiments",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "barbecue sauce",
+      "barbecue-sauce",
+      "cupboard",
+      "condiments"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "condiments"
+    ]
+  },
+  {
+    "id": "catalog-worcestershire-sauce",
+    "displayName": "Worcestershire Sauce",
+    "genericName": "worcestershire sauce",
+    "category": "cupboard",
+    "subcategory": "condiments",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "worcestershire sauce",
+      "worcestershire-sauce",
+      "cupboard",
+      "condiments"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "condiments"
+    ]
+  },
+  {
+    "id": "catalog-curry-paste",
+    "displayName": "Curry Paste",
+    "genericName": "curry paste",
+    "category": "cupboard",
+    "subcategory": "condiments",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "curry paste",
+      "curry-paste",
+      "cupboard",
+      "condiments"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "condiments"
+    ]
+  },
+  {
+    "id": "catalog-ground-cumin",
+    "displayName": "Ground Cumin",
+    "genericName": "ground cumin",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ground cumin",
+      "ground-cumin",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-ground-coriander",
+    "displayName": "Ground Coriander",
+    "genericName": "ground coriander",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ground coriander",
+      "ground-coriander",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-smoked-paprika",
+    "displayName": "Smoked Paprika",
+    "genericName": "smoked paprika",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "smoked paprika",
+      "smoked-paprika",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-turmeric",
+    "displayName": "Turmeric",
+    "genericName": "turmeric",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "turmeric",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-garlic-granules",
+    "displayName": "Garlic Granules",
+    "genericName": "garlic granules",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "garlic granules",
+      "garlic-granules",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-oregano",
+    "displayName": "Oregano",
+    "genericName": "oregano",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "oregano",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-basil",
+    "displayName": "Basil",
+    "genericName": "basil",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "basil",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-sea-salt",
+    "displayName": "Sea Salt",
+    "genericName": "sea salt",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "sea salt",
+      "sea-salt",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-chilli-flakes",
+    "displayName": "Chilli Flakes",
+    "genericName": "chilli flakes",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "chilli flakes",
+      "chilli-flakes",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-cinnamon",
+    "displayName": "Cinnamon",
+    "genericName": "cinnamon",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cinnamon",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-ground-ginger",
+    "displayName": "Ground Ginger",
+    "genericName": "ground ginger",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ground ginger",
+      "ground-ginger",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-vanilla-extract",
+    "displayName": "Vanilla Extract",
+    "genericName": "vanilla extract",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "vanilla extract",
+      "vanilla-extract",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-bread-flour",
+    "displayName": "Bread Flour",
+    "genericName": "bread flour",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "bread flour",
+      "bread-flour",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-granulated-sugar",
+    "displayName": "Granulated Sugar",
+    "genericName": "granulated sugar",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "granulated sugar",
+      "granulated-sugar",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-icing-sugar",
+    "displayName": "Icing Sugar",
+    "genericName": "icing sugar",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "icing sugar",
+      "icing-sugar",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-yeast",
+    "displayName": "Yeast",
+    "genericName": "yeast",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "yeast",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-blackberries",
+    "displayName": "Blackberries",
+    "genericName": "blackberries",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "blackberries",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-melon",
+    "displayName": "Melon",
+    "genericName": "melon",
+    "category": "produce",
+    "subcategory": "fruit",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "melon",
+      "produce",
+      "fruit"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "fruit"
+    ]
+  },
+  {
+    "id": "catalog-peaches",
+    "displayName": "Peaches",
+    "genericName": "peaches",
+    "category": "produce",
+    "subcategory": "fruit",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "peaches",
+      "produce",
+      "fruit"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "fruit"
+    ]
+  },
+  {
+    "id": "catalog-lemons",
+    "displayName": "Lemons",
+    "genericName": "lemons",
+    "category": "produce",
+    "subcategory": "fruit",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "lemons",
+      "produce",
+      "fruit"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "fruit"
+    ]
+  },
+  {
+    "id": "catalog-limes",
+    "displayName": "Limes",
+    "genericName": "limes",
+    "category": "produce",
+    "subcategory": "fruit",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "limes",
+      "produce",
+      "fruit"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "fruit"
+    ]
+  },
+  {
+    "id": "catalog-sugar-snap-peas",
+    "displayName": "Sugar Snap Peas",
+    "genericName": "sugar snap peas",
+    "category": "cupboard",
+    "subcategory": "dry",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "sugar snap peas",
+      "sugar-snap-peas",
+      "cupboard",
+      "dry"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "dry"
+    ]
+  },
+  {
+    "id": "catalog-asparagus",
+    "displayName": "Asparagus",
+    "genericName": "asparagus",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "asparagus",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-leek",
+    "displayName": "Leek",
+    "genericName": "leek",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "leek",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-red-cabbage",
+    "displayName": "Red Cabbage",
+    "genericName": "red cabbage",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "red cabbage",
+      "red-cabbage",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-rocket",
+    "displayName": "Rocket",
+    "genericName": "rocket",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "rocket",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-watercress",
+    "displayName": "Watercress",
+    "genericName": "watercress",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "watercress",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-mixed-salad-leaves",
+    "displayName": "Mixed Salad Leaves",
+    "genericName": "mixed salad leaves",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "mixed salad leaves",
+      "mixed-salad-leaves",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-fresh-coriander",
+    "displayName": "Fresh Coriander",
+    "genericName": "fresh coriander",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fresh coriander",
+      "fresh-coriander",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-fresh-parsley",
+    "displayName": "Fresh Parsley",
+    "genericName": "fresh parsley",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fresh parsley",
+      "fresh-parsley",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-fresh-basil",
+    "displayName": "Fresh Basil",
+    "genericName": "fresh basil",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fresh basil",
+      "fresh-basil",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-fresh-mint",
+    "displayName": "Fresh Mint",
+    "genericName": "fresh mint",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fresh mint",
+      "fresh-mint",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-ginger-root",
+    "displayName": "Ginger Root",
+    "genericName": "ginger root",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ginger root",
+      "ginger-root",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-red-chillies",
+    "displayName": "Red Chillies",
+    "genericName": "red chillies",
+    "category": "cupboard",
+    "subcategory": "spices",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "red chillies",
+      "red-chillies",
+      "cupboard",
+      "spices"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "cupboard",
+      "spices"
+    ]
+  },
+  {
+    "id": "catalog-chestnut-mushrooms",
+    "displayName": "Chestnut Mushrooms",
+    "genericName": "chestnut mushrooms",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "chestnut mushrooms",
+      "chestnut-mushrooms",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-shiitake-mushrooms",
+    "displayName": "Shiitake Mushrooms",
+    "genericName": "shiitake mushrooms",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "shiitake mushrooms",
+      "shiitake-mushrooms",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-sweet-potatoes",
+    "displayName": "Sweet Potatoes",
+    "genericName": "sweet potatoes",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "sweet potatoes",
+      "sweet-potatoes",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-red-onions",
+    "displayName": "Red Onions",
+    "genericName": "red onions",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "red onions",
+      "red-onions",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-white-onions",
+    "displayName": "White Onions",
+    "genericName": "white onions",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "white onions",
+      "white-onions",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-shallots",
+    "displayName": "Shallots",
+    "genericName": "shallots",
+    "category": "produce",
+    "subcategory": "vegetables",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "shallots",
+      "produce",
+      "vegetables"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "produce",
+      "vegetables"
+    ]
+  },
+  {
+    "id": "catalog-beef-mince",
+    "displayName": "Beef Mince",
+    "genericName": "beef mince",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "beef mince",
+      "beef-mince",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-pork-mince",
+    "displayName": "Pork Mince",
+    "genericName": "pork mince",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "pork mince",
+      "pork-mince",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-turkey-mince",
+    "displayName": "Turkey Mince",
+    "genericName": "turkey mince",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "turkey mince",
+      "turkey-mince",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-smoked-bacon",
+    "displayName": "Smoked Bacon",
+    "genericName": "smoked bacon",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "smoked bacon",
+      "smoked-bacon",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-cumberland-sausages",
+    "displayName": "Cumberland Sausages",
+    "genericName": "cumberland sausages",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cumberland sausages",
+      "cumberland-sausages",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-ham-slices",
+    "displayName": "Ham Slices",
+    "genericName": "ham slices",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ham slices",
+      "ham-slices",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-roast-chicken-slices",
+    "displayName": "Roast Chicken Slices",
+    "genericName": "roast chicken slices",
+    "category": "meat",
+    "subcategory": "fresh",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "roast chicken slices",
+      "roast-chicken-slices",
+      "meat",
+      "fresh"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "meat",
+      "fresh"
+    ]
+  },
+  {
+    "id": "catalog-breaded-chicken",
+    "displayName": "Breaded Chicken",
+    "genericName": "breaded chicken",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "breaded chicken",
+      "breaded-chicken",
+      "grocery",
+      "essentials"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-frozen-mixed-vegetables",
+    "displayName": "Frozen Mixed Vegetables",
+    "genericName": "frozen mixed vegetables",
+    "category": "frozen",
+    "subcategory": "frozen",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "frozen mixed vegetables",
+      "frozen-mixed-vegetables",
+      "frozen"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "frozen",
+      "frozen"
+    ]
+  },
+  {
+    "id": "catalog-cranberry-juice",
+    "displayName": "Cranberry Juice",
+    "genericName": "cranberry juice",
+    "category": "drinks",
+    "subcategory": "beverages",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "cranberry juice",
+      "cranberry-juice",
+      "drinks",
+      "beverages"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "drinks",
+      "beverages"
+    ]
+  },
+  {
+    "id": "catalog-ground-coffee",
+    "displayName": "Ground Coffee",
+    "genericName": "ground coffee",
+    "category": "drinks",
+    "subcategory": "beverages",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "ground coffee",
+      "ground-coffee",
+      "drinks",
+      "beverages"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "drinks",
+      "beverages"
+    ]
+  },
+  {
+    "id": "catalog-instant-coffee",
+    "displayName": "Instant Coffee",
+    "genericName": "instant coffee",
+    "category": "drinks",
+    "subcategory": "beverages",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "instant coffee",
+      "instant-coffee",
+      "drinks",
+      "beverages"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "drinks",
+      "beverages"
+    ]
+  },
+  {
+    "id": "catalog-fabric-softener",
+    "displayName": "Fabric Softener",
+    "genericName": "fabric softener",
+    "category": "household",
+    "subcategory": "cleaning",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "fabric softener",
+      "fabric-softener",
+      "household",
+      "cleaning"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "household",
+      "cleaning"
+    ]
+  },
+  {
+    "id": "catalog-multi-surface-cleaner",
+    "displayName": "Multi Surface Cleaner",
+    "genericName": "multi surface cleaner",
+    "category": "household",
+    "subcategory": "cleaning",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1kg"
+    ],
+    "commonUnits": [
+      "pack",
+      "g"
+    ],
+    "keywords": [
+      "multi surface cleaner",
+      "multi-surface-cleaner",
+      "household",
+      "cleaning"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "household",
+      "cleaning"
+    ]
+  },
+  {
+    "id": "catalog-soya-milk",
+    "displayName": "Soya Milk",
+    "genericName": "soya milk",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "soya milk",
+      "soya-milk"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-lactose-free-milk",
+    "displayName": "Lactose Free Milk",
+    "genericName": "lactose free milk",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "lactose free milk",
+      "lactose-free-milk"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-baby-potatoes",
+    "displayName": "Baby Potatoes",
+    "genericName": "baby potatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "baby potatoes",
+      "baby-potatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-new-potatoes",
+    "displayName": "New Potatoes",
+    "genericName": "new potatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "new potatoes",
+      "new-potatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-maris-piper-potatoes",
+    "displayName": "Maris Piper Potatoes",
+    "genericName": "maris piper potatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "maris piper potatoes",
+      "maris-piper-potatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-baby-spinach",
+    "displayName": "Baby Spinach",
+    "genericName": "baby spinach",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "baby spinach",
+      "baby-spinach"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-iceberg-lettuce",
+    "displayName": "Iceberg Lettuce",
+    "genericName": "iceberg lettuce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "iceberg lettuce",
+      "iceberg-lettuce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-little-gem-lettuce",
+    "displayName": "Little Gem Lettuce",
+    "genericName": "little gem lettuce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "little gem lettuce",
+      "little-gem-lettuce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-cherry-tomatoes",
+    "displayName": "Cherry Tomatoes",
+    "genericName": "cherry tomatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "cherry tomatoes",
+      "cherry-tomatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-beef-tomatoes",
+    "displayName": "Beef Tomatoes",
+    "genericName": "beef tomatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "beef tomatoes",
+      "beef-tomatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-vine-tomatoes",
+    "displayName": "Vine Tomatoes",
+    "genericName": "vine tomatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "vine tomatoes",
+      "vine-tomatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-romaine-lettuce",
+    "displayName": "Romaine Lettuce",
+    "genericName": "romaine lettuce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "romaine lettuce",
+      "romaine-lettuce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-pak-choi",
+    "displayName": "Pak Choi",
+    "genericName": "pak choi",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "pak choi",
+      "pak-choi"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-tenderstem-broccoli",
+    "displayName": "Tenderstem Broccoli",
+    "genericName": "tenderstem broccoli",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "tenderstem broccoli",
+      "tenderstem-broccoli"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-brussels-sprouts",
+    "displayName": "Brussels Sprouts",
+    "genericName": "brussels sprouts",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "brussels sprouts",
+      "brussels-sprouts"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-turnip",
+    "displayName": "Turnip",
+    "genericName": "turnip",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "turnip",
+      "turnip"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-radishes",
+    "displayName": "Radishes",
+    "genericName": "radishes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "radishes",
+      "radishes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-edamame-beans",
+    "displayName": "Edamame Beans",
+    "genericName": "edamame beans",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "edamame beans",
+      "edamame-beans"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-broad-beans",
+    "displayName": "Broad Beans",
+    "genericName": "broad beans",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "broad beans",
+      "broad-beans"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-frozen-spinach",
+    "displayName": "Frozen Spinach",
+    "genericName": "frozen spinach",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "frozen spinach",
+      "frozen-spinach"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-frozen-prawns",
+    "displayName": "Frozen Prawns",
+    "genericName": "frozen prawns",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "frozen prawns",
+      "frozen-prawns"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-frozen-cod",
+    "displayName": "Frozen Cod",
+    "genericName": "frozen cod",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "frozen cod",
+      "frozen-cod"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-vanilla-ice-cream",
+    "displayName": "Vanilla Ice Cream",
+    "genericName": "vanilla ice cream",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "vanilla ice cream",
+      "vanilla-ice-cream"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-chocolate-ice-cream",
+    "displayName": "Chocolate Ice Cream",
+    "genericName": "chocolate ice cream",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "chocolate ice cream",
+      "chocolate-ice-cream"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sliced-white-bread",
+    "displayName": "Sliced White Bread",
+    "genericName": "sliced white bread",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sliced white bread",
+      "sliced-white-bread"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sliced-wholemeal-bread",
+    "displayName": "Sliced Wholemeal Bread",
+    "genericName": "sliced wholemeal bread",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sliced wholemeal bread",
+      "sliced-wholemeal-bread"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-seeded-bread",
+    "displayName": "Seeded Bread",
+    "genericName": "seeded bread",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "seeded bread",
+      "seeded-bread"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-brioche-buns",
+    "displayName": "Brioche Buns",
+    "genericName": "brioche buns",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "brioche buns",
+      "brioche-buns"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-hot-dog-rolls",
+    "displayName": "Hot Dog Rolls",
+    "genericName": "hot dog rolls",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "hot dog rolls",
+      "hot-dog-rolls"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sourdough-bread",
+    "displayName": "Sourdough Bread",
+    "genericName": "sourdough bread",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sourdough bread",
+      "sourdough-bread"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-baguette",
+    "displayName": "Baguette",
+    "genericName": "baguette",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "baguette",
+      "baguette"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-apple-cider-vinegar",
+    "displayName": "Apple Cider Vinegar",
+    "genericName": "apple cider vinegar",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "apple cider vinegar",
+      "apple-cider-vinegar"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-rapeseed-oil",
+    "displayName": "Rapeseed Oil",
+    "genericName": "rapeseed oil",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "rapeseed oil",
+      "rapeseed-oil"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sesame-oil",
+    "displayName": "Sesame Oil",
+    "genericName": "sesame oil",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sesame oil",
+      "sesame-oil"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-tahini",
+    "displayName": "Tahini",
+    "genericName": "tahini",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "tahini",
+      "tahini"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-hoisin-sauce",
+    "displayName": "Hoisin Sauce",
+    "genericName": "hoisin sauce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "hoisin sauce",
+      "hoisin-sauce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-oyster-sauce",
+    "displayName": "Oyster Sauce",
+    "genericName": "oyster sauce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "oyster sauce",
+      "oyster-sauce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-teriyaki-sauce",
+    "displayName": "Teriyaki Sauce",
+    "genericName": "teriyaki sauce",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "teriyaki sauce",
+      "teriyaki-sauce"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-rice-vinegar",
+    "displayName": "Rice Vinegar",
+    "genericName": "rice vinegar",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "rice vinegar",
+      "rice-vinegar"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-pickled-gherkins",
+    "displayName": "Pickled Gherkins",
+    "genericName": "pickled gherkins",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "pickled gherkins",
+      "pickled-gherkins"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-capers",
+    "displayName": "Capers",
+    "genericName": "capers",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "capers",
+      "capers"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-olives",
+    "displayName": "Olives",
+    "genericName": "olives",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "olives",
+      "olives"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sun-dried-tomatoes",
+    "displayName": "Sun Dried Tomatoes",
+    "genericName": "sun dried tomatoes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sun dried tomatoes",
+      "sun-dried-tomatoes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-red-lentils",
+    "displayName": "Red Lentils",
+    "genericName": "red lentils",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "red lentils",
+      "red-lentils"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-green-lentils",
+    "displayName": "Green Lentils",
+    "genericName": "green lentils",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "green lentils",
+      "green-lentils"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-puy-lentils",
+    "displayName": "Puy Lentils",
+    "genericName": "puy lentils",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "puy lentils",
+      "puy-lentils"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-pearl-barley",
+    "displayName": "Pearl Barley",
+    "genericName": "pearl barley",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "pearl barley",
+      "pearl-barley"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-chia-seeds",
+    "displayName": "Chia Seeds",
+    "genericName": "chia seeds",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "chia seeds",
+      "chia-seeds"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-pumpkin-seeds",
+    "displayName": "Pumpkin Seeds",
+    "genericName": "pumpkin seeds",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "pumpkin seeds",
+      "pumpkin-seeds"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sunflower-seeds",
+    "displayName": "Sunflower Seeds",
+    "genericName": "sunflower seeds",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sunflower seeds",
+      "sunflower-seeds"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-flaked-almonds",
+    "displayName": "Flaked Almonds",
+    "genericName": "flaked almonds",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "flaked almonds",
+      "flaked-almonds"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-walnuts",
+    "displayName": "Walnuts",
+    "genericName": "walnuts",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "walnuts",
+      "walnuts"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-cashews",
+    "displayName": "Cashews",
+    "genericName": "cashews",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "cashews",
+      "cashews"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-peanuts",
+    "displayName": "Peanuts",
+    "genericName": "peanuts",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "peanuts",
+      "peanuts"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-hazelnuts",
+    "displayName": "Hazelnuts",
+    "genericName": "hazelnuts",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "hazelnuts",
+      "hazelnuts"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-raisins",
+    "displayName": "Raisins",
+    "genericName": "raisins",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "raisins",
+      "raisins"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-sultanas",
+    "displayName": "Sultanas",
+    "genericName": "sultanas",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "sultanas",
+      "sultanas"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-dates",
+    "displayName": "Dates",
+    "genericName": "dates",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "dates",
+      "dates"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-apricots",
+    "displayName": "Apricots",
+    "genericName": "apricots",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "apricots",
+      "apricots"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-prunes",
+    "displayName": "Prunes",
+    "genericName": "prunes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "prunes",
+      "prunes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-coconut-flakes",
+    "displayName": "Coconut Flakes",
+    "genericName": "coconut flakes",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "coconut flakes",
+      "coconut-flakes"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-tinned-peaches",
+    "displayName": "Tinned Peaches",
+    "genericName": "tinned peaches",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "tinned peaches",
+      "tinned-peaches"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-tinned-pineapple",
+    "displayName": "Tinned Pineapple",
+    "genericName": "tinned pineapple",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "tinned pineapple",
+      "tinned-pineapple"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-tinned-pears",
+    "displayName": "Tinned Pears",
+    "genericName": "tinned pears",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "tinned pears",
+      "tinned-pears"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-evaporated-milk",
+    "displayName": "Evaporated Milk",
+    "genericName": "evaporated milk",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "evaporated milk",
+      "evaporated-milk"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-condensed-milk",
+    "displayName": "Condensed Milk",
+    "genericName": "condensed milk",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "condensed milk",
+      "condensed-milk"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
+  },
+  {
+    "id": "catalog-custard",
+    "displayName": "Custard",
+    "genericName": "custard",
+    "category": "grocery",
+    "subcategory": "essentials",
+    "commonSizes": [
+      "1 pack",
+      "500g",
+      "1 litre"
+    ],
+    "commonUnits": [
+      "pack",
+      "g",
+      "litre"
+    ],
+    "keywords": [
+      "custard",
+      "custard"
+    ],
+    "defaultQuantityStep": 1,
+    "preferredMatchingTags": [
+      "grocery",
+      "essentials"
+    ]
   }
 ]

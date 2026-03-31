@@ -23,10 +23,14 @@ final class GroceryCatalogService: GroceryCatalogServing {
 
     func suggestions(for query: String, limit: Int = 8) -> [GrocerySuggestion] {
         let normalized = normalize(query)
-        guard !normalized.isEmpty else { return Array(allItems.prefix(limit)).map { GrocerySuggestion(id: $0.id, item: $0, score: 1) } }
+        guard !normalized.isEmpty else {
+            return Array(allItems.prefix(limit)).map { GrocerySuggestion(id: $0.id, item: $0, score: 1) }
+        }
+
+        let queryTokens = tokens(from: normalized)
 
         return allItems.compactMap { item in
-            let score = score(item: item, query: normalized)
+            let score = score(item: item, query: normalized, queryTokens: queryTokens)
             guard score > 0 else { return nil }
             return GrocerySuggestion(id: item.id, item: item, score: score)
         }
@@ -45,27 +49,41 @@ final class GroceryCatalogService: GroceryCatalogServing {
         return suggestions(for: normalized, limit: 1).first?.item
     }
 
-    private func score(item: GroceryCatalogItem, query: String) -> Int {
-        let name = item.displayName.lowercased()
-        let generic = item.genericName.lowercased()
-        let keywords = item.keywords.map { $0.lowercased() }
+    private func score(item: GroceryCatalogItem, query: String, queryTokens: [String]) -> Int {
+        let name = normalize(item.displayName)
+        let generic = normalize(item.genericName)
+        let keywords = item.keywords.map(normalize)
+        let itemTokens = item.normalizedTokens
 
-        if name == query || generic == query { return 120 }
+        if name == query || generic == query || keywords.contains(query) { return 220 }
 
         var value = 0
-        if name.hasPrefix(query) { value += 90 }
-        if generic.hasPrefix(query) { value += 70 }
-        if name.contains(query) { value += 55 }
-        if generic.contains(query) { value += 45 }
 
-        let keywordPrefixHits = keywords.filter { $0.hasPrefix(query) }.count
-        let keywordContainsHits = keywords.filter { $0.contains(query) }.count
-        value += keywordPrefixHits * 20
-        value += keywordContainsHits * 8
+        if name.hasPrefix(query) { value += 140 }
+        if generic.hasPrefix(query) { value += 120 }
+        if keywords.contains(where: { $0.hasPrefix(query) }) { value += 90 }
 
-        let queryTokens = Set(query.split(separator: " ").map(String.init))
-        let tokenMatches = queryTokens.intersection(Set(item.normalizedTokens)).count
-        value += tokenMatches * 18
+        if name.contains(query) { value += 85 }
+        if generic.contains(query) { value += 72 }
+        value += keywords.filter { $0.contains(query) }.count * 22
+
+        let tokenSet = Set(queryTokens)
+        let directTokenHits = tokenSet.intersection(Set(itemTokens)).count
+        value += directTokenHits * 32
+
+        let prefixTokenHits = queryTokens.filter { queryToken in
+            itemTokens.contains(where: { $0.hasPrefix(queryToken) })
+        }.count
+        value += prefixTokenHits * 20
+
+        let closeTokenHits = queryTokens.filter { queryToken in
+            itemTokens.contains(where: { levenshteinDistance($0, queryToken) == 1 && min($0.count, queryToken.count) > 3 })
+        }.count
+        value += closeTokenHits * 10
+
+        if queryTokens.count > 1 && queryTokens.allSatisfy({ token in name.contains(token) || generic.contains(token) }) {
+            value += 36
+        }
 
         return value
     }
@@ -73,7 +91,38 @@ final class GroceryCatalogService: GroceryCatalogServing {
     private func normalize(_ value: String) -> String {
         value
             .lowercased()
+            .folding(options: .diacriticInsensitive, locale: .current)
+            .replacingOccurrences(of: "[^a-z0-9 ]", with: " ", options: .regularExpression)
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "  ", with: " ")
+    }
+
+    private func tokens(from value: String) -> [String] {
+        normalize(value).split(separator: " ").map(String.init)
+    }
+
+    private func levenshteinDistance(_ lhs: String, _ rhs: String) -> Int {
+        if lhs == rhs { return 0 }
+        if lhs.isEmpty { return rhs.count }
+        if rhs.isEmpty { return lhs.count }
+
+        let a = Array(lhs)
+        let b = Array(rhs)
+        var previous = Array(0...b.count)
+
+        for (i, charA) in a.enumerated() {
+            var current = [i + 1]
+            for (j, charB) in b.enumerated() {
+                let substitutionCost = charA == charB ? 0 : 1
+                let next = min(
+                    previous[j + 1] + 1,
+                    current[j] + 1,
+                    previous[j] + substitutionCost
+                )
+                current.append(next)
+            }
+            previous = current
+        }
+        return previous[b.count]
     }
 }
