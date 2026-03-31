@@ -4,56 +4,56 @@ struct SupermarketSelectionView: View {
     @ObservedObject var viewModel: SupermarketSelectionViewModel
 
     var body: some View {
-        List {
-            Section("Compare mode") {
-                Picker("Basket mode", selection: $viewModel.comparisonMode) {
-                    ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
-                        Text(mode.title).tag(mode)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.md) {
+                AppSectionHeader(title: "Choose supermarkets", subtitle: "Pick stores and comparison preferences.")
 
-            Section("Product preferences") {
-                Picker("Brand", selection: $viewModel.brandPreference) {
-                    ForEach(BrandPreference.allCases, id: \.self) { preference in
-                        Text(preference.title).tag(preference)
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text("Basket mode").font(AppTypography.caption).foregroundStyle(AppColors.textSecondary)
+                    Picker("Basket mode", selection: $viewModel.comparisonMode) {
+                        ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
+                            Text(mode.title).tag(mode)
+                        }
                     }
+                    .pickerStyle(.segmented)
                 }
-                Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
-                Toggle("Organic only", isOn: $viewModel.organicOnly)
-            }
+                .appCardStyle()
 
-            Section("Choose supermarkets") {
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text("Preferences").font(AppTypography.caption).foregroundStyle(AppColors.textSecondary)
+                    Picker("Brand", selection: $viewModel.brandPreference) {
+                        ForEach(BrandPreference.allCases, id: \.self) { preference in
+                            Text(preference.title).tag(preference)
+                        }
+                    }
+                    Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
+                    Toggle("Organic only", isOn: $viewModel.organicOnly)
+                }
+                .appCardStyle()
+
                 ForEach(viewModel.supermarkets) { market in
-                    Button {
-                        viewModel.toggleSelection(for: market)
-                    } label: {
+                    Button { viewModel.toggleSelection(for: market) } label: {
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(market.name)
-                                    .font(.headline)
-                                Text(market.description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                Text(market.name).font(.headline)
+                                Text(market.description).font(.caption).foregroundStyle(AppColors.textSecondary)
                             }
                             Spacer()
                             Image(systemName: viewModel.selectedMarketIDs.contains(market.id) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(viewModel.selectedMarketIDs.contains(market.id) ? .green : .gray)
+                                .foregroundStyle(viewModel.selectedMarketIDs.contains(market.id) ? AppColors.brandRed : .gray)
                         }
                     }
                     .buttonStyle(.plain)
+                    .appCardStyle()
                 }
-            }
 
-            Section {
-                Button("Compare Basket") {
-                    viewModel.runComparison()
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(!viewModel.canCompare)
+                Button("Compare basket") { viewModel.runComparison() }
+                    .buttonStyle(AppPrimaryButtonStyle())
+                    .disabled(!viewModel.canCompare)
             }
+            .padding(AppSpacing.md)
         }
-        .navigationTitle("Supermarket Selection")
+        .background(AppColors.background.ignoresSafeArea())
+        .navigationTitle("Supermarkets")
     }
 }

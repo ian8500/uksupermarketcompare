@@ -11,7 +11,12 @@ struct UKSupermarketCompareApp: App {
                     .navigationDestination(for: AppRoute.self) { route in
                         switch route {
                         case .createList:
-                            CreateShoppingListView(viewModel: CreateShoppingListViewModel(coordinator: coordinator))
+                            CreateShoppingListView(
+                                viewModel: CreateShoppingListViewModel(
+                                    coordinator: coordinator,
+                                    catalogService: coordinator.groceryCatalogService
+                                )
+                            )
                         case .supermarketSelection(let shoppingList):
                             SupermarketSelectionView(viewModel: SupermarketSelectionViewModel(shoppingList: shoppingList, coordinator: coordinator))
                         case .comparison(let result):

@@ -5,27 +5,49 @@ struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text(viewModel.title)
-                .font(.largeTitle.bold())
-            Text(viewModel.subtitle)
-                .foregroundStyle(.secondary)
+        ScrollView {
+            VStack(alignment: .leading, spacing: AppSpacing.lg) {
+                HStack {
+                    AppWordmark()
+                    Spacer()
+                    AppBadge(text: "Beta", tint: AppColors.brandBlue)
+                }
 
-            Spacer()
+                VStack(alignment: .leading, spacing: AppSpacing.sm) {
+                    Text(viewModel.title)
+                        .font(AppTypography.hero)
+                        .foregroundStyle(AppColors.textPrimary)
+                    Text(viewModel.subtitle)
+                        .font(AppTypography.body)
+                        .foregroundStyle(AppColors.textSecondary)
+                }
 
-            Button("Create Shopping List") {
-                coordinator.openCreateList()
+                VStack(spacing: AppSpacing.md) {
+                    Button("Create New List") { coordinator.openCreateList() }
+                        .buttonStyle(AppPrimaryButtonStyle())
+                    Button("Saved Lists") { coordinator.openSavedLists() }
+                        .buttonStyle(.bordered)
+                        .tint(AppColors.brandBlue)
+                    Button("Sample Comparison") { coordinator.openCreateList() }
+                        .buttonStyle(.bordered)
+                        .tint(AppColors.brandRed)
+                }
+
+                AppSectionHeader(
+                    title: "How it works",
+                    subtitle: "Add groceries, select supermarkets, and get the lowest basket strategy in seconds."
+                )
+                .appCardStyle()
+
+                AppEmptyState(
+                    icon: "basket",
+                    title: "Ready for your weekly shop?",
+                    subtitle: "Build a list and compare mock prices from major UK supermarkets."
+                )
             }
-            .buttonStyle(.borderedProminent)
-
-            Button("View Saved Lists") {
-                coordinator.openSavedLists()
-            }
-            .buttonStyle(.bordered)
-
-            Spacer()
+            .padding(AppSpacing.md)
         }
-        .padding()
+        .background(AppColors.background.ignoresSafeArea())
         .navigationTitle("Welcome")
     }
 }

@@ -2,14 +2,20 @@ import Foundation
 
 final class CreateShoppingListViewModel: ObservableObject {
     @Published var listTitle = "Weekly Shop"
-    @Published var itemName = ""
+    @Published var itemName = "" {
+        didSet { refreshSuggestions() }
+    }
     @Published var quantity = 1
     @Published private(set) var items: [ShoppingItem] = []
+    @Published private(set) var suggestions: [GrocerySuggestion] = []
 
     private let coordinator: AppCoordinatorViewModel
+    private let catalogService: GroceryCatalogServing
 
-    init(coordinator: AppCoordinatorViewModel) {
+    init(coordinator: AppCoordinatorViewModel, catalogService: GroceryCatalogServing) {
         self.coordinator = coordinator
+        self.catalogService = catalogService
+        self.suggestions = catalogService.suggestions(for: "", limit: 6)
     }
 
     var canAddItem: Bool {
@@ -20,12 +26,29 @@ final class CreateShoppingListViewModel: ObservableObject {
         !items.isEmpty && !listTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    func applySuggestion(_ suggestion: GrocerySuggestion) {
+        itemName = suggestion.item.displayName
+        quantity = max(1, suggestion.item.defaultQuantityStep)
+    }
+
     func addItem() {
         guard canAddItem else { return }
         let cleanedName = itemName.trimmingCharacters(in: .whitespacesAndNewlines)
-        items.append(ShoppingItem(name: cleanedName, quantity: max(quantity, 1)))
+        let resolvedName = catalogService.catalogItem(matching: cleanedName)?.displayName ?? cleanedName.capitalized
+        items.append(ShoppingItem(name: resolvedName, quantity: max(quantity, 1)))
         itemName = ""
         quantity = 1
+        refreshSuggestions()
+    }
+
+    func quickAddSuggestion(_ suggestion: GrocerySuggestion) {
+        applySuggestion(suggestion)
+        addItem()
+    }
+
+    func updateQuantity(for itemID: UUID, delta: Int) {
+        guard let index = items.firstIndex(where: { $0.id == itemID }) else { return }
+        items[index].quantity = max(1, items[index].quantity + delta)
     }
 
     func deleteItem(at offsets: IndexSet) {
@@ -36,5 +59,9 @@ final class CreateShoppingListViewModel: ObservableObject {
         guard canContinue else { return }
         let list = ShoppingList(title: listTitle.trimmingCharacters(in: .whitespacesAndNewlines), items: items)
         coordinator.openSelection(for: list)
+    }
+
+    private func refreshSuggestions() {
+        suggestions = catalogService.suggestions(for: itemName, limit: 8)
     }
 }

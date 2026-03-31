@@ -11,9 +11,11 @@ protocol BasketOptimising {
 
 final class BasketOptimiserService: BasketOptimising {
     private let dataProvider: SupermarketDataProviding
+    private let groceryCatalogService: GroceryCatalogServing
 
-    init(dataProvider: SupermarketDataProviding) {
+    init(dataProvider: SupermarketDataProviding, groceryCatalogService: GroceryCatalogServing) {
         self.dataProvider = dataProvider
+        self.groceryCatalogService = groceryCatalogService
     }
 
     func optimise(
@@ -71,9 +73,10 @@ final class BasketOptimiserService: BasketOptimising {
 
     private func resolveIntent(item: ShoppingItem) -> GroceryIntent {
         let normalized = item.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        let category: GroceryCategory
+        let catalogItem = groceryCatalogService.catalogItem(matching: normalized)
 
-        switch normalized {
+        let category: GroceryCategory
+        switch (catalogItem?.genericName.lowercased() ?? normalized) {
         case let value where value.contains("milk"): category = .milk
         case let value where value.contains("bread") || value.contains("loaf"): category = .bread
         case let value where value.contains("egg"): category = .eggs
@@ -91,7 +94,7 @@ final class BasketOptimiserService: BasketOptimising {
         default: category = .unknown
         }
 
-        return GroceryIntent(userInput: item.name, category: category, quantity: item.quantity)
+        return GroceryIntent(userInput: catalogItem?.displayName ?? item.name, category: category, quantity: item.quantity)
     }
 
     private func buildSupermarketTotal(for supermarket: Supermarket, intents: [GroceryIntent], preferences: BasketUserPreferences) -> SupermarketBasketTotal {
