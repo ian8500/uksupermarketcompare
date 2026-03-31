@@ -1,0 +1,200 @@
+[
+  {
+    "sku": "SA001",
+    "title": "semi skimmed milk 2l",
+    "brand": "Tesco",
+    "category": "dairy",
+    "size_value": 2,
+    "size_unit": "l",
+    "own_brand": false,
+    "price": 1.76,
+    "unit_price": 0.88
+  },
+  {
+    "sku": "SA002",
+    "title": "heinz baked beans 415g",
+    "brand": "Heinz",
+    "category": "tinned",
+    "size_value": 415,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 1.51,
+    "unit_price": 3.64
+  },
+  {
+    "sku": "SA003",
+    "title": "penne pasta 500g",
+    "brand": "Sainsbury's",
+    "category": "dry",
+    "size_value": 500,
+    "size_unit": "g",
+    "own_brand": true,
+    "price": 1.01,
+    "unit_price": 2.02
+  },
+  {
+    "sku": "SA004",
+    "title": "wholemeal bread 800g",
+    "brand": "Sainsbury's",
+    "category": "bakery",
+    "size_value": 800,
+    "size_unit": "g",
+    "own_brand": true,
+    "price": 1.41,
+    "unit_price": 1.76
+  },
+  {
+    "sku": "SA005",
+    "title": "cheddar cheese 400g",
+    "brand": "Cathedral City",
+    "category": "dairy",
+    "size_value": 400,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 3.58,
+    "unit_price": 8.95
+  },
+  {
+    "sku": "SA006",
+    "title": "eggs 12 pack",
+    "brand": "Sainsbury's",
+    "category": "dairy",
+    "size_value": 12,
+    "size_unit": "ct",
+    "own_brand": true,
+    "price": 2.21,
+    "unit_price": 0.18
+  },
+  {
+    "sku": "SA007",
+    "title": "bananas 1kg",
+    "brand": "Sainsbury's",
+    "category": "produce",
+    "size_value": 1,
+    "size_unit": "kg",
+    "own_brand": true,
+    "price": 1.26,
+    "unit_price": 1.26
+  },
+  {
+    "sku": "SA008",
+    "title": "chicken breast fillets 650g",
+    "brand": "Sainsbury's",
+    "category": "meat",
+    "size_value": 650,
+    "size_unit": "g",
+    "own_brand": true,
+    "price": 4.56,
+    "unit_price": 7.02
+  },
+  {
+    "sku": "SA009",
+    "title": "basmati rice 1kg",
+    "brand": "Tilda",
+    "category": "dry",
+    "size_value": 1,
+    "size_unit": "kg",
+    "own_brand": false,
+    "price": 2.88,
+    "unit_price": 2.88
+  },
+  {
+    "sku": "SA010",
+    "title": "olive oil 1l",
+    "brand": "Bertolli",
+    "category": "dry",
+    "size_value": 1,
+    "size_unit": "l",
+    "own_brand": false,
+    "price": 6.26,
+    "unit_price": 6.26
+  },
+  {
+    "sku": "SA011",
+    "title": "greek yogurt 500g",
+    "brand": "Fage",
+    "category": "dairy",
+    "size_value": 500,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 2.68,
+    "unit_price": 5.36
+  },
+  {
+    "sku": "SA012",
+    "title": "frozen peas 900g",
+    "brand": "Birds Eye",
+    "category": "frozen",
+    "size_value": 900,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 2.38,
+    "unit_price": 2.64
+  },
+  {
+    "sku": "SA013",
+    "title": "orange juice 1l",
+    "brand": "Tropicana",
+    "category": "drinks",
+    "size_value": 1,
+    "size_unit": "l",
+    "own_brand": false,
+    "price": 2.46,
+    "unit_price": 2.46
+  },
+  {
+    "sku": "SA014",
+    "title": "toilet roll 9 pack",
+    "brand": "Andrex",
+    "category": "household",
+    "size_value": 9,
+    "size_unit": "ct",
+    "own_brand": false,
+    "price": 5.86,
+    "unit_price": 0.65
+  },
+  {
+    "sku": "SA015",
+    "title": "washing up liquid 500ml",
+    "brand": "Fairy",
+    "category": "household",
+    "size_value": 500,
+    "size_unit": "ml",
+    "own_brand": false,
+    "price": 1.96,
+    "unit_price": 3.92
+  },
+  {
+    "sku": "SA016",
+    "title": "porridge oats 1kg",
+    "brand": "Sainsbury's",
+    "category": "breakfast",
+    "size_value": 1,
+    "size_unit": "kg",
+    "own_brand": true,
+    "price": 1.51,
+    "unit_price": 1.51
+  },
+  {
+    "sku": "SA017",
+    "title": "cornflakes 500g",
+    "brand": "Kellogg's",
+    "category": "breakfast",
+    "size_value": 500,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 2.78,
+    "unit_price": 5.56
+  },
+  {
+    "sku": "SA018",
+    "title": "passata 500g",
+    "brand": "Mutti",
+    "category": "tinned",
+    "size_value": 500,
+    "size_unit": "g",
+    "own_brand": false,
+    "price": 1.86,
+    "unit_price": 3.72
+  }
+]
