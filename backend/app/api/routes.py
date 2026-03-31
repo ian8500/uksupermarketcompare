@@ -13,7 +13,7 @@ from app.schemas.common import (
     SavedListIn,
     SavedListOut,
 )
-from app.services.basket import compare_basket, create_saved_list
+from app.services.basket import compare_basket, compare_existing_basket, create_saved_list
 
 router = APIRouter()
 
@@ -39,6 +39,17 @@ def get_basket(basket_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Not found")
     items = db.query(BasketItem).filter(BasketItem.basket_id == basket_id).all()
     return {"id": basket.id, "name": basket.name, "items": [i.query_text for i in items]}
+
+
+@router.get("/baskets/{basket_id}/comparison")
+def get_basket_comparison(basket_id: int, retailers: str, db: Session = Depends(get_db)):
+    basket = db.query(Basket).filter(Basket.id == basket_id).first()
+    if not basket:
+        raise HTTPException(status_code=404, detail="Not found")
+    retailer_list = [value.strip() for value in retailers.split(",") if value.strip()]
+    if not retailer_list:
+        raise HTTPException(status_code=400, detail="At least one retailer is required")
+    return compare_existing_basket(db, basket_id, retailer_list)
 
 
 @router.post("/saved-lists", response_model=SavedListOut)
