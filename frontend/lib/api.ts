@@ -35,3 +35,10 @@ export async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${API}${path}`, { cache: "no-store" });
   return parseResponse<T>(res);
 }
+
+export async function deleteJson(path: string): Promise<void> {
+  const res = await fetch(`${API}${path}`, { method: "DELETE", cache: "no-store" });
+  if (!res.ok) {
+    await parseResponse(res);
+  }
+}
