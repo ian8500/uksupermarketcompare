@@ -6,108 +6,162 @@ struct BasketComparisonResultsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.md) {
-                HStack {
-                    AppWordmark()
-                    Spacer()
-                    AppBadge(text: "Results", tint: AppColors.brandBlue)
+            VStack(alignment: .leading, spacing: 14) {
+                BrandLogoView(subtitle: "Optimised savings results")
+
+                section("Summary") {
+                    summaryCard(
+                        title: "Selected strategy",
+                        value: viewModel.result.selectedBasket.total,
+                        tint: BrandPalette.success,
+                        subtitle: viewModel.result.comparisonMode.title
+                    )
+
+                    if let cheapestSingle = viewModel.result.cheapestSingleStore {
+                        summaryCard(
+                            title: "Cheapest single-store basket",
+                            value: cheapestSingle.total,
+                            tint: BrandPalette.blue,
+                            subtitle: cheapestSingle.supermarket.name
+                        )
+                    }
+
+                    summaryCard(
+                        title: "Savings vs most expensive",
+                        value: viewModel.result.savingsVsMostExpensive,
+                        tint: BrandPalette.red,
+                        subtitle: "Based on selected supermarkets"
+                    )
                 }
 
-                resultHeader
-                savingsCards
-                rankings
-                purchasePlan
+                section("Supermarket totals") {
+                    ForEach(Array(viewModel.result.supermarketTotals.enumerated()), id: \.element.id) { index, total in
+                        BrandCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack {
+                                    Label(total.supermarket.name, systemImage: "cart")
+                                        .font(BrandTypography.section)
+                                    Spacer()
+                                    Text(total.total, format: .currency(code: "GBP"))
+                                        .font(BrandTypography.section)
+                                }
 
-                Button(didSave ? "Saved" : "Save list") {
+                                HStack(spacing: 8) {
+                                    if isCheapestSingleStore(total) {
+                                        BrandBadge(text: "Best single-store")
+                                    }
+                                    if !total.unavailableItems.isEmpty {
+                                        BrandBadge(text: "Missing \(total.unavailableItems.count)", tint: BrandPalette.warning)
+                                    }
+                                    BrandBadge(text: "Rank #\(index + 1)", tint: BrandPalette.red)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                section(viewModel.result.comparisonMode == .cheapestPossible ? "Cheapest mixed basket" : "Cheapest single-store basket") {
+                    if viewModel.result.selectedBasket.selections.isEmpty {
+                        BrandCard {
+                            Text("No valid product matches were found for this basket.")
+                                .foregroundStyle(BrandPalette.textSecondary)
+                        }
+                    } else {
+                        ForEach(viewModel.result.selectedBasket.selections) { selection in
+                            BrandCard {
+                                VStack(alignment: .leading, spacing: 10) {
+                                    HStack {
+                                        Text("\(selection.intent.quantity)x \(selection.intent.userInput)")
+                                            .font(BrandTypography.section)
+                                        Spacer()
+                                        Text(selection.totalPrice, format: .currency(code: "GBP"))
+                                            .font(BrandTypography.section)
+                                            .foregroundStyle(BrandPalette.blue)
+                                    }
+
+                                    Text(selection.product.name)
+                                        .font(BrandTypography.body)
+
+                                    Text("\(selection.supermarket.name) • \(selection.product.size)")
+                                        .font(BrandTypography.caption)
+                                        .foregroundStyle(BrandPalette.textSecondary)
+
+                                    ScrollView(.horizontal, showsIndicators: false) {
+                                        HStack(spacing: 8) {
+                                            BrandBadge(text: selection.product.isOwnBrand ? "Own-brand" : selection.product.brand, tint: BrandPalette.textSecondary)
+                                            BrandBadge(text: selection.matchQuality.label, tint: BrandPalette.success)
+                                            if selection.product.isPremium {
+                                                BrandBadge(text: "Premium", tint: BrandPalette.red)
+                                            }
+                                            if selection.product.isOrganic {
+                                                BrandBadge(text: "Organic", tint: BrandPalette.success)
+                                            }
+                                            BrandBadge(text: selection.supermarket.name)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                section("Fallback") {
+                    if viewModel.result.selectedBasket.unavailableItems.isEmpty {
+                        BrandCard {
+                            Text("All intents matched successfully.")
+                                .font(BrandTypography.body)
+                                .foregroundStyle(BrandPalette.textSecondary)
+                        }
+                    } else {
+                        ForEach(viewModel.result.selectedBasket.unavailableItems) { intent in
+                            BrandCard {
+                                Text("No sensible match found for \(intent.userInput).")
+                                    .font(BrandTypography.body)
+                                    .foregroundStyle(BrandPalette.textSecondary)
+                            }
+                        }
+                    }
+                }
+
+                Button(didSave ? "Saved" : "Save List") {
                     viewModel.saveList()
                     didSave = true
                 }
-                .buttonStyle(AppPrimaryButtonStyle())
+                .buttonStyle(BrandPrimaryButtonStyle())
                 .disabled(didSave)
             }
-            .padding(AppSpacing.md)
+            .padding()
         }
-        .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle("Best Basket")
+        .brandScreenBackground()
+        .navigationTitle("Optimised Basket")
     }
 
-    private var resultHeader: some View {
+    private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Comparison complete")
-                .font(AppTypography.title)
-            Text("\(viewModel.result.comparisonMode.title) across \(viewModel.result.supermarketTotals.count) supermarkets")
-                .foregroundStyle(AppColors.textSecondary)
-            Text(viewModel.result.selectedBasket.total, format: .currency(code: "GBP"))
-                .font(.system(size: 30, weight: .bold, design: .rounded))
-                .foregroundStyle(AppColors.brandRed)
-        }
-        .appCardStyle()
-    }
-
-    private var savingsCards: some View {
-        VStack(spacing: AppSpacing.sm) {
-            summaryRow(title: "Cheapest mixed basket", amount: viewModel.result.mixedBasket.total, tint: AppColors.brandBlue)
-            if let cheapestSingle = viewModel.result.cheapestSingleStore {
-                summaryRow(title: "Cheapest single-store (\(cheapestSingle.supermarket.name))", amount: cheapestSingle.total, tint: AppColors.success)
-            }
-            summaryRow(title: "Savings vs most expensive", amount: viewModel.result.savingsVsMostExpensive, tint: AppColors.brandRed)
-        }
-    }
-
-    private var rankings: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            AppSectionHeader(title: "Supermarket ranking", subtitle: "Quickly scan totals and missing items.")
-            ForEach(Array(viewModel.result.supermarketTotals.enumerated()), id: \.element.id) { index, total in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("#\(index + 1) \(total.supermarket.name)")
-                            .font(.headline)
-                        Text(total.unavailableItems.isEmpty ? "All items available" : "Missing \(total.unavailableItems.count) item(s)")
-                            .font(.caption)
-                            .foregroundStyle(AppColors.textSecondary)
-                    }
-                    Spacer()
-                    Text(total.total, format: .currency(code: "GBP"))
-                        .font(.headline)
-                }
-                .appCardStyle()
-            }
-        }
-    }
-
-    private var purchasePlan: some View {
-        VStack(alignment: .leading, spacing: AppSpacing.sm) {
-            AppSectionHeader(title: "Item-by-item plan", subtitle: "Use this to buy each item from the best-value store.")
-            ForEach(viewModel.result.selectedBasket.selections) { selection in
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack {
-                        Text("\(selection.quantity)x \(selection.intent.userInput)")
-                            .font(.headline)
-                        Spacer()
-                        Text(selection.totalPrice, format: .currency(code: "GBP"))
-                            .font(.headline)
-                    }
-                    Text(selection.supermarket.name + " • " + selection.product.name)
-                        .font(.caption)
-                        .foregroundStyle(AppColors.textSecondary)
-                    HStack {
-                        AppBadge(text: selection.matchQuality.label, tint: AppColors.brandBlue)
-                        if selection.product.isOwnBrand { AppBadge(text: "Own-brand", tint: AppColors.success) }
-                    }
-                }
-                .appCardStyle()
-            }
-        }
-    }
-
-    private func summaryRow(title: String, amount: Decimal, tint: Color) -> some View {
-        HStack {
             Text(title)
-            Spacer()
-            Text(amount, format: .currency(code: "GBP"))
-                .font(.headline)
-                .foregroundStyle(tint)
+                .font(BrandTypography.section)
+                .foregroundStyle(BrandPalette.navy)
+            content()
         }
-        .appCardStyle()
+    }
+
+    private func summaryCard(title: String, value: Decimal, tint: Color, subtitle: String) -> some View {
+        BrandCard {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(BrandTypography.caption)
+                    .foregroundStyle(BrandPalette.textSecondary)
+                Text(value, format: .currency(code: "GBP"))
+                    .font(BrandTypography.title)
+                    .foregroundStyle(tint)
+                Text(subtitle)
+                    .font(BrandTypography.caption)
+                    .foregroundStyle(BrandPalette.textSecondary)
+            }
+        }
+    }
+
+    private func isCheapestSingleStore(_ total: SupermarketBasketTotal) -> Bool {
+        viewModel.result.cheapestSingleStore?.supermarket.id == total.supermarket.id
     }
 }

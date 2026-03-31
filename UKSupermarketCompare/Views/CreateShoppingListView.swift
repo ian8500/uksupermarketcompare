@@ -5,107 +5,89 @@ struct CreateShoppingListView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                AppSectionHeader(title: "Create shopping list", subtitle: "Search your groceries and build a comparison-ready basket.")
-
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("List name")
-                        .font(AppTypography.caption)
-                        .foregroundStyle(AppColors.textSecondary)
-                    TextField("Weekly Shop", text: $viewModel.listTitle)
-                        .textFieldStyle(.roundedBorder)
+            VStack(spacing: 14) {
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("List Name")
+                        TextField("Weekly Shop", text: $viewModel.listTitle)
+                            .textInputAutocapitalization(.words)
+                            .padding(12)
+                            .background(BrandPalette.cloud)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
                 }
-                .appCardStyle()
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Add item")
-                        .font(AppTypography.caption)
-                        .foregroundStyle(AppColors.textSecondary)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("Add Item")
+                        TextField("Item name", text: $viewModel.itemName)
+                            .padding(12)
+                            .background(BrandPalette.cloud)
+                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                    TextField("Try milk, pasta, tomatoes...", text: $viewModel.itemName)
-                        .textFieldStyle(.roundedBorder)
+                        HStack {
+                            Text("Quantity")
+                                .font(BrandTypography.body)
+                                .foregroundStyle(BrandPalette.textPrimary)
+                            Spacer()
+                            Stepper("\(viewModel.quantity)", value: $viewModel.quantity, in: 1...20)
+                                .labelsHidden()
+                            Text("\(viewModel.quantity)")
+                                .font(BrandTypography.section)
+                                .foregroundStyle(BrandPalette.blue)
+                        }
 
-                    Stepper("Quantity: \(viewModel.quantity)", value: $viewModel.quantity, in: 1...20)
-
-                    Button("Add to list") { viewModel.addItem() }
-                        .buttonStyle(AppPrimaryButtonStyle())
+                        Button("Add Item") {
+                            viewModel.addItem()
+                        }
+                        .buttonStyle(BrandSecondaryButtonStyle())
                         .disabled(!viewModel.canAddItem)
+                    }
+                }
 
-                    if !viewModel.suggestions.isEmpty {
-                        VStack(alignment: .leading, spacing: AppSpacing.xs) {
-                            Text("Suggestions")
-                                .font(AppTypography.caption)
-                                .foregroundStyle(AppColors.textSecondary)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("Current Basket")
 
-                            ForEach(viewModel.suggestions) { suggestion in
-                                Button {
-                                    viewModel.quickAddSuggestion(suggestion)
-                                } label: {
-                                    HStack {
-                                        VStack(alignment: .leading, spacing: 2) {
-                                            Text(suggestion.item.displayName)
-                                                .foregroundStyle(AppColors.textPrimary)
-                                            Text(suggestion.hintText)
-                                                .font(.caption)
-                                                .foregroundStyle(AppColors.textSecondary)
-                                        }
-                                        Spacer()
-                                        Image(systemName: "plus.circle.fill")
-                                            .foregroundStyle(AppColors.brandRed)
+                        if viewModel.items.isEmpty {
+                            Text("No items yet. Add at least one item to continue.")
+                                .font(BrandTypography.body)
+                                .foregroundStyle(BrandPalette.textSecondary)
+                        } else {
+                            ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { index, item in
+                                HStack {
+                                    Text(item.name)
+                                        .font(BrandTypography.body)
+                                    Spacer()
+                                    BrandBadge(text: "x\(item.quantity)", tint: BrandPalette.red)
+                                    Button {
+                                        viewModel.deleteItem(at: IndexSet(integer: index))
+                                    } label: {
+                                        Image(systemName: "trash")
+                                            .foregroundStyle(BrandPalette.red)
                                     }
                                 }
-                                .buttonStyle(.plain)
-                                Divider()
+                                .padding(.vertical, 2)
                             }
                         }
                     }
                 }
-                .appCardStyle()
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text("Your basket")
-                        .font(AppTypography.sectionTitle)
-
-                    if viewModel.items.isEmpty {
-                        AppEmptyState(icon: "list.bullet.rectangle", title: "No items yet", subtitle: "Start typing to get smart grocery suggestions.")
-                    } else {
-                        ForEach(viewModel.items) { item in
-                            HStack(spacing: AppSpacing.md) {
-                                VStack(alignment: .leading) {
-                                    Text(item.name)
-                                        .font(.headline)
-                                    Text("Quantity: \(item.quantity)")
-                                        .font(.caption)
-                                        .foregroundStyle(AppColors.textSecondary)
-                                }
-                                Spacer()
-                                HStack {
-                                    Button { viewModel.updateQuantity(for: item.id, delta: -1) } label: { Image(systemName: "minus.circle") }
-                                    Button { viewModel.updateQuantity(for: item.id, delta: 1) } label: { Image(systemName: "plus.circle") }
-                                    Button {
-                                        if let index = viewModel.items.firstIndex(where: { $0.id == item.id }) {
-                                            viewModel.deleteItem(at: IndexSet(integer: index))
-                                        }
-                                    } label: { Image(systemName: "trash") }
-                                }
-                                .buttonStyle(.plain)
-                                .foregroundStyle(AppColors.brandBlue)
-                            }
-                            .padding(.vertical, 6)
-                        }
-                    }
-                }
-                .appCardStyle()
-
-                Button("Continue to supermarket selection") {
+                Button("Continue to Supermarket Selection") {
                     viewModel.continueToSupermarketSelection()
                 }
-                .buttonStyle(AppPrimaryButtonStyle())
+                .buttonStyle(BrandPrimaryButtonStyle())
                 .disabled(!viewModel.canContinue)
             }
-            .padding(AppSpacing.md)
+            .padding()
         }
-        .background(AppColors.background.ignoresSafeArea())
-        .navigationTitle("Shopping List")
+        .brandScreenBackground()
+        .navigationTitle("Create Shopping List")
+    }
+
+    private func sectionTitle(_ text: String) -> some View {
+        Text(text)
+            .font(BrandTypography.section)
+            .foregroundStyle(BrandPalette.navy)
     }
 }

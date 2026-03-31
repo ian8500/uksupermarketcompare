@@ -6,48 +6,44 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: AppSpacing.lg) {
-                HStack {
-                    AppWordmark()
-                    Spacer()
-                    AppBadge(text: "Beta", tint: AppColors.brandBlue)
+            VStack(alignment: .leading, spacing: 18) {
+                BrandLogoView()
+                    .padding(.top, 8)
+
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(viewModel.title)
+                            .font(BrandTypography.hero)
+                            .foregroundStyle(BrandPalette.textPrimary)
+                        Text(viewModel.subtitle)
+                            .font(BrandTypography.body)
+                            .foregroundStyle(BrandPalette.textSecondary)
+                        HStack(spacing: 8) {
+                            BrandBadge(text: "Groceries")
+                            BrandBadge(text: "Price Compare", tint: BrandPalette.red)
+                            BrandBadge(text: "Save Money", tint: BrandPalette.success)
+                        }
+                        .padding(.top, 4)
+                    }
                 }
 
-                VStack(alignment: .leading, spacing: AppSpacing.sm) {
-                    Text(viewModel.title)
-                        .font(AppTypography.hero)
-                        .foregroundStyle(AppColors.textPrimary)
-                    Text(viewModel.subtitle)
-                        .font(AppTypography.body)
-                        .foregroundStyle(AppColors.textSecondary)
+                VStack(spacing: 12) {
+                    Button("Create Shopping List") {
+                        coordinator.openCreateList()
+                    }
+                    .buttonStyle(BrandPrimaryButtonStyle())
+
+                    Button("View Saved Lists") {
+                        coordinator.openSavedLists()
+                    }
+                    .buttonStyle(BrandSecondaryButtonStyle())
                 }
 
-                VStack(spacing: AppSpacing.md) {
-                    Button("Create New List") { coordinator.openCreateList() }
-                        .buttonStyle(AppPrimaryButtonStyle())
-                    Button("Saved Lists") { coordinator.openSavedLists() }
-                        .buttonStyle(.bordered)
-                        .tint(AppColors.brandBlue)
-                    Button("Sample Comparison") { coordinator.openCreateList() }
-                        .buttonStyle(.bordered)
-                        .tint(AppColors.brandRed)
-                }
-
-                AppSectionHeader(
-                    title: "How it works",
-                    subtitle: "Add groceries, select supermarkets, and get the lowest basket strategy in seconds."
-                )
-                .appCardStyle()
-
-                AppEmptyState(
-                    icon: "basket",
-                    title: "Ready for your weekly shop?",
-                    subtitle: "Build a list and compare mock prices from major UK supermarkets."
-                )
+                Spacer(minLength: 12)
             }
-            .padding(AppSpacing.md)
+            .padding()
         }
-        .background(AppColors.background.ignoresSafeArea())
+        .brandScreenBackground()
         .navigationTitle("Welcome")
     }
 }
