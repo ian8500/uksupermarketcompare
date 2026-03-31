@@ -13,3 +13,11 @@ def test_saved_lists(client):
     got = client.get("/saved-lists")
     assert got.status_code == 200
     assert len(got.json()) == 1
+
+    saved_id = create.json()["id"]
+    deleted = client.delete(f"/saved-lists/{saved_id}")
+    assert deleted.status_code == 204
+
+    after_delete = client.get("/saved-lists")
+    assert after_delete.status_code == 200
+    assert after_delete.json() == []

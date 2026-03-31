@@ -64,6 +64,15 @@ def list_saved_lists(db: Session = Depends(get_db)):
     return [SavedListOut(id=r.id, name=r.name, items=json.loads(r.items_json)) for r in rows]
 
 
+@router.delete("/saved-lists/{saved_list_id}", status_code=204)
+def delete_saved_list(saved_list_id: int, db: Session = Depends(get_db)):
+    row = db.query(SavedList).filter(SavedList.id == saved_list_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Saved list not found")
+    db.delete(row)
+    db.commit()
+
+
 @router.get("/products/search")
 def search_products(q: str, db: Session = Depends(get_db)):
     items = db.query(ProductRaw).filter(ProductRaw.normalized_title.contains(q.lower())).limit(20).all()
