@@ -1,6 +1,6 @@
 import Foundation
 
 final class HomeViewModel: ObservableObject {
-    let title = "UK Supermarket Compare"
-    let subtitle = "Build a basket, compare mock prices, and save your lists locally."
+    let title = "Shop smarter, save more each week"
+    let subtitle = "UKSupermarketCompare helps you build a basket, compare prices, and spot the best-value checkout plan."
 }
