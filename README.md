@@ -38,6 +38,48 @@ App URLs:
 - Frontend: http://localhost:3000
 - API docs: http://localhost:8000/docs
 
+
+## Xcode (iOS) support
+
+This repo is **not a native Swift app**, but the Next.js frontend can be wrapped and run from Xcode using Capacitor.
+
+1. Install frontend dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+2. Start the existing app services from the repo root:
+
+```bash
+docker compose up --build
+```
+
+3. In a second terminal, run the iOS sync/open flow:
+
+```bash
+cd frontend
+npm run xcode
+```
+
+4. Xcode opens `ios/App/App.xcworkspace`. Pick an iOS Simulator and press **Run**.
+
+### Running on a physical iPhone
+
+When using a real device, set `CAP_SERVER_URL` to your computer's LAN IP so the phone can reach your Next.js frontend:
+
+```bash
+cd frontend
+CAP_SERVER_URL=http://192.168.1.20:3000 npm run xcode
+```
+
+Also set `NEXT_PUBLIC_API_URL` to a reachable backend address (not localhost on the phone), for example:
+
+```bash
+NEXT_PUBLIC_API_URL=http://192.168.1.20:8000
+```
+
 ## API Endpoints
 
 - `POST /lists/parse`
