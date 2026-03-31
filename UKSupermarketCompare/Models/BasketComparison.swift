@@ -11,6 +11,10 @@ enum GroceryCategory: String, Codable, Hashable, CaseIterable {
     case chickenBreast
     case cereal
     case cheese
+    case tomatoes
+    case rice
+    case yogurt
+    case apples
     case unknown
 
     var displayName: String {
@@ -23,16 +27,20 @@ enum GroceryCategory: String, Codable, Hashable, CaseIterable {
 
     var defaultKeywords: [String] {
         switch self {
-        case .milk: return ["milk", "semi skimmed", "whole", "skimmed"]
-        case .bread: return ["bread", "sliced", "wholemeal", "white"]
-        case .eggs: return ["eggs", "egg", "free range"]
-        case .butter: return ["butter", "spreadable"]
-        case .pasta: return ["pasta", "spaghetti", "penne"]
-        case .bakedBeans: return ["baked beans", "beans"]
-        case .bananas: return ["banana", "bananas"]
-        case .chickenBreast: return ["chicken breast", "chicken"]
-        case .cereal: return ["cereal", "corn flakes", "wheat biscuits", "muesli"]
-        case .cheese: return ["cheese", "cheddar"]
+        case .milk: return ["milk", "semi skimmed", "whole", "skimmed", "uht"]
+        case .bread: return ["bread", "sliced", "wholemeal", "white", "seeded"]
+        case .eggs: return ["eggs", "egg", "free range", "mixed weight"]
+        case .butter: return ["butter", "spreadable", "salted", "unsalted"]
+        case .pasta: return ["pasta", "spaghetti", "penne", "fusilli"]
+        case .bakedBeans: return ["baked beans", "beans", "tinned beans"]
+        case .bananas: return ["banana", "bananas", "fruit"]
+        case .chickenBreast: return ["chicken breast", "chicken", "fillets", "fresh"]
+        case .cereal: return ["cereal", "corn flakes", "wheat biscuits", "muesli", "granola"]
+        case .cheese: return ["cheese", "cheddar", "mozzarella", "red leicester"]
+        case .tomatoes: return ["tomato", "tomatoes", "salad"]
+        case .rice: return ["rice", "basmati", "long grain"]
+        case .yogurt: return ["yogurt", "yoghurt", "greek"]
+        case .apples: return ["apple", "apples", "fruit"]
         case .unknown: return []
         }
     }
@@ -54,6 +62,40 @@ enum MatchQuality: Int, Codable, Hashable, Comparable {
         case .weakSubstitute: return "Substitute"
         }
     }
+}
+
+enum BasketComparisonMode: String, Codable, CaseIterable, Hashable {
+    case cheapestPossible
+    case cheapestSingleStoreOnly
+
+    var title: String {
+        switch self {
+        case .cheapestPossible: return "Cheapest possible"
+        case .cheapestSingleStoreOnly: return "Single-store only"
+        }
+    }
+}
+
+enum BrandPreference: String, Codable, CaseIterable, Hashable {
+    case neutral
+    case ownBrandPreferred
+    case brandedPreferred
+
+    var title: String {
+        switch self {
+        case .neutral: return "No preference"
+        case .ownBrandPreferred: return "Own-brand preferred"
+        case .brandedPreferred: return "Branded preferred"
+        }
+    }
+}
+
+struct BasketUserPreferences: Codable, Hashable {
+    var brandPreference: BrandPreference
+    var avoidPremium: Bool
+    var organicOnly: Bool
+
+    static let `default` = BasketUserPreferences(brandPreference: .neutral, avoidPremium: false, organicOnly: false)
 }
 
 struct GroceryIntent: Identifiable, Codable, Hashable {
@@ -131,7 +173,9 @@ struct ProductCandidate: Identifiable, Codable, Hashable {
     let product: SupermarketProduct
     let matchQuality: MatchQuality
     let confidence: Decimal
+    let weightedUnitValue: Decimal
     let isValid: Bool
+    let reasons: [String]
 }
 
 struct ItemSelectionResult: Identifiable, Codable, Hashable {
@@ -141,20 +185,24 @@ struct ItemSelectionResult: Identifiable, Codable, Hashable {
     let product: SupermarketProduct
     let quantity: Int
     let unitPrice: Decimal
+    let unitPriceDescription: String
     let totalPrice: Decimal
     let matchQuality: MatchQuality
     let confidence: Decimal
+    let reasons: [String]
 
-    init(intent: GroceryIntent, supermarket: Supermarket, product: SupermarketProduct, matchQuality: MatchQuality, confidence: Decimal) {
+    init(intent: GroceryIntent, supermarket: Supermarket, product: SupermarketProduct, matchQuality: MatchQuality, confidence: Decimal, reasons: [String]) {
         self.id = UUID()
         self.intent = intent
         self.supermarket = supermarket
         self.product = product
         self.quantity = intent.quantity
         self.unitPrice = product.price
+        self.unitPriceDescription = "\(product.unitDescription) \(product.unitValue)"
         self.totalPrice = product.price * Decimal(intent.quantity)
         self.matchQuality = matchQuality
         self.confidence = confidence
+        self.reasons = reasons
     }
 }
 
@@ -196,6 +244,9 @@ struct BasketOptimisationResult: Codable, Hashable {
     let supermarketTotals: [SupermarketBasketTotal]
     let cheapestSingleStore: SupermarketBasketTotal?
     let mixedBasket: MixedBasketResult
+    let selectedBasket: MixedBasketResult
+    let comparisonMode: BasketComparisonMode
+    let preferences: BasketUserPreferences
 
     var mostExpensiveCompleteStoreTotal: Decimal? {
         let complete = supermarketTotals.filter { $0.unavailableItems.isEmpty }
@@ -204,11 +255,11 @@ struct BasketOptimisationResult: Codable, Hashable {
 
     var savingsVsMostExpensive: Decimal {
         guard let maxTotal = mostExpensiveCompleteStoreTotal else { return .zero }
-        return maxTotal - mixedBasket.total
+        return maxTotal - selectedBasket.total
     }
 
     var savingsVsCheapestSingleStore: Decimal {
         guard let cheapestSingleStore else { return .zero }
-        return cheapestSingleStore.total - mixedBasket.total
+        return cheapestSingleStore.total - selectedBasket.total
     }
 }

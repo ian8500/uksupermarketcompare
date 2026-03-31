@@ -5,6 +5,25 @@ struct SupermarketSelectionView: View {
 
     var body: some View {
         List {
+            Section("Compare mode") {
+                Picker("Basket mode", selection: $viewModel.comparisonMode) {
+                    ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
+                        Text(mode.title).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            Section("Product preferences") {
+                Picker("Brand", selection: $viewModel.brandPreference) {
+                    ForEach(BrandPreference.allCases, id: \.self) { preference in
+                        Text(preference.title).tag(preference)
+                    }
+                }
+                Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
+                Toggle("Organic only", isOn: $viewModel.organicOnly)
+            }
+
             Section("Choose supermarkets") {
                 ForEach(viewModel.supermarkets) { market in
                     Button {

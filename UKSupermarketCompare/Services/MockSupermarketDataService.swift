@@ -26,82 +26,83 @@ final class MockSupermarketDataService: SupermarketDataProviding {
 
     private func buildProducts() -> [String: [SupermarketProduct]] {
         [
-            "Tesco": [
-                p("Tesco Semi Skimmed Milk 2L", .milk, "semi-skimmed", 1.55, "2L", "Tesco", true, false, false, "per litre", 0.775, ["milk", "semi skimmed", "fresh"]),
-                p("Tesco Whole Milk 2L", .milk, "whole", 1.60, "2L", "Tesco", true, false, false, "per litre", 0.80, ["milk", "whole"]),
-                p("Tesco Finest Organic Milk 2L", .milk, "whole", 2.35, "2L", "Tesco Finest", true, true, true, "per litre", 1.175, ["milk", "organic", "premium"]),
-                p("Tesco Medium Sliced White Bread 800g", .bread, "white sliced", 0.85, "800g", "Tesco", true, false, false, "per 100g", 0.10625, ["bread", "white", "sliced"]),
-                p("Warburtons Wholemeal Medium 800g", .bread, "wholemeal sliced", 1.45, "800g", "Warburtons", false, false, false, "per 100g", 0.18125, ["bread", "wholemeal"]),
-                p("Tesco British Eggs Mixed Weight 12", .eggs, "mixed weight", 2.10, "12 pack", "Tesco", true, false, false, "per egg", 0.175, ["eggs", "mixed"]),
-                p("Tesco Salted Butter 250g", .butter, "salted", 1.99, "250g", "Tesco", true, false, false, "per 100g", 0.796, ["butter", "salted"]),
-                p("Tesco Spreadable Blend 500g", .butter, "spreadable blend", 2.39, "500g", "Tesco", true, false, false, "per 100g", 0.478, ["spreadable", "butter", "blend"]),
-                p("Tesco Penne Pasta 500g", .pasta, "penne", 0.89, "500g", "Tesco", true, false, false, "per 100g", 0.178, ["pasta", "penne"]),
-                p("Heinz Baked Beans 4x415g", .bakedBeans, "tinned", 3.20, "4 pack", "Heinz", false, false, false, "per can", 0.80, ["baked beans", "beans"]),
-                p("Tesco Baked Beans 4x420g", .bakedBeans, "tinned", 2.10, "4 pack", "Tesco", true, false, false, "per can", 0.525, ["baked beans", "beans"]),
-                p("Tesco Fairtrade Bananas", .bananas, "produce", 1.05, "5 pack", "Tesco", true, false, false, "per banana", 0.21, ["banana", "fruit"]),
-                p("Tesco British Chicken Breast Fillets", .chickenBreast, "fresh", 4.35, "550g", "Tesco", true, false, false, "per 100g", 0.79, ["chicken breast", "fillets"]),
-                p("Tesco Corn Flakes 500g", .cereal, "corn flakes", 1.25, "500g", "Tesco", true, false, false, "per 100g", 0.25, ["cereal", "corn flakes"]),
-                p("Tesco Mature Cheddar 400g", .cheese, "cheddar", 2.85, "400g", "Tesco", true, false, false, "per 100g", 0.7125, ["cheese", "cheddar"]),
-                p("Tesco Finest Vintage Cheddar 300g", .cheese, "cheddar", 3.95, "300g", "Tesco Finest", true, true, false, "per 100g", 1.316, ["cheese", "cheddar", "premium"])
-            ],
-            "Sainsbury's": [
-                p("Sainsbury's Semi Skimmed Milk 2L", .milk, "semi-skimmed", 1.62, "2L", "Sainsbury's", true, false, false, "per litre", 0.81, ["milk", "semi skimmed"]),
-                p("Sainsbury's Whole Milk 2L", .milk, "whole", 1.66, "2L", "Sainsbury's", true, false, false, "per litre", 0.83, ["milk", "whole"]),
-                p("Sainsbury's Soft White Bread 800g", .bread, "white sliced", 0.89, "800g", "Sainsbury's", true, false, false, "per 100g", 0.111, ["bread", "white"]),
-                p("Sainsbury's Wholemeal Bread 800g", .bread, "wholemeal sliced", 0.95, "800g", "Sainsbury's", true, false, false, "per 100g", 0.119, ["bread", "wholemeal"]),
-                p("Sainsbury's Eggs Mixed Weight 12", .eggs, "mixed weight", 2.08, "12 pack", "Sainsbury's", true, false, false, "per egg", 0.173, ["eggs", "mixed"]),
-                p("Sainsbury's Salted Butter 250g", .butter, "salted", 2.05, "250g", "Sainsbury's", true, false, false, "per 100g", 0.82, ["butter"]),
-                p("Sainsbury's Lighter Spread 500g", .butter, "spreadable blend", 1.95, "500g", "Sainsbury's", true, false, false, "per 100g", 0.39, ["spreadable", "blend"]),
-                p("Sainsbury's Fusilli Pasta 500g", .pasta, "fusilli", 0.92, "500g", "Sainsbury's", true, false, false, "per 100g", 0.184, ["pasta", "fusilli"]),
-                p("Sainsbury's Baked Beans 4x420g", .bakedBeans, "tinned", 2.25, "4 pack", "Sainsbury's", true, false, false, "per can", 0.5625, ["beans", "baked beans"]),
-                p("Sainsbury's Bananas", .bananas, "produce", 1.10, "5 pack", "Sainsbury's", true, false, false, "per banana", 0.22, ["banana"]),
-                p("Sainsbury's Chicken Breast Fillets", .chickenBreast, "fresh", 4.55, "550g", "Sainsbury's", true, false, false, "per 100g", 0.827, ["chicken breast"]),
-                p("Sainsbury's Wheat Biscuits 24", .cereal, "wheat biscuits", 1.39, "24 pack", "Sainsbury's", true, false, false, "per biscuit", 0.058, ["cereal", "wheat biscuits"]),
-                p("Sainsbury's Mature Cheddar 400g", .cheese, "cheddar", 2.95, "400g", "Sainsbury's", true, false, false, "per 100g", 0.7375, ["cheddar", "cheese"])
-            ],
-            "ASDA": [
-                p("ASDA Semi Skimmed Milk 2L", .milk, "semi-skimmed", 1.49, "2L", "ASDA", true, false, false, "per litre", 0.745, ["milk"]),
-                p("ASDA Whole Milk 2L", .milk, "whole", 1.52, "2L", "ASDA", true, false, false, "per litre", 0.76, ["milk"]),
-                p("ASDA White Bread 800g", .bread, "white sliced", 0.75, "800g", "ASDA", true, false, false, "per 100g", 0.094, ["bread", "white"]),
-                p("ASDA Wholemeal Bread 800g", .bread, "wholemeal sliced", 0.79, "800g", "ASDA", true, false, false, "per 100g", 0.099, ["bread", "wholemeal"]),
-                p("ASDA Mixed Weight Eggs 12", .eggs, "mixed weight", 1.99, "12 pack", "ASDA", true, false, false, "per egg", 0.166, ["eggs"]),
-                p("ASDA Salted Butter 250g", .butter, "salted", 1.89, "250g", "ASDA", true, false, false, "per 100g", 0.756, ["butter"]),
-                p("ASDA Spreadable 500g", .butter, "spreadable blend", 1.75, "500g", "ASDA", true, false, false, "per 100g", 0.35, ["spreadable", "blend"]),
-                p("ASDA Penne Pasta 500g", .pasta, "penne", 0.74, "500g", "ASDA", true, false, false, "per 100g", 0.148, ["pasta"]),
-                p("ASDA Baked Beans 4x420g", .bakedBeans, "tinned", 1.85, "4 pack", "ASDA", true, false, false, "per can", 0.462, ["beans", "baked beans"]),
-                p("ASDA Bananas", .bananas, "produce", 0.98, "5 pack", "ASDA", true, false, false, "per banana", 0.196, ["banana"]),
-                p("ASDA Chicken Breast Fillets", .chickenBreast, "fresh", 4.10, "550g", "ASDA", true, false, false, "per 100g", 0.745, ["chicken breast"]),
-                p("ASDA Corn Flakes 500g", .cereal, "corn flakes", 1.10, "500g", "ASDA", true, false, false, "per 100g", 0.22, ["cereal"]),
-                p("ASDA Mature Cheddar 400g", .cheese, "cheddar", 2.65, "400g", "ASDA", true, false, false, "per 100g", 0.6625, ["cheese", "cheddar"])
-            ],
-            "Morrisons": [
-                p("Morrisons Semi Skimmed Milk 2L", .milk, "semi-skimmed", 1.58, "2L", "Morrisons", true, false, false, "per litre", 0.79, ["milk"]),
-                p("Morrisons Whole Milk 2L", .milk, "whole", 1.62, "2L", "Morrisons", true, false, false, "per litre", 0.81, ["milk"]),
-                p("Morrisons White Bread 800g", .bread, "white sliced", 0.82, "800g", "Morrisons", true, false, false, "per 100g", 0.103, ["bread"]),
-                p("Morrisons Eggs 12", .eggs, "mixed weight", 2.05, "12 pack", "Morrisons", true, false, false, "per egg", 0.171, ["eggs"]),
-                p("Morrisons Salted Butter 250g", .butter, "salted", 1.95, "250g", "Morrisons", true, false, false, "per 100g", 0.78, ["butter"]),
-                p("Morrisons Fusilli Pasta 500g", .pasta, "fusilli", 0.88, "500g", "Morrisons", true, false, false, "per 100g", 0.176, ["pasta"]),
-                p("Morrisons Baked Beans 4x420g", .bakedBeans, "tinned", 2.05, "4 pack", "Morrisons", true, false, false, "per can", 0.5125, ["beans"]),
-                p("Morrisons Bananas", .bananas, "produce", 1.02, "5 pack", "Morrisons", true, false, false, "per banana", 0.204, ["bananas"]),
-                p("Morrisons Chicken Breast", .chickenBreast, "fresh", 4.30, "550g", "Morrisons", true, false, false, "per 100g", 0.781, ["chicken breast"]),
-                p("Morrisons Muesli 750g", .cereal, "muesli", 1.75, "750g", "Morrisons", true, false, false, "per 100g", 0.233, ["cereal", "muesli"]),
-                p("Morrisons Mature Cheddar 400g", .cheese, "cheddar", 2.80, "400g", "Morrisons", true, false, false, "per 100g", 0.70, ["cheese", "cheddar"])
-            ],
-            "Waitrose": [
-                p("Essential Waitrose Semi Skimmed Milk 2L", .milk, "semi-skimmed", 1.80, "2L", "Essential Waitrose", true, false, false, "per litre", 0.90, ["milk"]),
-                p("Waitrose Duchy Organic Whole Milk 2L", .milk, "whole", 2.60, "2L", "Duchy", false, true, true, "per litre", 1.30, ["milk", "organic", "premium"]),
-                p("Essential Waitrose White Bread 800g", .bread, "white sliced", 1.05, "800g", "Essential Waitrose", true, false, false, "per 100g", 0.131, ["bread"]),
-                p("Waitrose Eggs 12", .eggs, "mixed weight", 2.35, "12 pack", "Essential Waitrose", true, false, false, "per egg", 0.195, ["eggs"]),
-                p("Waitrose Butter 250g", .butter, "salted", 2.25, "250g", "Essential Waitrose", true, false, false, "per 100g", 0.90, ["butter"]),
-                p("Waitrose Spreadable 500g", .butter, "spreadable blend", 2.45, "500g", "Essential Waitrose", true, false, false, "per 100g", 0.49, ["spreadable", "blend"]),
-                p("Waitrose Penne Pasta 500g", .pasta, "penne", 1.15, "500g", "Essential Waitrose", true, false, false, "per 100g", 0.23, ["pasta"]),
-                p("Waitrose Baked Beans 4x415g", .bakedBeans, "tinned", 2.55, "4 pack", "Essential Waitrose", true, false, false, "per can", 0.6375, ["beans", "baked beans"]),
-                p("Waitrose Bananas", .bananas, "produce", 1.25, "5 pack", "Essential Waitrose", true, false, false, "per banana", 0.25, ["banana"]),
-                p("Waitrose Chicken Breast Fillets", .chickenBreast, "fresh", 4.95, "550g", "Essential Waitrose", true, false, false, "per 100g", 0.90, ["chicken breast"]),
-                p("Waitrose Corn Flakes 500g", .cereal, "corn flakes", 1.65, "500g", "Essential Waitrose", true, false, false, "per 100g", 0.33, ["cereal"]),
-                p("Waitrose Mature Cheddar 400g", .cheese, "cheddar", 3.20, "400g", "Essential Waitrose", true, false, false, "per 100g", 0.80, ["cheese", "cheddar"])
-            ]
+            "Tesco": commonRange(
+                store: "Tesco",
+                ownBrand: "Tesco",
+                budgetFactor: 1.0,
+                hasMorePremium: true
+            ),
+            "Sainsbury's": commonRange(
+                store: "Sainsbury's",
+                ownBrand: "Sainsbury's",
+                budgetFactor: 1.05,
+                hasMorePremium: false
+            ),
+            "ASDA": commonRange(
+                store: "ASDA",
+                ownBrand: "ASDA",
+                budgetFactor: 0.93,
+                hasMorePremium: false
+            ),
+            "Morrisons": commonRange(
+                store: "Morrisons",
+                ownBrand: "Morrisons",
+                budgetFactor: 1.0,
+                hasMorePremium: false
+            ),
+            "Waitrose": commonRange(
+                store: "Waitrose",
+                ownBrand: "Essential Waitrose",
+                budgetFactor: 1.16,
+                hasMorePremium: true
+            )
         ]
+    }
+
+    private func commonRange(store: String, ownBrand: String, budgetFactor: Double, hasMorePremium: Bool) -> [SupermarketProduct] {
+        let premiumMultiplier: Double = hasMorePremium ? 1.0 : 0.96
+        return [
+            p("\(ownBrand) Semi Skimmed Milk 2L", .milk, "semi-skimmed", adjusted(1.55, budgetFactor), "2L", ownBrand, true, false, false, "per litre", adjusted(0.775, budgetFactor), ["milk", "semi skimmed"]),
+            p("Cravendale Fresh Milk 2L", .milk, "semi-skimmed", adjusted(2.10, premiumMultiplier * budgetFactor), "2L", "Cravendale", false, false, false, "per litre", adjusted(1.05, premiumMultiplier * budgetFactor), ["milk", "branded"]),
+            p("\(store) Organic Whole Milk 2L", .milk, "whole", adjusted(2.40, premiumMultiplier * budgetFactor), "2L", ownBrand, true, true, true, "per litre", adjusted(1.20, premiumMultiplier * budgetFactor), ["milk", "organic", "premium"]),
+
+            p("\(ownBrand) White Bread 800g", .bread, "white sliced", adjusted(0.85, budgetFactor), "800g", ownBrand, true, false, false, "per kg", adjusted(1.0625, budgetFactor), ["bread", "white", "sliced"]),
+            p("Warburtons Toastie 800g", .bread, "white sliced", adjusted(1.45, budgetFactor), "800g", "Warburtons", false, false, false, "per kg", adjusted(1.8125, budgetFactor), ["bread", "branded"]),
+            p("\(store) Organic Seeded Loaf 700g", .bread, "seeded", adjusted(2.05, premiumMultiplier * budgetFactor), "700g", ownBrand, true, true, true, "per kg", adjusted(2.9285, premiumMultiplier * budgetFactor), ["bread", "organic", "seeded"]),
+
+            p("\(ownBrand) Eggs 12", .eggs, "free range", adjusted(2.05, budgetFactor), "12 pack", ownBrand, true, false, false, "per egg", adjusted(0.171, budgetFactor), ["eggs", "free range"]),
+            p("Happy Egg Co Large Eggs 10", .eggs, "free range", adjusted(2.55, budgetFactor), "10 pack", "Happy Egg Co", false, false, false, "per egg", adjusted(0.255, budgetFactor), ["eggs", "branded"]),
+
+            p("\(ownBrand) Salted Butter 250g", .butter, "salted", adjusted(1.95, budgetFactor), "250g", ownBrand, true, false, false, "per kg", adjusted(7.8, budgetFactor), ["butter", "salted"]),
+            p("Lurpak Slightly Salted 400g", .butter, "spreadable", adjusted(3.65, budgetFactor), "400g", "Lurpak", false, false, false, "per kg", adjusted(9.125, budgetFactor), ["butter", "spreadable", "branded"]),
+
+            p("\(ownBrand) Penne Pasta 500g", .pasta, "penne", adjusted(0.86, budgetFactor), "500g", ownBrand, true, false, false, "per kg", adjusted(1.72, budgetFactor), ["pasta", "penne"]),
+            p("Barilla Spaghetti No.5 500g", .pasta, "spaghetti", adjusted(1.60, budgetFactor), "500g", "Barilla", false, false, false, "per kg", adjusted(3.2, budgetFactor), ["pasta", "spaghetti", "branded"]),
+
+            p("\(ownBrand) Baked Beans 4x420g", .bakedBeans, "tinned", adjusted(2.15, budgetFactor), "4 pack", ownBrand, true, false, false, "per can", adjusted(0.5375, budgetFactor), ["baked beans", "beans"]),
+            p("Heinz Baked Beans 4x415g", .bakedBeans, "tinned", adjusted(3.25, budgetFactor), "4 pack", "Heinz", false, false, false, "per can", adjusted(0.8125, budgetFactor), ["baked beans", "branded"]),
+
+            p("\(ownBrand) Bananas", .bananas, "produce", adjusted(1.05, budgetFactor), "5 pack", ownBrand, true, false, false, "per item", adjusted(0.21, budgetFactor), ["banana", "fruit"]),
+            p("\(store) Organic Bananas", .bananas, "produce", adjusted(1.35, premiumMultiplier * budgetFactor), "5 pack", ownBrand, true, true, true, "per item", adjusted(0.27, premiumMultiplier * budgetFactor), ["banana", "organic"]),
+
+            p("\(ownBrand) Chicken Breast Fillets 550g", .chickenBreast, "fresh", adjusted(4.35, budgetFactor), "550g", ownBrand, true, false, false, "per kg", adjusted(7.91, budgetFactor), ["chicken breast", "fillets"]),
+            p("RSPCA Organic Chicken Breast 500g", .chickenBreast, "fresh", adjusted(6.85, premiumMultiplier * budgetFactor), "500g", "RSPCA Assured", false, true, true, "per kg", adjusted(13.7, premiumMultiplier * budgetFactor), ["chicken breast", "organic", "premium"]),
+
+            p("\(ownBrand) Corn Flakes 500g", .cereal, "corn flakes", adjusted(1.25, budgetFactor), "500g", ownBrand, true, false, false, "per kg", adjusted(2.5, budgetFactor), ["cereal", "corn flakes"]),
+            p("Kellogg's Corn Flakes 450g", .cereal, "corn flakes", adjusted(2.30, budgetFactor), "450g", "Kellogg's", false, false, false, "per kg", adjusted(5.11, budgetFactor), ["cereal", "branded"]),
+
+            p("\(ownBrand) Mature Cheddar 400g", .cheese, "cheddar", adjusted(2.85, budgetFactor), "400g", ownBrand, true, false, false, "per kg", adjusted(7.125, budgetFactor), ["cheese", "cheddar"]),
+            p("Cathedral City Mature Cheddar 350g", .cheese, "cheddar", adjusted(4.25, budgetFactor), "350g", "Cathedral City", false, false, false, "per kg", adjusted(12.14, budgetFactor), ["cheese", "branded"]),
+
+            p("\(ownBrand) Salad Tomatoes 6 Pack", .tomatoes, "produce", adjusted(1.10, budgetFactor), "6 pack", ownBrand, true, false, false, "per item", adjusted(0.183, budgetFactor), ["tomatoes", "salad"]),
+            p("\(ownBrand) Basmati Rice 1kg", .rice, "dry", adjusted(1.95, budgetFactor), "1kg", ownBrand, true, false, false, "per kg", adjusted(1.95, budgetFactor), ["rice", "basmati"]),
+            p("\(ownBrand) Greek Style Yogurt 500g", .yogurt, "dairy", adjusted(1.35, budgetFactor), "500g", ownBrand, true, false, false, "per kg", adjusted(2.7, budgetFactor), ["yogurt", "greek"]),
+            p("\(ownBrand) Gala Apples 6 Pack", .apples, "produce", adjusted(1.45, budgetFactor), "6 pack", ownBrand, true, false, false, "per item", adjusted(0.241, budgetFactor), ["apple", "fruit"])
+        ]
+    }
+
+    private func adjusted(_ value: Double, _ factor: Double) -> Decimal {
+        Decimal((value * factor * 1000).rounded() / 1000)
     }
 
     private func p(
@@ -118,7 +119,10 @@ final class MockSupermarketDataService: SupermarketDataProviding {
         _ unitValue: Decimal,
         _ tags: [String]
     ) -> SupermarketProduct {
-        let market = markets.first { name.hasPrefix($0.name) || brand.contains($0.name) || $0.name == "Waitrose" && name.contains("Waitrose") }?.name ?? "Tesco"
+        let market = markets.first {
+            name.contains($0.name) || brand.contains($0.name) || ($0.name == "Waitrose" && name.contains("Essential Waitrose"))
+        }?.name ?? "Tesco"
+
         return SupermarketProduct(
             supermarketName: market,
             name: name,
