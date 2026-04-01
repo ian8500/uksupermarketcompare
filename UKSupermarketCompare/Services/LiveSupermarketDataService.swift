@@ -232,6 +232,23 @@ private struct LiveCatalogMetadata: Decodable {
     let source: String?
     let debugMarker: String?
     let generatedAt: String?
+
+    private enum CodingKeys: String, CodingKey {
+        case source
+        case debugMarker
+        case generatedAt
+        case debug_marker
+        case generated_at
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        source = try container.decodeIfPresent(String.self, forKey: .source)
+        debugMarker = try container.decodeIfPresent(String.self, forKey: .debugMarker)
+            ?? container.decodeIfPresent(String.self, forKey: .debug_marker)
+        generatedAt = try container.decodeIfPresent(String.self, forKey: .generatedAt)
+            ?? container.decodeIfPresent(String.self, forKey: .generated_at)
+    }
 }
 
 private struct LiveSupermarket: Decodable {
@@ -253,4 +270,93 @@ private struct LiveProduct: Decodable {
     let unitDescription: String
     let unitValue: Decimal
     let tags: [String]
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case category
+        case subcategory
+        case price
+        case size
+        case brand
+        case isOwnBrand
+        case isPremium
+        case isOrganic
+        case unitDescription
+        case unitValue
+        case tags
+        case is_own_brand
+        case is_premium
+        case is_organic
+        case unit_description
+        case unit_value
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        name = try container.decode(String.self, forKey: .name)
+        subcategory = try container.decode(String.self, forKey: .subcategory)
+        size = try container.decode(String.self, forKey: .size)
+        brand = try container.decode(String.self, forKey: .brand)
+        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+
+        let rawCategory = try container.decode(String.self, forKey: .category)
+        category = GroceryCategory(rawValue: rawCategory) ?? .unknown
+
+        price = try Self.decodeDecimal(container: container, primary: .price, fallback: nil)
+        unitValue = try Self.decodeDecimal(container: container, primary: .unitValue, fallback: .unit_value)
+
+        isOwnBrand = try Self.decodeBool(container: container, primary: .isOwnBrand, fallback: .is_own_brand)
+        isPremium = try Self.decodeBool(container: container, primary: .isPremium, fallback: .is_premium)
+        isOrganic = try Self.decodeBool(container: container, primary: .isOrganic, fallback: .is_organic)
+        unitDescription = try Self.decodeString(container: container, primary: .unitDescription, fallback: .unit_description)
+    }
+
+    private static func decodeString(
+        container: KeyedDecodingContainer<CodingKeys>,
+        primary: CodingKeys,
+        fallback: CodingKeys?
+    ) throws -> String {
+        if let value = try container.decodeIfPresent(String.self, forKey: primary) {
+            return value
+        }
+        if let fallback, let value = try container.decodeIfPresent(String.self, forKey: fallback) {
+            return value
+        }
+        throw DecodingError.keyNotFound(primary, .init(codingPath: container.codingPath, debugDescription: "Missing required string value."))
+    }
+
+    private static func decodeBool(
+        container: KeyedDecodingContainer<CodingKeys>,
+        primary: CodingKeys,
+        fallback: CodingKeys?
+    ) throws -> Bool {
+        if let value = try container.decodeIfPresent(Bool.self, forKey: primary) {
+            return value
+        }
+        if let fallback, let value = try container.decodeIfPresent(Bool.self, forKey: fallback) {
+            return value
+        }
+        throw DecodingError.keyNotFound(primary, .init(codingPath: container.codingPath, debugDescription: "Missing required boolean value."))
+    }
+
+    private static func decodeDecimal(
+        container: KeyedDecodingContainer<CodingKeys>,
+        primary: CodingKeys,
+        fallback: CodingKeys?
+    ) throws -> Decimal {
+        if let value = try container.decodeIfPresent(Decimal.self, forKey: primary) {
+            return value
+        }
+        if let fallback, let value = try container.decodeIfPresent(Decimal.self, forKey: fallback) {
+            return value
+        }
+        if let text = try container.decodeIfPresent(String.self, forKey: primary), let value = Decimal(string: text) {
+            return value
+        }
+        if let fallback, let text = try container.decodeIfPresent(String.self, forKey: fallback), let value = Decimal(string: text) {
+            return value
+        }
+        throw DecodingError.keyNotFound(primary, .init(codingPath: container.codingPath, debugDescription: "Missing required decimal value."))
+    }
 }
