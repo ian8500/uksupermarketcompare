@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from decimal import Decimal
+from difflib import SequenceMatcher
 from typing import Iterable
 from uuid import uuid4
 
@@ -13,6 +14,8 @@ from app.models import (
     GroceryCategory,
     ItemSelectionResult,
     MatchQuality,
+    MissingItemCandidate,
+    MissingItemDetail,
     MixedBasketResult,
     SavingsExplanation,
     Supermarket,
@@ -24,6 +27,9 @@ from app.services.item_parser import parse_item_input
 from app.services.seed_catalog import COMMON_KEYWORD_MAP, SEEDED_SUPERMARKETS
 
 logger = logging.getLogger(__name__)
+PREMIUM_PENALTY = Decimal("0.18")
+SIZE_MISMATCH_PENALTY = Decimal("0.22")
+WEAK_SUBSTITUTE_PENALTY = Decimal("0.25")
 
 SYNONYM_MAP: dict[str, list[str]] = {
     "beanz": ["beans", "baked beans"],
@@ -90,11 +96,14 @@ def _categorize(name: str) -> GroceryCategory:
     return GroceryCategory.unknown
 
 
-def _intent_from_item(item_name: str, quantity: int):
-    category = _categorize(item_name)
-    keywords = COMMON_KEYWORD_MAP.get(category, [item_name.lower()])
-    expanded = sorted({_normalize_token(kw) for kw in keywords}.union(_expand_tokens(item_name)))
-    return build_intent(item_name, quantity, category, expanded)
+def _intent_from_item(parsed_item):
+    category = _categorize(parsed_item.name)
+    keywords = COMMON_KEYWORD_MAP.get(category, [parsed_item.name.lower()])
+    expanded = sorted({_normalize_token(kw) for kw in keywords}.union(_expand_tokens(parsed_item.name)))
+    if parsed_item.brand:
+        expanded.append(_normalize_token(parsed_item.brand))
+    expanded.extend(_normalize_token(tag) for tag in parsed_item.preferenceTags)
+    return build_intent(parsed_item.name, parsed_item.quantity, category, sorted(set(expanded)))
 
 
 def _score_overlap(intent_tokens: set[str], product: SupermarketProduct) -> tuple[int, list[str]]:
@@ -104,29 +113,44 @@ def _score_overlap(intent_tokens: set[str], product: SupermarketProduct) -> tupl
     return len(hits), hits
 
 
+def _similarity_score(a: str, b: str) -> Decimal:
+    return Decimal(str(round(SequenceMatcher(None, a, b).ratio(), 3)))
+
+
 def _rank_candidate(intent, product: SupermarketProduct):
     reasons: list[str] = []
+    tradeoffs: list[str] = []
     intent_tokens = set(intent.acceptedKeywords)
 
     if intent.category != GroceryCategory.unknown and product.category != intent.category:
         return None
 
     quality = MatchQuality.exact if product.category == intent.category else MatchQuality.acceptableEquivalent
-    confidence = Decimal("0.25")
+    score = Decimal("0.30")
+    confidence = Decimal("0.35")
 
     token_score, hits = _score_overlap(intent_tokens, product)
     if token_score:
-        confidence += Decimal(min(token_score, 5)) * Decimal("0.11")
+        token_boost = Decimal(min(token_score, 6)) * Decimal("0.09")
+        score += token_boost
+        confidence += token_boost / 2
         reasons.append(f"Matched tokens ({token_score}): {', '.join(hits[:5])}.")
     else:
         reasons.append("No token overlap across name/tags/category/subcategory.")
 
     if intent.normalizedInput in product.name.lower():
-        confidence += Decimal("0.25")
+        score += Decimal("0.2")
+        confidence += Decimal("0.15")
         reasons.append("Direct phrase match in product name.")
+    else:
+        fuzzy = _similarity_score(intent.normalizedInput, product.name.lower())
+        if fuzzy >= Decimal("0.64"):
+            score += fuzzy * Decimal("0.20")
+            confidence += Decimal("0.06")
+            reasons.append(f"Fuzzy name similarity {fuzzy}.")
 
     if product.isOwnBrand:
-        confidence += Decimal("0.03")
+        score += Decimal("0.03")
         reasons.append("Own-brand value signal applied.")
 
     if intent.category == GroceryCategory.unknown and token_score < 2 and intent.normalizedInput not in product.name.lower():
@@ -135,13 +159,24 @@ def _rank_candidate(intent, product: SupermarketProduct):
 
     if token_score <= 1 and intent.category == GroceryCategory.unknown:
         quality = MatchQuality.weakSubstitute
+        score -= WEAK_SUBSTITUTE_PENALTY
+        tradeoffs.append("Low-confidence substitute due to weak category intent.")
+
+    if product.isPremium:
+        score -= PREMIUM_PENALTY
+        tradeoffs.append("Premium product penalty applied.")
+
+    if any(size_token in intent.normalizedInput for size_token in ["kg", "g", "l", "ml"]) and product.size not in intent.normalizedInput:
+        score -= SIZE_MISMATCH_PENALTY
+        tradeoffs.append("Requested size differs from candidate pack size.")
 
     confidence = max(Decimal("0.05"), min(Decimal("0.99"), confidence))
+    score = max(Decimal("0.01"), min(Decimal("1.50"), score))
     reasons.append(f"Unit comparison basis: {product.unitDescription} {product.unitValue}.")
-    return quality, confidence, reasons
+    return quality, confidence, score, hits, reasons, tradeoffs
 
 
-def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, quality: MatchQuality, confidence: Decimal, reasons: list[str]) -> ItemSelectionResult:
+def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, quality: MatchQuality, confidence: Decimal, score: Decimal, matched_tokens: list[str], reasons: list[str], tradeoffs: list[str]) -> ItemSelectionResult:
     quantity = intent.quantity
     total = product.price * Decimal(quantity)
     return ItemSelectionResult(
@@ -155,7 +190,10 @@ def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, qu
         totalPrice=total,
         matchQuality=quality,
         confidence=confidence,
+        score=score,
+        matchedTokens=matched_tokens,
         reasons=reasons,
+        tradeoffs=tradeoffs,
     )
 
 
@@ -169,33 +207,76 @@ def _missing_explanation(unavailable_items) -> str:
 def _build_market_total(supermarket: Supermarket, intents, inventory: list[SupermarketProduct]) -> SupermarketBasketTotal:
     selections: list[ItemSelectionResult] = []
     unavailable = []
+    missing_details: list[MissingItemDetail] = []
 
     for intent in intents:
-        ranked: list[tuple[MatchQuality, Decimal, SupermarketProduct, list[str]]] = []
+        ranked: list[tuple[MatchQuality, Decimal, Decimal, SupermarketProduct, list[str], list[str], list[str]]] = []
         for product in inventory:
             scored = _rank_candidate(intent, product)
             if scored is None:
                 continue
-            quality, confidence, reasons = scored
-            ranked.append((quality, confidence, product, reasons))
+            quality, confidence, score, matched_tokens, reasons, tradeoffs = scored
+            ranked.append((quality, confidence, score, product, matched_tokens, reasons, tradeoffs))
 
-        ranked.sort(key=lambda item: (-item[0].value, item[2].unitValue, item[2].price, -item[1]))
+        ranked.sort(key=lambda item: (-item[2], -item[0].value, item[3].price, item[3].unitValue))
 
         if not ranked:
             unavailable.append(intent)
+            loose: list[MissingItemCandidate] = []
+            for product in inventory:
+                if intent.category != GroceryCategory.unknown and product.category != intent.category:
+                    continue
+                fuzzy_score = _similarity_score(intent.normalizedInput, product.name.lower())
+                if fuzzy_score >= Decimal("0.45"):
+                    loose.append(
+                        MissingItemCandidate(
+                            supermarketName=supermarket.name,
+                            productName=product.name,
+                            score=fuzzy_score,
+                            reason=f"Name similarity {fuzzy_score}",
+                        )
+                    )
+            missing_details.append(
+                MissingItemDetail(
+                    intent=intent,
+                    reason="No candidate passed quality threshold.",
+                    closeCandidates=sorted(loose, key=lambda item: item.score, reverse=True)[:3],
+                    suggestion="Try adding brand, size, or simpler wording.",
+                )
+            )
             logger.info("no-match supermarket=%s item=%s category=%s reason=no candidates survived filters", supermarket.name, intent.userInput, intent.category.value)
             continue
 
-        quality, confidence, product, reasons = ranked[0]
-        selections.append(_selection(intent, supermarket, product, quality, confidence, reasons))
-        debug_top = [f"{candidate[2].name}({candidate[1]})" for candidate in ranked[:3]]
+        quality, confidence, score, product, matched_tokens, reasons, tradeoffs = ranked[0]
+        if score < Decimal("0.30"):
+            unavailable.append(intent)
+            missing_details.append(
+                MissingItemDetail(
+                    intent=intent,
+                    reason=f"Best candidate score {score} below acceptance threshold.",
+                    closeCandidates=[
+                        MissingItemCandidate(
+                            supermarketName=supermarket.name,
+                            productName=candidate[3].name,
+                            score=candidate[2],
+                            reason="Candidate was close but lower confidence.",
+                        )
+                        for candidate in ranked[:3]
+                    ],
+                    suggestion="Add preferred brand or approximate size (e.g. 500g).",
+                )
+            )
+            continue
+        selections.append(_selection(intent, supermarket, product, quality, confidence, score, matched_tokens, reasons, tradeoffs))
+        debug_top = [f"{candidate[3].name}(score={candidate[2]})" for candidate in ranked[:3]]
         logger.info(
-            "match supermarket=%s item=%s product=%s quality=%s confidence=%s candidates=%s",
+            "match supermarket=%s item=%s product=%s quality=%s confidence=%s score=%s candidates=%s",
             supermarket.name,
             intent.userInput,
             product.name,
             quality.name,
             confidence,
+            score,
             " | ".join(debug_top),
         )
 
@@ -205,6 +286,7 @@ def _build_market_total(supermarket: Supermarket, intents, inventory: list[Super
         selections=selections,
         unavailableItems=unavailable,
         missingItemsExplanation=_missing_explanation(unavailable),
+        missingItemDetails=missing_details,
         total=sum((item.totalPrice for item in selections), Decimal("0.00")),
     )
 
@@ -212,7 +294,7 @@ def _build_market_total(supermarket: Supermarket, intents, inventory: list[Super
 def _best_options_per_intent(intents, totals: Iterable[SupermarketBasketTotal]):
     for intent in intents:
         options = [selection for total in totals for selection in total.selections if selection.intent.id == intent.id]
-        best = min(options, key=lambda option: (option.totalPrice, -option.matchQuality.value, -option.confidence)) if options else None
+        best = min(options, key=lambda option: (option.totalPrice, -option.score, -option.matchQuality.value, -option.confidence)) if options else None
         yield intent, best
 
 
@@ -235,17 +317,20 @@ def _build_mixed_basket(intents, totals: list[SupermarketBasketTotal], max_super
                 if selection.intent.id == intent.id and selection.supermarket.name in allowed
             ]
             if constrained:
-                selections.append(min(constrained, key=lambda option: (option.totalPrice, -option.matchQuality.value, -option.confidence)))
+                selections.append(min(constrained, key=lambda option: (option.totalPrice, -option.score, -option.matchQuality.value, -option.confidence)))
     else:
         for _, best in _best_options_per_intent(intents, totals):
             if best:
                 selections.append(best)
 
     unavailable = [intent for intent in intents if not any(selection.intent.id == intent.id for selection in selections)]
+    unavailable_ids = {intent.id for intent in unavailable}
+    combined_missing = [detail for total in totals for detail in total.missingItemDetails if detail.intent.id in unavailable_ids]
     return MixedBasketResult(
         selections=selections,
         unavailableItems=unavailable,
         missingItemsExplanation=_missing_explanation(unavailable),
+        missingItemDetails=combined_missing,
         total=sum((item.totalPrice for item in selections), Decimal("0.00")),
     )
 
@@ -272,6 +357,7 @@ def _best_convenience_basket(intents, totals: list[SupermarketBasketTotal]) -> M
         unavailableItems=best_total.unavailableItems,
         total=best_total.total,
         missingItemsExplanation=best_total.missingItemsExplanation,
+        missingItemDetails=best_total.missingItemDetails,
     )
 
 def build_comparison(request: CompareRequest) -> CompareResponse:
@@ -279,7 +365,7 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
     intents = []
     for item in request.shoppingList.items:
         parsed = parse_item_input(item.name, fallback_quantity=item.quantity)
-        intents.append(_intent_from_item(parsed.name, parsed.quantity))
+        intents.append(_intent_from_item(parsed))
 
     totals = []
     for supermarket in request.supermarkets:
@@ -297,6 +383,7 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
         selections=cheapest_single.selections if cheapest_single else [],
         unavailableItems=cheapest_single.unavailableItems if cheapest_single else intents,
         missingItemsExplanation=cheapest_single.missingItemsExplanation if cheapest_single else _missing_explanation(intents),
+        missingItemDetails=cheapest_single.missingItemDetails if cheapest_single else [],
         total=cheapest_single.total if cheapest_single else Decimal("0.00"),
     )
 
