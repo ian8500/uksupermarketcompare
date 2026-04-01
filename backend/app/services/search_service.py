@@ -167,7 +167,10 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
             match_type = "partial"
         matched_terms.append(query_text)
 
+    size_term_set = set(size_terms)
+    lexical_tokens = [token for token in expanded_tokens if token not in size_term_set]
     token_matches = [token for token in expanded_tokens if token in haystack]
+    lexical_token_matches = [token for token in lexical_tokens if token in haystack]
     if token_matches:
         token_score = 0.12 * len(token_matches)
         score += min(token_score, 0.48)
@@ -177,7 +180,7 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
             score += 0.2
 
     brand_token = normalize_text(candidate.brand)
-    brand_hits = [token for token in expanded_tokens if token in brand_token]
+    brand_hits = [token for token in lexical_tokens if token in brand_token]
     if brand_hits:
         score += 0.25
         if match_type == "fuzzy":
@@ -205,6 +208,10 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
         score += fuzzy_ratio * 0.45
         if match_type == "fuzzy":
             match_type = "fuzzy"
+
+    has_lexical_signal = bool(lexical_token_matches or brand_hits or query_text in haystack)
+    if lexical_tokens and not has_lexical_signal:
+        score *= 0.55
 
     if score < 0.35:
         return None
