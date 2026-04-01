@@ -119,7 +119,28 @@ class ItemSelectionResult(BaseModel):
     totalPrice: Decimal
     matchQuality: MatchQuality
     confidence: Decimal
+    score: Decimal
+    matchedTokens: List[str] = []
     reasons: List[str]
+    tradeoffs: List[str] = []
+
+
+class MissingItemCandidate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    supermarketName: str
+    productName: str
+    score: Decimal
+    reason: str
+
+
+class MissingItemDetail(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intent: GroceryIntent
+    reason: str
+    closeCandidates: List[MissingItemCandidate] = []
+    suggestion: str
 
 
 class SupermarketBasketTotal(BaseModel):
@@ -131,6 +152,7 @@ class SupermarketBasketTotal(BaseModel):
     unavailableItems: List[GroceryIntent]
     total: Decimal
     missingItemsExplanation: str = "All requested items were matched."
+    missingItemDetails: List[MissingItemDetail] = []
 
 
 class MixedBasketResult(BaseModel):
@@ -140,6 +162,7 @@ class MixedBasketResult(BaseModel):
     unavailableItems: List[GroceryIntent]
     total: Decimal
     missingItemsExplanation: str = "All requested items were matched."
+    missingItemDetails: List[MissingItemDetail] = []
 
 
 class BasketSummaryCard(BaseModel):
@@ -221,6 +244,12 @@ class ParsedItem(BaseModel):
 
     name: str
     quantity: int
+    brand: str | None = None
+    requestedSizeValue: Decimal | None = None
+    requestedSizeUnit: str | None = None
+    preferenceTags: List[str] = []
+    parsedTokens: List[str] = []
+    corrections: List[str] = []
 
 
 def build_intent(item_name: str, quantity: int, category: GroceryCategory, keywords: list[str]) -> GroceryIntent:

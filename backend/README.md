@@ -8,6 +8,18 @@ This backend now serves the Swift app's live catalog payload with the exact JSON
 - `GET /catalog`
 - `POST /compare` *(existing mock comparison route retained; app can ignore for now)*
 
+## Comparison quality (Phase 1)
+
+`POST /compare` now includes:
+
+- richer free-text parsing (`2x milk`, `heinz baked beans`, `cheddar 400g`, preference words)
+- synonym and typo-tolerant token expansion
+- scored candidate matching using intent/category/tags/size clues
+- explainability on matches (`reasons`, `tradeoffs`, `matchedTokens`, `score`)
+- explainability on misses (`missingItemDetails` with close candidates + suggestions)
+
+This is intentionally structured for future product phases (autocomplete ranking, user preferences, and provider-backed catalogs) without changing the Swift contract for existing fields.
+
 ## `/catalog` response shape
 
 `/catalog` returns (plus live metadata marker):
