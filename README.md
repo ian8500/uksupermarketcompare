@@ -27,3 +27,40 @@ This repository now contains a native iPhone app built with Swift and SwiftUI.
 - `UKSupermarketCompare/ViewModels`
 - `UKSupermarketCompare/Services`
 - `UKSupermarketCompare/Views`
+
+## Live data setup
+
+By default the app still falls back to mock supermarket data. To use live data, set an environment variable in your Xcode Run scheme:
+
+- `LIVE_SUPERMARKET_DATA_URL=https://your-domain.example/live-supermarket-data.json`
+
+Expected JSON shape:
+
+```json
+{
+  "supermarkets": [
+    {
+      "name": "Tesco",
+      "description": "...",
+      "products": [
+        {
+          "name": "Tesco Semi Skimmed Milk 2L",
+          "category": "milk",
+          "subcategory": "semi-skimmed",
+          "price": 1.55,
+          "size": "2L",
+          "brand": "Tesco",
+          "isOwnBrand": true,
+          "isPremium": false,
+          "isOrganic": false,
+          "unitDescription": "per litre",
+          "unitValue": 0.775,
+          "tags": ["milk", "semi skimmed"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+If fetching/parsing fails, the app automatically falls back to `MockSupermarketDataService`.

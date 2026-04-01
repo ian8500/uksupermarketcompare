@@ -10,14 +10,23 @@ final class AppCoordinatorViewModel: ObservableObject {
 
     init(
         store: ShoppingListStore = ShoppingListStore(),
-        dataProvider: SupermarketDataProviding = MockSupermarketDataService(),
+        dataProvider: SupermarketDataProviding? = nil,
         groceryCatalogService: GroceryCatalogServing = GroceryCatalogService(),
         basketService: BasketOptimising? = nil
     ) {
         self.store = store
-        self.dataProvider = dataProvider
         self.groceryCatalogService = groceryCatalogService
-        self.basketService = basketService ?? BasketOptimiserService(dataProvider: dataProvider, groceryCatalogService: groceryCatalogService)
+
+        if let dataProvider {
+            self.dataProvider = dataProvider
+        } else if let config = LiveSupermarketDataService.Config.fromEnvironment() {
+            let liveProvider = LiveSupermarketDataService(config: config)
+            self.dataProvider = liveProvider.supermarkets().isEmpty ? MockSupermarketDataService() : liveProvider
+        } else {
+            self.dataProvider = MockSupermarketDataService()
+        }
+
+        self.basketService = basketService ?? BasketOptimiserService(dataProvider: self.dataProvider, groceryCatalogService: groceryCatalogService)
     }
 
     func supermarkets() -> [Supermarket] {
