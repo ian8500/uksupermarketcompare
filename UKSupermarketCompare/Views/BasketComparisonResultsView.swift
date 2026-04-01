@@ -76,7 +76,7 @@ struct BasketComparisonResultsView: View {
                                 }
                                 Spacer()
                                 VStack(alignment: .trailing, spacing: 6) {
-                                    Text(total.total, format: .currency(code: "GBP"))
+                                    Text(total.total.asGBP())
                                         .font(BrandTypography.section)
                                     BrandChip(text: "Rank #\(index + 1)", tint: BrandPalette.red)
                                 }
@@ -104,7 +104,7 @@ struct BasketComparisonResultsView: View {
                                                 .foregroundStyle(BrandPalette.textSecondary)
                                         }
                                         Spacer()
-                                        Text(selection.totalPrice, format: .currency(code: "GBP"))
+                                        Text(selection.totalPrice.asGBP())
                                             .font(BrandTypography.section)
                                             .foregroundStyle(BrandPalette.blue)
                                     }
@@ -187,7 +187,7 @@ struct BasketComparisonResultsView: View {
                 Text(title)
                     .font(BrandTypography.caption)
                     .foregroundStyle(BrandPalette.textSecondary)
-                Text(value, format: .currency(code: "GBP"))
+                Text(value.asGBP())
                     .font(BrandTypography.title)
                     .foregroundStyle(tint)
                 Text(subtitle)

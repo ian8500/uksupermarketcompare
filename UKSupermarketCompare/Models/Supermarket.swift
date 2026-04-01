@@ -11,3 +11,14 @@ struct Supermarket: Identifiable, Codable, Hashable {
         self.description = description
     }
 }
+
+
+extension Decimal {
+    func asGBP() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = "GBP"
+        formatter.locale = Locale(identifier: "en_GB")
+        return formatter.string(from: self as NSDecimalNumber) ?? "£0.00"
+    }
+}
