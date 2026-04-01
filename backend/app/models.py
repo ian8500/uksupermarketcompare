@@ -128,9 +128,13 @@ class ItemSelectionResult(BaseModel):
     totalPrice: Decimal
     matchQuality: MatchQuality
     confidence: Decimal
+    matchType: str = "approximate"
+    confidenceLabel: str = "low"
     score: Decimal
     matchedTokens: List[str] = []
     reasons: List[str]
+    matchExplanation: str = ""
+    selectionReason: str = ""
     tradeoffs: List[str] = []
 
 

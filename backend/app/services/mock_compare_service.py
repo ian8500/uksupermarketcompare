@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 PREMIUM_PENALTY = Decimal("0.18")
 SIZE_MISMATCH_PENALTY = Decimal("0.22")
 WEAK_SUBSTITUTE_PENALTY = Decimal("0.25")
+SIZE_NEAR_MISS_PENALTY = Decimal("0.08")
 
 SYNONYM_MAP: dict[str, list[str]] = {
     "beanz": ["beans", "baked beans"],
@@ -137,6 +138,38 @@ def _similarity_score(a: str, b: str) -> Decimal:
     return Decimal(str(round(SequenceMatcher(None, a, b).ratio(), 3)))
 
 
+def _parse_size_token(text: str) -> tuple[Decimal | None, str | None]:
+    normalized = text.lower().replace(" ", "")
+    units = ("kg", "g", "ml", "l")
+    for unit in units:
+        idx = normalized.find(unit)
+        if idx <= 0:
+            continue
+        value_str = "".join(ch for ch in normalized[:idx] if ch.isdigit() or ch == ".")
+        if not value_str:
+            continue
+        try:
+            return Decimal(value_str), unit
+        except Exception:
+            return None, None
+    return None, None
+
+
+def _size_similarity(intent_text: str, product_size: str) -> tuple[Decimal, str]:
+    requested_value, requested_unit = _parse_size_token(intent_text)
+    candidate_value, candidate_unit = _parse_size_token(product_size)
+    if requested_value is None or candidate_value is None or requested_unit != candidate_unit:
+        return Decimal("0.35"), "No directly comparable size token; neutral size confidence applied."
+    if requested_value == 0:
+        return Decimal("0.35"), "No usable requested size value."
+    ratio = candidate_value / requested_value
+    if Decimal("0.9") <= ratio <= Decimal("1.1"):
+        return Decimal("1.00"), f"Size closely matches requested amount ({requested_value}{requested_unit})."
+    if Decimal("0.7") <= ratio <= Decimal("1.3"):
+        return Decimal("0.70"), f"Size is near requested amount ({candidate_value}{candidate_unit} vs {requested_value}{requested_unit})."
+    return Decimal("0.10"), f"Size differs materially ({candidate_value}{candidate_unit} vs {requested_value}{requested_unit})."
+
+
 def _rank_candidate(intent, product: SupermarketProduct, preferences: PreferenceContext):
     reasons: list[str] = []
     tradeoffs: list[str] = []
@@ -146,45 +179,48 @@ def _rank_candidate(intent, product: SupermarketProduct, preferences: Preference
         return None
 
     quality = MatchQuality.exact if product.category == intent.category else MatchQuality.acceptableEquivalent
-    score = Decimal("0.30")
-    confidence = Decimal("0.35")
+    score = Decimal("0.00")
+    confidence = Decimal("0.00")
 
     token_score, hits = _score_overlap(intent_tokens, product)
+    name_similarity = _similarity_score(intent.normalizedInput, product.name.lower())
+    category_similarity = Decimal("1.0") if product.category == intent.category and intent.category != GroceryCategory.unknown else (Decimal("0.5") if intent.category == GroceryCategory.unknown else Decimal("0.0"))
+    size_similarity, size_reason = _size_similarity(intent.normalizedInput, product.size)
+    brand_similarity = Decimal("0.55")
+    price_sanity = Decimal("1.0")
+
     if token_score:
-        token_boost = Decimal(min(token_score, 6)) * Decimal("0.09")
-        score += token_boost
-        confidence += token_boost / 2
         reasons.append(f"Matched tokens ({token_score}): {', '.join(hits[:5])}.")
     else:
         reasons.append("No token overlap across name/tags/category/subcategory.")
 
     if intent.normalizedInput in product.name.lower():
-        score += Decimal("0.2")
-        confidence += Decimal("0.15")
+        name_similarity = max(name_similarity, Decimal("1.0"))
         reasons.append("Direct phrase match in product name.")
-    else:
-        fuzzy = _similarity_score(intent.normalizedInput, product.name.lower())
-        if fuzzy >= Decimal("0.64"):
-            score += fuzzy * Decimal("0.20")
-            confidence += Decimal("0.06")
-            reasons.append(f"Fuzzy name similarity {fuzzy}.")
+    elif name_similarity >= Decimal("0.64"):
+        reasons.append(f"Fuzzy name similarity {name_similarity}.")
+
+    if intent.category != GroceryCategory.unknown and product.category != intent.category:
+        reasons.append("Rejected: wrong product category for request.")
+        return None
+    reasons.append(size_reason)
 
     if product.isOwnBrand:
-        score += Decimal("0.03")
+        brand_similarity = Decimal("0.65")
         reasons.append("Own-brand value signal applied.")
     if preferences.own_brand_preferred:
         if product.isOwnBrand:
-            score += Decimal("0.08")
+            brand_similarity = min(Decimal("1.0"), brand_similarity + Decimal("0.35"))
             reasons.append("Own-brand preference applied.")
         else:
-            score -= Decimal("0.06")
+            brand_similarity = Decimal("0.25")
             tradeoffs.append("Non-own-brand product deprioritised.")
     if preferences.branded_preferred:
         if not product.isOwnBrand:
-            score += Decimal("0.08")
+            brand_similarity = Decimal("0.92")
             reasons.append("Branded preference applied.")
         else:
-            score -= Decimal("0.06")
+            brand_similarity = Decimal("0.20")
             tradeoffs.append("Own-brand item deprioritised for branded preference.")
     if preferences.branded_only and product.isOwnBrand:
         reasons.append("Rejected: branded-only preference.")
@@ -200,7 +236,7 @@ def _rank_candidate(intent, product: SupermarketProduct, preferences: Preference
         tradeoffs.append("Low-confidence substitute due to weak category intent.")
 
     if product.isPremium:
-        score -= PREMIUM_PENALTY
+        price_sanity -= Decimal("0.22")
         tradeoffs.append("Premium product penalty applied.")
     if preferences.avoid_premium and product.isPremium:
         score -= Decimal("0.45")
@@ -210,9 +246,18 @@ def _rank_candidate(intent, product: SupermarketProduct, preferences: Preference
         reasons.append("Rejected: organic-only preference.")
         return None
 
-    if any(size_token in intent.normalizedInput for size_token in ["kg", "g", "l", "ml"]) and product.size not in intent.normalizedInput:
+    if size_similarity <= Decimal("0.10"):
         score -= SIZE_MISMATCH_PENALTY
         tradeoffs.append("Requested size differs from candidate pack size.")
+    elif size_similarity < Decimal("1.0"):
+        score -= SIZE_NEAR_MISS_PENALTY
+
+    score += (name_similarity * Decimal("0.38"))
+    score += (category_similarity * Decimal("0.18"))
+    score += (size_similarity * Decimal("0.22"))
+    score += (brand_similarity * Decimal("0.14"))
+    score += (price_sanity * Decimal("0.08"))
+    confidence = score
 
     confidence = max(Decimal("0.05"), min(Decimal("0.99"), confidence))
     score = max(Decimal("0.01"), min(Decimal("1.50"), score))
@@ -223,6 +268,17 @@ def _rank_candidate(intent, product: SupermarketProduct, preferences: Preference
 def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, quality: MatchQuality, confidence: Decimal, score: Decimal, matched_tokens: list[str], reasons: list[str], tradeoffs: list[str]) -> ItemSelectionResult:
     quantity = intent.quantity
     total = product.price * Decimal(quantity)
+    if confidence >= Decimal("0.85") and quality == MatchQuality.exact:
+        match_type = "exact"
+        confidence_label = "high"
+    elif confidence >= Decimal("0.60"):
+        match_type = "close"
+        confidence_label = "medium"
+    else:
+        match_type = "approximate"
+        confidence_label = "low"
+    match_explanation = reasons[0] if reasons else "Chosen as strongest available candidate."
+    selection_reason = f"Chosen for best weighted score ({score}) balancing name/category/size/brand/price checks."
     return ItemSelectionResult(
         id=uuid4(),
         intent=intent,
@@ -234,9 +290,13 @@ def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, qu
         totalPrice=total,
         matchQuality=quality,
         confidence=confidence,
+        matchType=match_type,
+        confidenceLabel=confidence_label,
         score=score,
         matchedTokens=matched_tokens,
         reasons=reasons,
+        matchExplanation=match_explanation,
+        selectionReason=selection_reason,
         tradeoffs=tradeoffs,
     )
 
@@ -293,24 +353,30 @@ def _build_market_total(supermarket: Supermarket, intents, inventory: list[Super
 
         quality, confidence, score, product, matched_tokens, reasons, tradeoffs = ranked[0]
         if score < Decimal("0.30"):
-            unavailable.append(intent)
-            missing_details.append(
-                MissingItemDetail(
-                    intent=intent,
-                    reason=f"Best candidate score {score} below acceptance threshold.",
-                    closeCandidates=[
-                        MissingItemCandidate(
-                            supermarketName=supermarket.name,
-                            productName=candidate[3].name,
-                            score=candidate[2],
-                            reason="Candidate was close but lower confidence.",
-                        )
-                        for candidate in ranked[:3]
-                    ],
-                    suggestion="Add preferred brand or approximate size (e.g. 500g).",
+            if score >= Decimal("0.22"):
+                tradeoffs.append("Approximate fallback selected because no high-confidence candidate was available.")
+                if quality != MatchQuality.exact:
+                    quality = MatchQuality.weakSubstitute
+                reasons.append(f"Fallback accepted: best available option had score {score}.")
+            else:
+                unavailable.append(intent)
+                missing_details.append(
+                    MissingItemDetail(
+                        intent=intent,
+                        reason=f"Best candidate score {score} below acceptance threshold.",
+                        closeCandidates=[
+                            MissingItemCandidate(
+                                supermarketName=supermarket.name,
+                                productName=candidate[3].name,
+                                score=candidate[2],
+                                reason="Candidate was close but lower confidence.",
+                            )
+                            for candidate in ranked[:3]
+                        ],
+                        suggestion="Add preferred brand or approximate size (e.g. 500g).",
+                    )
                 )
-            )
-            continue
+                continue
         selections.append(_selection(intent, supermarket, product, quality, confidence, score, matched_tokens, reasons, tradeoffs))
         debug_top = [f"{candidate[3].name}(score={candidate[2]})" for candidate in ranked[:3]]
         logger.info(
