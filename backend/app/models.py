@@ -130,6 +130,7 @@ class SupermarketBasketTotal(BaseModel):
     selections: List[ItemSelectionResult]
     unavailableItems: List[GroceryIntent]
     total: Decimal
+    missingItemsExplanation: str = "All requested items were matched."
 
 
 class MixedBasketResult(BaseModel):
@@ -138,6 +139,7 @@ class MixedBasketResult(BaseModel):
     selections: List[ItemSelectionResult]
     unavailableItems: List[GroceryIntent]
     total: Decimal
+    missingItemsExplanation: str = "All requested items were matched."
 
 
 class BasketOptimisationResult(BaseModel):
