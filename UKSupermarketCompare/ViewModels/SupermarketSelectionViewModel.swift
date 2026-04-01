@@ -40,6 +40,7 @@ final class SupermarketSelectionViewModel: ObservableObject {
 
     func runComparison() {
         let markets = supermarkets.filter { selectedMarketIDs.contains($0.id) }
+        coordinator.store.markCompared(listID: shoppingList.id)
         let result = coordinator.compare(
             list: shoppingList,
             markets: markets,

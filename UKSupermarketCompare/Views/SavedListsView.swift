@@ -26,10 +26,8 @@ struct SavedListsView: View {
                     }
                 } else {
                     ForEach(viewModel.savedLists) { list in
-                        Button {
-                            coordinator.openSavedListDetail(list)
-                        } label: {
-                            BrandCard {
+                        BrandCard {
+                            VStack(alignment: .leading, spacing: 10) {
                                 HStack {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(list.title)
@@ -38,14 +36,33 @@ struct SavedListsView: View {
                                         Text("\(list.items.count) items")
                                             .font(BrandTypography.caption)
                                             .foregroundStyle(BrandPalette.textSecondary)
+                                        Text(lastComparedLabel(for: list))
+                                            .font(BrandTypography.caption)
+                                            .foregroundStyle(BrandPalette.textSecondary)
                                     }
                                     Spacer()
-                                    Image(systemName: "chevron.right")
-                                        .foregroundStyle(BrandPalette.textSecondary)
+                                    Button {
+                                        coordinator.openSavedListDetail(list)
+                                    } label: {
+                                        Image(systemName: "slider.horizontal.3")
+                                    }
+                                    .buttonStyle(.bordered)
+                                }
+
+                                HStack(spacing: 8) {
+                                    Button("Rerun") {
+                                        viewModel.rerun(list)
+                                        coordinator.openSelection(for: list)
+                                    }
+                                    .buttonStyle(BrandPrimaryButtonStyle())
+
+                                    Button("Duplicate") {
+                                        viewModel.duplicate(list)
+                                    }
+                                    .buttonStyle(BrandSecondaryButtonStyle())
                                 }
                             }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -53,5 +70,10 @@ struct SavedListsView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Saved Lists")
+    }
+
+    private func lastComparedLabel(for list: ShoppingList) -> String {
+        guard let lastComparedAt = list.lastComparedAt else { return "Not compared yet" }
+        return "Last compared \(lastComparedAt.formatted(date: .abbreviated, time: .shortened))"
     }
 }

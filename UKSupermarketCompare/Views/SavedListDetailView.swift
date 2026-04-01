@@ -34,6 +34,7 @@ struct SavedListDetailView: View {
 
                 HStack(spacing: 8) {
                     Button("Rerun basket") {
+                        coordinator.store.markCompared(listID: shoppingList.id)
                         coordinator.openSelection(for: shoppingList)
                     }
                     .buttonStyle(BrandPrimaryButtonStyle())
@@ -44,13 +45,24 @@ struct SavedListDetailView: View {
                     .buttonStyle(BrandSecondaryButtonStyle())
                 }
 
-                ForEach(shoppingList.items) { item in
+                ForEach(Array(shoppingList.items.enumerated()), id: \.element.id) { index, item in
                     BrandCard {
                         HStack {
-                            Text(item.name)
-                                .font(BrandTypography.body)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.name)
+                                    .font(BrandTypography.body)
+                                Stepper("Qty \(item.quantity)", value: bindingForQuantity(at: index), in: 1...99)
+                                    .labelsHidden()
+                            }
                             Spacer()
                             BrandBadge(text: "x\(item.quantity)", tint: BrandPalette.red)
+                            Button {
+                                shoppingList.items.remove(at: index)
+                                coordinator.store.update(list: shoppingList)
+                            } label: {
+                                Image(systemName: "trash")
+                                    .foregroundStyle(BrandPalette.red)
+                            }
                         }
                     }
                 }
@@ -59,5 +71,15 @@ struct SavedListDetailView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Saved List")
+    }
+
+    private func bindingForQuantity(at index: Int) -> Binding<Int> {
+        Binding(
+            get: { shoppingList.items[index].quantity },
+            set: { newValue in
+                shoppingList.items[index].quantity = newValue
+                coordinator.store.update(list: shoppingList)
+            }
+        )
     }
 }
