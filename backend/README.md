@@ -288,3 +288,50 @@ Set the Xcode Run environment variable:
 - `LIVE_SUPERMARKET_DATA_URL=http://<your-machine-ip>:8000/catalog`
 
 If running in the iOS Simulator on the same Mac, `http://localhost:8000/catalog` is fine.
+
+
+## Stage 4: live provider + enrichment
+
+### Live provider configuration (Tesco)
+
+The backend keeps the iOS app speaking only to FastAPI while allowing Tesco ingestion to switch source types behind the provider layer.
+
+Environment variables:
+
+- `TESCO_SOURCE_MODE` (`seed` by default)
+  - `seed`: local deterministic import files
+  - `structured` / `official` / `thirdparty` / `scrape`: enables the live Tesco adapter
+- `TESCO_API_KEY`: required when non-seed mode is enabled
+- `TESCO_SOURCE_BASE_URL`: structured Tesco-compatible API endpoint (default `https://api.trolley.co.uk/api/v1/products`)
+- `TESCO_QUERY_TERMS`: comma-separated seed queries for pull/import (default `milk,bread,eggs,butter`)
+- `OFF_BASE_URL`: Open Food Facts API base URL (default `https://world.openfoodfacts.org`)
+
+### Running imports and cache refresh
+
+```bash
+cd backend
+python -m scripts.import_catalog --replace
+python -m scripts.import_catalog --tesco-live
+```
+
+Imports populate/update the local cache tables (`raw_retailer_products`, `product_mappings`, `canonical_products`, `price_snapshots`) so app requests do not require a remote fetch every time.
+
+Cached fields now include retailer product id, price, promo price, size, unit pricing, brand, image, category tags, and last update timestamps.
+
+### App-facing endpoints
+
+- `GET /catalog` (legacy compatibility route retained)
+- `GET /autocomplete`
+- `GET /search`
+- `GET /product/{id}` (optional enrichment via `?barcode=...`)
+- `POST /compare`
+
+### Open Food Facts enrichment
+
+`GET /product/{id}?barcode=...` keeps enrichment separate from store pricing and returns product metadata, ingredients, nutrition, and allergens from Open Food Facts.
+
+### What remains for ASDA / Sainsbury's
+
+- Implement parallel live adapters equivalent to Tesco live source.
+- Add scheduler/background jobs for periodic refresh and stale-data monitoring.
+- Expand retailer-specific promo mechanics and unit normalization edge-cases.

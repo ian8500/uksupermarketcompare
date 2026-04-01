@@ -30,6 +30,9 @@ class ProviderProduct:
     unit_description: str
     unit_value: Decimal
     tags: list[str]
+    promo_price: Decimal | None = None
+    image_url: str | None = None
+    last_updated: str | None = None
 
 
 @dataclass(frozen=True)
@@ -75,6 +78,9 @@ class SeedFileProvider:
                 unit_description=item["unitDescription"],
                 unit_value=Decimal(str(item["unitValue"])),
                 tags=item["tags"],
+                promo_price=Decimal(str(item["promoPrice"])) if item.get("promoPrice") is not None else None,
+                image_url=item.get("imageUrl"),
+                last_updated=item.get("lastUpdated"),
             )
             for item in self._payload_products
         ]

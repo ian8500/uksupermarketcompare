@@ -33,6 +33,7 @@ class SearchResultItem(BaseModel):
     matchedTerms: list[str]
 
 
+
 class SearchResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
