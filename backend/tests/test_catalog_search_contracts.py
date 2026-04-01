@@ -114,7 +114,17 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
     assert catalog_payload["mappings"] > 0
     assert catalog_payload["productsPerSupermarket"]
     assert catalog_payload["retailerFreshness"]
-    assert {"retailer", "status", "ageHours", "lastAttemptAt", "lastSuccessAt", "lastImportStatus"} <= set(
+    assert {
+        "retailer",
+        "status",
+        "ageHours",
+        "lastAttemptAt",
+        "lastSuccessAt",
+        "lastSuccessTimestamp",
+        "lastImportStatus",
+        "sourceMode",
+        "productCount",
+    } <= set(
         catalog_payload["retailerFreshness"][0].keys()
     )
     assert catalog_payload["latestImportRuns"]
