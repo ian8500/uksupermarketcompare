@@ -100,28 +100,29 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
         for provider in providers:
             source_mode = getattr(provider, "active_source", "seed")
             run_state = _insert_import_run(conn, retailer=provider.name, source_mode=source_mode)
-            logger.info("Starting import for provider=%s replace_existing=%s", provider.name, replace_existing)
-            retailer_row = conn.execute("SELECT id FROM retailers WHERE name = ?", (provider.name,)).fetchone()
-            if retailer_row:
-                retailer_id = retailer_row[0]
-                conn.execute("UPDATE retailers SET description = ? WHERE id = ?", (provider.description, retailer_id))
-            else:
-                retailer_id = conn.execute(
-                    "INSERT INTO retailers(name, description) VALUES(?, ?)", (provider.name, provider.description)
-                ).lastrowid
-
-            if replace_existing:
-                conn.execute(
-                    "DELETE FROM price_snapshots WHERE raw_product_id IN (SELECT id FROM raw_retailer_products WHERE retailer_id = ?)",
-                    (retailer_id,),
-                )
-                conn.execute(
-                    "DELETE FROM product_mappings WHERE raw_product_id IN (SELECT id FROM raw_retailer_products WHERE retailer_id = ?)",
-                    (retailer_id,),
-                )
-                conn.execute("DELETE FROM raw_retailer_products WHERE retailer_id = ?", (retailer_id,))
-
+            provider_report: dict[str, int] = {}
             try:
+                logger.info("Starting import for provider=%s replace_existing=%s", provider.name, replace_existing)
+                retailer_row = conn.execute("SELECT id FROM retailers WHERE name = ?", (provider.name,)).fetchone()
+                if retailer_row:
+                    retailer_id = retailer_row[0]
+                    conn.execute("UPDATE retailers SET description = ? WHERE id = ?", (provider.description, retailer_id))
+                else:
+                    retailer_id = conn.execute(
+                        "INSERT INTO retailers(name, description) VALUES(?, ?)", (provider.name, provider.description)
+                    ).lastrowid
+
+                if replace_existing:
+                    conn.execute(
+                        "DELETE FROM price_snapshots WHERE raw_product_id IN (SELECT id FROM raw_retailer_products WHERE retailer_id = ?)",
+                        (retailer_id,),
+                    )
+                    conn.execute(
+                        "DELETE FROM product_mappings WHERE raw_product_id IN (SELECT id FROM raw_retailer_products WHERE retailer_id = ?)",
+                        (retailer_id,),
+                    )
+                    conn.execute("DELETE FROM raw_retailer_products WHERE retailer_id = ?", (retailer_id,))
+
                 normalized_products = provider.normalize_products()
                 provider_report = getattr(provider, "last_import_report", {}) or {}
                 run_state.fetched_count = int(provider_report.get("fetched", len(normalized_products)))
