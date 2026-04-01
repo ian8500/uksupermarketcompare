@@ -32,7 +32,7 @@ This repository now contains a native iPhone app built with Swift and SwiftUI.
 
 By default the app still falls back to mock supermarket data. To use live data, set an environment variable in your Xcode Run scheme:
 
-- `LIVE_SUPERMARKET_DATA_URL=https://your-domain.example/live-supermarket-data.json`
+- `LIVE_SUPERMARKET_DATA_URL=http://localhost:8000/catalog`
 
 Expected JSON shape:
 
