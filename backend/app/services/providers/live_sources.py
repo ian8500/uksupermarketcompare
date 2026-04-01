@@ -3,11 +3,12 @@ from __future__ import annotations
 import json
 import logging
 import os
+import socket
+import time
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
-import socket
-from typing import Protocol
+from typing import Any, Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -31,6 +32,7 @@ class TescoLiveSourceConfig:
     third_party_api_key: str | None
     query_terms: list[str]
     timeout_seconds: int
+    max_retries: int
 
     @classmethod
     def from_env(cls) -> "TescoLiveSourceConfig":
@@ -44,11 +46,13 @@ class TescoLiveSourceConfig:
             third_party_api_key=os.getenv("TESCO_THIRD_PARTY_API_KEY") or os.getenv("TESCO_API_KEY"),
             query_terms=query_terms,
             timeout_seconds=max(5, int(os.getenv("TESCO_SOURCE_TIMEOUT_SECONDS", "20"))),
+            max_retries=max(0, int(os.getenv("TESCO_SOURCE_MAX_RETRIES", "1"))),
         )
 
 
 class TescoUpstreamSource(Protocol):
     source_name: str
+    last_fetch_report: dict[str, Any]
 
     def is_configured(self) -> bool: ...
 
@@ -60,6 +64,7 @@ class TescoOfficialApiSource:
 
     def __init__(self, config: TescoLiveSourceConfig) -> None:
         self.config = config
+        self.last_fetch_report: dict[str, Any] = {}
 
     def is_configured(self) -> bool:
         return bool(self.config.official_base_url and self.config.official_api_key and self.config.official_partner_id)
@@ -74,6 +79,8 @@ class TescoOfficialApiSource:
             source_name=self.source_name,
             extra_headers={"X-Partner-Id": str(self.config.official_partner_id)},
             timeout_seconds=self.config.timeout_seconds,
+            max_retries=self.config.max_retries,
+            report_target=self,
         )
 
 
@@ -82,6 +89,7 @@ class TescoThirdPartyApiSource:
 
     def __init__(self, config: TescoLiveSourceConfig) -> None:
         self.config = config
+        self.last_fetch_report: dict[str, Any] = {}
 
     def is_configured(self) -> bool:
         return bool(self.config.third_party_base_url and self.config.third_party_api_key)
@@ -95,6 +103,8 @@ class TescoThirdPartyApiSource:
             query_terms=self.config.query_terms,
             source_name=self.source_name,
             timeout_seconds=self.config.timeout_seconds,
+            max_retries=self.config.max_retries,
+            report_target=self,
         )
 
 
@@ -147,15 +157,35 @@ def _fetch_structured_products(
     source_name: str,
     extra_headers: dict[str, str] | None = None,
     timeout_seconds: int = 20,
+    max_retries: int = 1,
+    report_target: TescoUpstreamSource | None = None,
 ) -> list[ProviderProduct]:
     if not api_key:
         raise LiveSourceError("API key is required")
 
     rows: list[ProviderProduct] = []
     failures: list[str] = []
+    fetched = 0
+    skipped = 0
+    rejected = 0
+    mapped = 0
+
     for term in query_terms:
         try:
-            rows.extend(_fetch_for_query(base_url, api_key, term, source_name, extra_headers or {}, timeout_seconds))
+            query_rows, query_report = _fetch_for_query(
+                base_url=base_url,
+                api_key=api_key,
+                term=term,
+                source_name=source_name,
+                extra_headers=extra_headers or {},
+                timeout_seconds=timeout_seconds,
+                max_retries=max_retries,
+            )
+            rows.extend(query_rows)
+            fetched += query_report["fetched"]
+            skipped += query_report["skipped"]
+            rejected += query_report["rejected"]
+            mapped += query_report["mapped"]
         except LiveSourceError as exc:
             failures.append(f"{term}:{exc}")
             logger.warning("Tesco upstream query failed source=%s query=%r error=%s", source_name, term, exc)
@@ -174,17 +204,44 @@ def _fetch_structured_products(
             len(failures),
             len(query_terms),
         )
+
+    report = {
+        "source": source_name,
+        "fetched": fetched,
+        "skipped": skipped,
+        "rejected": rejected,
+        "mapped": mapped,
+        "deduped": len(deduped),
+        "failed_queries": len(failures),
+        "total_queries": len(query_terms),
+    }
+    if report_target is not None:
+        report_target.last_fetch_report = report
+
+    logger.info(
+        "Tesco upstream summary source=%s fetched=%d skipped=%d rejected=%d mapped=%d deduped=%d failed_queries=%d total_queries=%d",
+        source_name,
+        fetched,
+        skipped,
+        rejected,
+        mapped,
+        len(deduped),
+        len(failures),
+        len(query_terms),
+    )
     return list(deduped.values())
 
 
 def _fetch_for_query(
+    *,
     base_url: str,
     api_key: str,
     term: str,
     source_name: str,
     extra_headers: dict[str, str],
     timeout_seconds: int,
-) -> list[ProviderProduct]:
+    max_retries: int,
+) -> tuple[list[ProviderProduct], dict[str, int]]:
     url = f"{base_url}?query={quote(term)}&retailer=tesco"
     headers = {
         "User-Agent": "UKSupermarketCompare/1.0",
@@ -194,46 +251,39 @@ def _fetch_for_query(
     headers.update(extra_headers)
     req = Request(url, headers=headers)
 
-    try:
-        with urlopen(req, timeout=timeout_seconds) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except HTTPError as exc:
-        if exc.code == 429:
-            raise LiveSourceError(f"Tesco {source_name} source rate limited") from exc
-        raise LiveSourceError(f"Tesco {source_name} source HTTP error: {exc.code}") from exc
-    except TimeoutError as exc:
-        raise LiveSourceError(f"Tesco {source_name} source timeout") from exc
-    except socket.timeout as exc:
-        raise LiveSourceError(f"Tesco {source_name} source timeout") from exc
-    except URLError as exc:
-        raise LiveSourceError(f"Tesco {source_name} source connection error: {exc.reason}") from exc
+    payload = _request_json_with_retries(req, source_name, timeout_seconds, max_retries)
+    items = _validated_items(payload, source_name)
 
-    if not isinstance(payload, dict):
-        raise LiveSourceError(f"Tesco {source_name} source invalid payload root")
-    items = payload.get("products") or payload.get("items") or []
-    if not isinstance(items, list):
-        raise LiveSourceError(f"Tesco {source_name} source invalid products field")
     now = datetime.now(UTC).isoformat()
     products: list[ProviderProduct] = []
+    skipped = 0
+    rejected = 0
+
     for item in items:
         if not isinstance(item, dict):
+            rejected += 1
             continue
         price_value = item.get("price") or item.get("current_price")
         if price_value in (None, ""):
+            skipped += 1
             continue
         try:
             parsed_price = Decimal(str(price_value))
         except Exception:
             logger.warning("Tesco upstream skipped malformed price source=%s query=%r", source_name, term)
+            rejected += 1
             continue
+
         unit_value = item.get("unit_price") or item.get("unit_value") or 0
         try:
             parsed_unit_value = Decimal(str(unit_value or 0))
         except Exception:
             parsed_unit_value = Decimal("0")
+
         tags = item.get("tags") or item.get("category_tags") or []
         if isinstance(tags, str):
             tags = [t.strip() for t in tags.split(",") if t.strip()]
+
         promo_price_raw = item.get("promo_price")
         promo_price = None
         if promo_price_raw not in (None, ""):
@@ -241,6 +291,7 @@ def _fetch_for_query(
                 promo_price = Decimal(str(promo_price_raw))
             except Exception:
                 promo_price = None
+
         products.append(
             ProviderProduct(
                 source_product_id=str(item.get("id") or item.get("product_id") or "") or None,
@@ -259,5 +310,68 @@ def _fetch_for_query(
                 last_updated=str(item.get("last_updated") or now),
             )
         )
-    logger.info("Tesco upstream fetch source=%s query=%r rows=%d", source_name, term, len(products))
-    return products
+
+    logger.info(
+        "Tesco upstream fetch source=%s query=%r fetched=%d skipped=%d rejected=%d mapped=%d",
+        source_name,
+        term,
+        len(items),
+        skipped,
+        rejected,
+        len(products),
+    )
+    return products, {"fetched": len(items), "skipped": skipped, "rejected": rejected, "mapped": len(products)}
+
+
+def _validated_items(payload: object, source_name: str) -> list[object]:
+    if not isinstance(payload, dict):
+        raise LiveSourceError(f"Tesco {source_name} source invalid payload root")
+
+    items = payload.get("products")
+    if items is None:
+        items = payload.get("items")
+    if items is None:
+        return []
+    if not isinstance(items, list):
+        raise LiveSourceError(f"Tesco {source_name} source invalid products field")
+    return items
+
+
+def _request_json_with_retries(req: Request, source_name: str, timeout_seconds: int, max_retries: int) -> object:
+    attempts = max_retries + 1
+    for attempt in range(1, attempts + 1):
+        try:
+            with urlopen(req, timeout=timeout_seconds) as response:
+                return json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            if exc.code == 429:
+                if attempt >= attempts:
+                    raise LiveSourceError(f"Tesco {source_name} source rate limited") from exc
+                retry_after = _retry_after_seconds(exc)
+                logger.warning(
+                    "Tesco upstream rate limited source=%s attempt=%d/%d retry_after_seconds=%d",
+                    source_name,
+                    attempt,
+                    attempts,
+                    retry_after,
+                )
+                time.sleep(retry_after)
+                continue
+            raise LiveSourceError(f"Tesco {source_name} source HTTP error: {exc.code}") from exc
+        except TimeoutError as exc:
+            raise LiveSourceError(f"Tesco {source_name} source timeout after {timeout_seconds}s") from exc
+        except socket.timeout as exc:
+            raise LiveSourceError(f"Tesco {source_name} source timeout after {timeout_seconds}s") from exc
+        except URLError as exc:
+            reason = str(exc.reason).lower()
+            if "timed out" in reason:
+                raise LiveSourceError(f"Tesco {source_name} source timeout after {timeout_seconds}s") from exc
+            raise LiveSourceError(f"Tesco {source_name} source connection error: {exc.reason}") from exc
+    raise LiveSourceError(f"Tesco {source_name} source unavailable")
+
+
+def _retry_after_seconds(exc: HTTPError) -> int:
+    raw = exc.headers.get("Retry-After") if exc.headers else None
+    if raw and str(raw).isdigit():
+        return max(1, min(int(raw), 5))
+    return 1

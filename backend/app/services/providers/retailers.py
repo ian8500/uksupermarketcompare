@@ -23,10 +23,15 @@ class TescoProvider(SeedFileProvider):
         self._official = TescoOfficialApiSource(self.config)
         self._third_party = TescoThirdPartyApiSource(self.config)
         self._active_source = "seed"
+        self._last_import_report: dict[str, int | str] = {"source": "seed", "fetched": 0, "skipped": 0, "rejected": 0, "mapped": 0}
 
     @property
     def active_source(self) -> str:
         return self._active_source
+
+    @property
+    def last_import_report(self) -> dict[str, int | str]:
+        return dict(self._last_import_report)
 
     def load_products(self) -> list[ProviderProduct]:
         requested = self.config.mode
@@ -48,6 +53,13 @@ class TescoProvider(SeedFileProvider):
                 live_products = source.fetch_products()
                 if live_products:
                     self._active_source = source.source_name
+                    self._last_import_report = {
+                        "source": source.source_name,
+                        "fetched": int(source.last_fetch_report.get("fetched", len(live_products))),
+                        "skipped": int(source.last_fetch_report.get("skipped", 0)),
+                        "rejected": int(source.last_fetch_report.get("rejected", 0)),
+                        "mapped": int(source.last_fetch_report.get("mapped", len(live_products))),
+                    }
                     logger.info("Tesco provider using live source=%s rows=%d", source.source_name, len(live_products))
                     return live_products
                 logger.warning("Tesco source returned zero products source=%s", source.source_name)
@@ -56,7 +68,9 @@ class TescoProvider(SeedFileProvider):
 
         self._active_source = "seed"
         logger.info("Tesco provider fallback=seed mode=%s", requested)
-        return super().load_products()
+        seed_products = super().load_products()
+        self._last_import_report = {"source": "seed", "fetched": len(seed_products), "skipped": 0, "rejected": 0, "mapped": len(seed_products)}
+        return seed_products
 
 
 class AsdaProvider(SeedFileProvider):
