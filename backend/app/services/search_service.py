@@ -27,6 +27,8 @@ class SearchCandidate:
     promo_price: float | None
     image_url: str | None
     category_tags: list[str]
+    availability: str | None
+    source_metadata: str | None
     last_updated: str | None
     raw_searchable_text: str
     canonical_name: str
@@ -76,6 +78,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
               ps.promo_price,
               raw.image_url,
               raw.category_tags,
+              raw.availability,
+              raw.source_metadata,
               raw.last_updated
             FROM raw_retailer_products raw
             JOIN retailers r ON r.id = raw.retailer_id
@@ -109,6 +113,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
             promo_price=float(row["promo_price"]) if row["promo_price"] is not None else None,
             image_url=row["image_url"] or None,
             category_tags=[tag for tag in (row["category_tags"] or "").split(",") if tag],
+            availability=row["availability"] or None,
+            source_metadata=row["source_metadata"] or None,
             last_updated=row["last_updated"] or None,
             raw_searchable_text=row["raw_searchable_text"],
             canonical_name=row["canonical_name"],

@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict
 
-from app.services.diagnostics import catalog_diagnostics, search_diagnostics
+from app.services.diagnostics import catalog_diagnostics, search_diagnostics, tesco_live_diagnostics
 
 router = APIRouter(prefix="/diagnostics", tags=["diagnostics"])
 
@@ -15,6 +15,17 @@ class ProductsPerSupermarket(BaseModel):
     products: int
 
 
+
+
+class TescoLiveDiagnostics(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: str
+    activeSource: str
+    status: str
+    lastUpdated: str | None = None
+
+
 class CatalogDiagnosticsResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -24,6 +35,7 @@ class CatalogDiagnosticsResponse(BaseModel):
     categoriesCovered: list[str]
     priceSnapshots: int
     priceDropAlertCandidates: int
+    tescoLive: TescoLiveDiagnostics
 
 
 class EndpointSearchDiagnostics(BaseModel):
@@ -47,7 +59,9 @@ class SearchDiagnosticsResponse(BaseModel):
 
 @router.get("/catalog", response_model=CatalogDiagnosticsResponse)
 def catalog_metrics() -> CatalogDiagnosticsResponse:
-    return CatalogDiagnosticsResponse(**catalog_diagnostics())
+    payload = catalog_diagnostics()
+    payload["tescoLive"] = tesco_live_diagnostics()
+    return CatalogDiagnosticsResponse(**payload)
 
 
 @router.get("/search", response_model=SearchDiagnosticsResponse)

@@ -114,3 +114,33 @@ def search_diagnostics() -> dict:
             for row in per_endpoint
         ],
     }
+
+
+def tesco_live_diagnostics() -> dict:
+    with get_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT raw.source_metadata, raw.last_updated
+            FROM raw_retailer_products raw
+            JOIN retailers r ON r.id = raw.retailer_id
+            WHERE r.name = 'Tesco'
+            ORDER BY raw.last_updated DESC
+            LIMIT 1
+            """
+        ).fetchone()
+
+    if not row:
+        return {"mode": "fallback", "activeSource": "none", "status": "empty", "lastUpdated": None}
+
+    source_metadata = (row["source_metadata"] or "").lower()
+    active_source = "seed"
+    if "official" in source_metadata:
+        active_source = "official"
+    elif "third_party" in source_metadata:
+        active_source = "third_party"
+
+    if active_source == "seed":
+        status = "fallback"
+    else:
+        status = "active"
+    return {"mode": active_source, "activeSource": active_source, "status": status, "lastUpdated": row["last_updated"] or None}

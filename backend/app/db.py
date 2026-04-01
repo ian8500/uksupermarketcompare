@@ -35,6 +35,8 @@ def init_db() -> None:
                 raw_payload TEXT,
                 image_url TEXT NOT NULL DEFAULT "",
                 category_tags TEXT NOT NULL DEFAULT "",
+                availability TEXT NOT NULL DEFAULT "",
+                source_metadata TEXT NOT NULL DEFAULT "{}",
                 last_updated TEXT NOT NULL DEFAULT "",
                 searchable_text TEXT NOT NULL,
                 created_at TEXT NOT NULL,
@@ -136,6 +138,8 @@ def init_db() -> None:
         _ensure_column(conn, "canonical_products", "canonical_aliases", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "raw_retailer_products", "image_url", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "raw_retailer_products", "category_tags", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "raw_retailer_products", "availability", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "raw_retailer_products", "source_metadata", "TEXT NOT NULL DEFAULT '{}'")
         _ensure_column(conn, "raw_retailer_products", "last_updated", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "price_snapshots", "promo_price", "REAL")
         conn.commit()

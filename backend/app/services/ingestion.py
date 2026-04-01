@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 import logging
 
 from app.db import get_connection
-from app.services.providers import AsdaProvider, CatalogProvider, SainsburysProvider, TescoProvider
+from app.services.providers import AsdaProvider, SainsburysProvider, SupermarketPriceProvider, TescoProvider
 
 DEFAULT_SYNONYMS: dict[str, str] = {
     "beanz": "baked beans",
@@ -15,11 +15,11 @@ DEFAULT_SYNONYMS: dict[str, str] = {
 logger = logging.getLogger(__name__)
 
 
-def default_providers() -> list[CatalogProvider]:
+def default_providers() -> list[SupermarketPriceProvider]:
     return [TescoProvider(), AsdaProvider(), SainsburysProvider()]
 
 
-def import_catalog_data(providers: list[CatalogProvider] | None = None, *, replace_existing: bool = False) -> dict[str, int]:
+def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None, *, replace_existing: bool = False) -> dict[str, int]:
     providers = providers or default_providers()
     inserted_raw = 0
     updated_raw = 0
@@ -115,7 +115,7 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                     conn.execute(
                         """
                         UPDATE raw_retailer_products
-                        SET source_subcategory = ?, searchable_text = ?, image_url = ?, category_tags = ?, last_updated = ?, created_at = ?
+                        SET source_subcategory = ?, searchable_text = ?, image_url = ?, category_tags = ?, availability = ?, source_metadata = ?, last_updated = ?, created_at = ?
                         WHERE id = ?
                         """,
                         (
@@ -123,6 +123,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                             product.searchable_text,
                             product.raw.image_url or "",
                             ",".join(product.normalized_tags),
+                            product.raw.availability or "",
+                            str(product.raw.source_metadata or {}),
                             product.raw.last_updated or now,
                             now,
                             raw_product_id,
@@ -134,8 +136,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                         """
                         INSERT INTO raw_retailer_products(
                             retailer_id, source_product_id, source_name, source_brand, source_size, source_subcategory,
-                            image_url, category_tags, last_updated, searchable_text, created_at
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            image_url, category_tags, availability, source_metadata, last_updated, searchable_text, created_at
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             retailer_id,
@@ -146,6 +148,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                             product.raw.subcategory,
                             product.raw.image_url or "",
                             ",".join(product.normalized_tags),
+                            product.raw.availability or "",
+                            str(product.raw.source_metadata or {}),
                             product.raw.last_updated or now,
                             product.searchable_text,
                             now,
