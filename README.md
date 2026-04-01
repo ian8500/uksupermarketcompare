@@ -8,15 +8,26 @@ This repository contains a native iPhone app built with Swift and SwiftUI, plus 
 2. Select an iPhone simulator (e.g., iPhone 16).
 3. Build and run.
 
-## App MVP features
+## Current app capabilities (Stages 1–4)
 
-- Welcome / Home screen
-- Create Shopping List screen
-- Supermarket Selection screen
-- Basket Comparison Results screen
-- Saved Lists screen
-- Local persistence of saved lists via `UserDefaults`
-- MVVM architecture (`Models`, `ViewModels`, `Services`, `Views`)
+- Welcome / Home, list creation, supermarket selection, results, and saved baskets.
+- Local persistence of saved lists via `UserDefaults`.
+- Live backend catalog support with automatic fallback to mock data.
+- Basket strategy modes:
+  - Cheapest mixed basket
+  - Cheapest single-store basket
+  - Best convenience option
+- Preference and constraint controls:
+  - Brand preference (neutral / own-brand preferred / branded preferred / branded only)
+  - Avoid premium products
+  - Organic-only filter
+  - Max stores constraint (auto, 1, or 2)
+- Premium decision-focused results:
+  - Strategy cards with selected-strategy highlighting
+  - Store-grouped purchase plan with per-item confidence and decision reasons
+  - Savings + convenience trade-off summaries
+  - Missing-item guidance and close alternatives
+- MVVM architecture (`Models`, `ViewModels`, `Services`, `Views`).
 
 ## Live vs mock data selection
 
@@ -117,16 +128,16 @@ For live catalog/search health checks, use:
 
 See `backend/README.md` for troubleshooting and validation steps.
 
-## Stage 4 Step 2: richer basket strategy result model
+## Stage 4 strategy model support
 
 `POST /compare` now returns decision-oriented strategy results so the app can explain *why* a basket was chosen, not just the total.
 
-Each strategy (cheapest single-store, cheapest mixed, convenience, max-two-store mixed) includes:
+Backend strategy payloads include these modes and metadata:
 
 - total price + stores used/store count
 - savings vs key alternatives
 - missing-item summary
 - chosen purchase-plan items (requested item, selected product/store, quantity, price, explanation, match confidence when available)
-- human-readable explanation and trade-off summary
+- human-readable explanation and trade-off summary.
 
 This extends compare payloads while preserving `/catalog` contract compatibility and current live catalog data flow.

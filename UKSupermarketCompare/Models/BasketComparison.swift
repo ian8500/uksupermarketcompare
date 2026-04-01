@@ -67,11 +67,24 @@ enum MatchQuality: Int, Codable, Hashable, Comparable {
 enum BasketComparisonMode: String, Codable, CaseIterable, Hashable {
     case cheapestPossible
     case cheapestSingleStoreOnly
+    case bestConvenienceOption
 
     var title: String {
         switch self {
         case .cheapestPossible: return "Cheapest possible"
         case .cheapestSingleStoreOnly: return "Single-store only"
+        case .bestConvenienceOption: return "Best convenience"
+        }
+    }
+
+    var summary: String {
+        switch self {
+        case .cheapestPossible:
+            return "Lowest total cost across selected stores."
+        case .cheapestSingleStoreOnly:
+            return "One-store checkout, even if it costs a bit more."
+        case .bestConvenienceOption:
+            return "Simplest near-complete trip with strong value."
         }
     }
 }

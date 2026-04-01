@@ -50,6 +50,11 @@ final class BasketOptimiserService: BasketOptimising {
 
         let mixed = MixedBasketResult(selections: constrainedMixedSelections, unavailableItems: unavailable)
         let cheapestSingle = totals.first(where: { $0.unavailableItems.isEmpty })
+        let convenience = totals.min {
+            let lhsScore = $0.total + Decimal($0.unavailableItems.count * 5)
+            let rhsScore = $1.total + Decimal($1.unavailableItems.count * 5)
+            return lhsScore < rhsScore
+        }
         let selectedBasket: MixedBasketResult
 
         switch mode {
@@ -58,6 +63,12 @@ final class BasketOptimiserService: BasketOptimising {
         case .cheapestSingleStoreOnly:
             if let cheapestSingle {
                 selectedBasket = MixedBasketResult(selections: cheapestSingle.selections, unavailableItems: cheapestSingle.unavailableItems)
+            } else {
+                selectedBasket = mixed
+            }
+        case .bestConvenienceOption:
+            if let convenience {
+                selectedBasket = MixedBasketResult(selections: convenience.selections, unavailableItems: convenience.unavailableItems)
             } else {
                 selectedBasket = mixed
             }

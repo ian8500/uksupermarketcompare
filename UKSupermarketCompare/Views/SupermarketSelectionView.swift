@@ -10,21 +10,37 @@ struct SupermarketSelectionView: View {
 
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Basket mode")
+                        Text("Shopping strategy")
                             .font(BrandTypography.caption)
                             .foregroundStyle(BrandPalette.textSecondary)
-                        Picker("Basket mode", selection: $viewModel.comparisonMode) {
-                            ForEach(BasketComparisonMode.allCases, id: \.self) { mode in
-                                Text(mode.title).tag(mode)
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(viewModel.modeOptions) { option in
+                                Button {
+                                    viewModel.comparisonMode = option.mode
+                                } label: {
+                                    HStack(alignment: .top, spacing: 10) {
+                                        Image(systemName: viewModel.comparisonMode == option.mode ? "largecircle.fill.circle" : "circle")
+                                            .foregroundStyle(viewModel.comparisonMode == option.mode ? BrandPalette.red : BrandPalette.textSecondary)
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(option.mode.title)
+                                                .font(BrandTypography.body.weight(.semibold))
+                                                .foregroundStyle(BrandPalette.textPrimary)
+                                            Text(option.mode.summary)
+                                                .font(BrandTypography.caption)
+                                                .foregroundStyle(BrandPalette.textSecondary)
+                                        }
+                                        Spacer()
+                                    }
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .pickerStyle(.segmented)
                     }
                 }
 
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text("Preferences")
+                        Text("Shopping preferences")
                             .font(BrandTypography.caption)
                             .foregroundStyle(BrandPalette.textSecondary)
                         Picker("Brand", selection: $viewModel.brandPreference) {
@@ -35,6 +51,9 @@ struct SupermarketSelectionView: View {
 
                         Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
                         Toggle("Organic only", isOn: $viewModel.organicOnly)
+                        Text("Store limit for mixed baskets")
+                            .font(BrandTypography.caption)
+                            .foregroundStyle(BrandPalette.textSecondary)
 
                         Picker("Max stores", selection: $viewModel.maxStores) {
                             Text("Auto").tag(0)
@@ -42,6 +61,10 @@ struct SupermarketSelectionView: View {
                             Text("2 stores").tag(2)
                         }
                         .pickerStyle(.segmented)
+
+                        Text(viewModel.selectedModeSummary)
+                            .font(BrandTypography.caption)
+                            .foregroundStyle(BrandPalette.textSecondary)
                     }
                 }
 
