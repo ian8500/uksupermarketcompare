@@ -21,6 +21,10 @@ final class BasketComparisonResultsViewModel: ObservableObject {
         "You save \(result.savingsVsMostExpensive.asGBP()) vs the priciest option and \(result.savingsVsCheapestSingleStore.asGBP()) vs the best single-store basket."
     }
 
+    var preferenceEffects: [String] {
+        result.preferenceEffects ?? []
+    }
+
     var selectedStoresUsed: [String] {
         Array(Set(result.selectedBasket.selections.map { $0.supermarket.name })).sorted()
     }

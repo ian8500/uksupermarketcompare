@@ -35,6 +35,13 @@ struct SupermarketSelectionView: View {
 
                         Toggle("Avoid premium", isOn: $viewModel.avoidPremium)
                         Toggle("Organic only", isOn: $viewModel.organicOnly)
+
+                        Picker("Max stores", selection: $viewModel.maxStores) {
+                            Text("Auto").tag(0)
+                            Text("1 store").tag(1)
+                            Text("2 stores").tag(2)
+                        }
+                        .pickerStyle(.segmented)
                     }
                 }
 

@@ -5,7 +5,8 @@ protocol BasketOptimising {
         shoppingList: ShoppingList,
         supermarkets: [Supermarket],
         mode: BasketComparisonMode,
-        preferences: BasketUserPreferences
+        preferences: BasketUserPreferences,
+        maxSupermarkets: Int?
     ) -> BasketOptimisationResult
 }
 
@@ -22,7 +23,8 @@ final class BasketOptimiserService: BasketOptimising {
         shoppingList: ShoppingList,
         supermarkets: [Supermarket],
         mode: BasketComparisonMode,
-        preferences: BasketUserPreferences
+        preferences: BasketUserPreferences,
+        maxSupermarkets: Int?
     ) -> BasketOptimisationResult {
         let intents = shoppingList.items.map(resolveIntent)
         let totals = supermarkets.map { buildSupermarketTotal(for: $0, intents: intents, preferences: preferences) }
@@ -32,19 +34,21 @@ final class BasketOptimiserService: BasketOptimising {
             let options = totals.compactMap { total in
                 total.selections.first(where: { $0.intent.id == intent.id })
             }
-            return options.min { lhs, rhs in
+            let best = options.min { lhs, rhs in
                 if lhs.totalPrice == rhs.totalPrice {
                     return lhs.confidence > rhs.confidence
                 }
                 return lhs.totalPrice < rhs.totalPrice
             }
+            return best
         }
+        let constrainedMixedSelections = constrainSelections(mixedSelections, maxSupermarkets: maxSupermarkets)
 
         let unavailable = intents.filter { intent in
-            !mixedSelections.contains(where: { $0.intent.id == intent.id })
+            !constrainedMixedSelections.contains(where: { $0.intent.id == intent.id })
         }
 
-        let mixed = MixedBasketResult(selections: mixedSelections, unavailableItems: unavailable)
+        let mixed = MixedBasketResult(selections: constrainedMixedSelections, unavailableItems: unavailable)
         let cheapestSingle = totals.first(where: { $0.unavailableItems.isEmpty })
         let selectedBasket: MixedBasketResult
 
@@ -67,8 +71,36 @@ final class BasketOptimiserService: BasketOptimising {
             mixedBasket: mixed,
             selectedBasket: selectedBasket,
             comparisonMode: mode,
-            preferences: preferences
+            preferences: preferences,
+            preferenceEffects: buildPreferenceEffects(preferences: preferences, maxSupermarkets: maxSupermarkets)
         )
+    }
+
+    private func buildPreferenceEffects(preferences: BasketUserPreferences, maxSupermarkets: Int?) -> [String] {
+        var effects: [String] = []
+        switch preferences.brandPreference {
+        case .ownBrandPreferred: effects.append("Own-brand preference applied")
+        case .brandedPreferred: effects.append("Branded preference applied")
+        case .brandedOnly: effects.append("Branded-only filter applied")
+        case .neutral: break
+        }
+        if preferences.avoidPremium { effects.append("Premium products excluded") }
+        if preferences.organicOnly { effects.append("Organic-only filter applied") }
+        if let maxSupermarkets { effects.append("Limited to \(maxSupermarkets) store\(maxSupermarkets == 1 ? "" : "s")") }
+        return effects
+    }
+
+    private func constrainSelections(_ selections: [ItemSelectionResult], maxSupermarkets: Int?) -> [ItemSelectionResult] {
+        guard let maxSupermarkets, maxSupermarkets > 0 else { return selections }
+        var allowed: Set<String> = []
+        var constrained: [ItemSelectionResult] = []
+        for selection in selections.sorted(by: { $0.totalPrice < $1.totalPrice }) {
+            if allowed.contains(selection.supermarket.name) || allowed.count < maxSupermarkets {
+                allowed.insert(selection.supermarket.name)
+                constrained.append(selection)
+            }
+        }
+        return constrained
     }
 
     private func resolveIntent(item: ShoppingItem) -> GroceryIntent {
@@ -186,6 +218,13 @@ final class BasketOptimiserService: BasketOptimising {
             } else {
                 score -= 0.06
             }
+        case .brandedOnly:
+            if product.isOwnBrand {
+                reasons.append("Rejected by branded-only preference.")
+                return nil
+            }
+            score += 0.07
+            reasons.append("Branded-only preference applied.")
         case .neutral:
             break
         }

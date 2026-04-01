@@ -24,6 +24,7 @@ from app.services.item_parser import parse_item_input
         ("barilla spag 500g", 1, "pasta", "barilla", "g", 500, []),
         ("sainsbury's baked beanz", 1, "baked beans", "sainsbury's", None, None, []),
         ("free-range eggs", 1, "eggs", None, None, None, ["free range"]),
+        ("branded only cereal", 1, "cereal", None, None, None, ["branded", "branded only"]),
         ("whole milk", 1, "milk", None, None, None, ["whole"]),
         ("4 heinz beans 415g", 4, "baked beans", "heinz", "g", 415, []),
     ],

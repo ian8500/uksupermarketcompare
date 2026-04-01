@@ -28,6 +28,30 @@ def _request(mode: BasketComparisonMode = BasketComparisonMode.cheapestPossible,
     )
 
 
+def _request_with_items(
+    item_names: list[str],
+    mode: BasketComparisonMode = BasketComparisonMode.cheapestPossible,
+    max_supermarkets: int | None = None,
+    preferences: BasketUserPreferences | None = None,
+) -> CompareRequest:
+    return CompareRequest(
+        shoppingList=ShoppingList(
+            id=uuid4(),
+            title="strategy-custom",
+            createdAt="2026-04-01T00:00:00Z",
+            items=[ShoppingItem(id=uuid4(), name=name, quantity=1) for name in item_names],
+        ),
+        supermarkets=[
+            Supermarket(id=uuid4(), name="Tesco", description=""),
+            Supermarket(id=uuid4(), name="ASDA", description=""),
+            Supermarket(id=uuid4(), name="Sainsbury's", description=""),
+        ],
+        comparisonMode=mode,
+        preferences=preferences or BasketUserPreferences(brandPreference=BrandPreference.neutral, avoidPremium=False, organicOnly=False),
+        maxSupermarkets=max_supermarkets,
+    )
+
+
 def test_cheapest_single_store_strategy_returns_complete_best_store():
     response = build_comparison(_request(mode=BasketComparisonMode.cheapestSingleStoreOnly))
 
@@ -98,3 +122,42 @@ def test_strategy_savings_calculation_matches_totals():
     expected_vs_mixed = mixed.totalPrice - single.totalPrice
     assert single.savings.versusCheapestMixedBasket == expected_vs_mixed
     assert single.plan.savings.versusCheapestMixedBasket == expected_vs_mixed
+
+
+def test_own_brand_preference_applied_to_matches():
+    response = build_comparison(
+        _request_with_items(
+            ["milk", "bread", "cheese"],
+            preferences=BasketUserPreferences(brandPreference=BrandPreference.ownBrandPreferred, avoidPremium=False, organicOnly=False),
+        )
+    )
+
+    assert "Own-brand preference applied" in response.result.preferenceEffects
+    assert any(
+        "Own-brand preference applied." in reason
+        for selection in response.result.selectedBasket.selections
+        for reason in selection.reasons
+    )
+
+
+def test_avoid_premium_excludes_premium_products():
+    response = build_comparison(
+        _request_with_items(
+            ["premium cereal", "cheese"],
+            preferences=BasketUserPreferences(brandPreference=BrandPreference.neutral, avoidPremium=True, organicOnly=False),
+        )
+    )
+    assert "Premium products excluded" in response.result.preferenceEffects
+    assert all(not selection.product.isPremium for selection in response.result.selectedBasket.selections)
+
+
+def test_single_store_constraint_limits_mixed_basket_to_one_store():
+    response = build_comparison(_request(max_supermarkets=1))
+    assert response.result.mixedBasket.storesUsed <= 1
+    assert "Limited to 1 store" in response.result.preferenceEffects
+
+
+def test_two_store_constraint_limits_mixed_basket_to_two_stores():
+    response = build_comparison(_request(max_supermarkets=2))
+    assert response.result.mixedBasket.storesUsed <= 2
+    assert "Limited to 2 stores" in response.result.preferenceEffects
