@@ -243,7 +243,7 @@ struct BasketComparisonResultsView: View {
 
     private func premiumDecisionCard(card: BasketComparisonResultsViewModel.StrategyCard) -> some View {
         let tint = card.tint == "green" ? BrandPalette.success : card.tint == "blue" ? BrandPalette.blue : card.tint == "navy" ? BrandPalette.navy : BrandPalette.red
-        BrandCard {
+        return BrandCard {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(card.title.uppercased())
