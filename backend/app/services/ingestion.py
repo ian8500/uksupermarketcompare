@@ -123,7 +123,8 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
 
             try:
                 normalized_products = provider.normalize_products()
-                run_state.fetched_count = len(normalized_products)
+                provider_report = getattr(provider, "last_import_report", {}) or {}
+                run_state.fetched_count = int(provider_report.get("fetched", len(normalized_products)))
                 run_state.source_mode = getattr(provider, "active_source", source_mode)
 
                 for product in normalized_products:
@@ -294,9 +295,12 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
 
             _persist_import_run(conn, run_state, status="success")
             logger.info(
-                "Completed import provider=%s fetched=%d inserted=%d updated=%d mapped=%d unmapped=%d snapshots=%d",
+                "Completed import provider=%s source=%s fetched=%d skipped=%d rejected=%d inserted=%d updated=%d mapped=%d unmapped=%d snapshots=%d",
                 provider.name,
+                run_state.source_mode,
                 run_state.fetched_count,
+                int(provider_report.get("skipped", 0)),
+                int(provider_report.get("rejected", 0)),
                 run_state.inserted_count,
                 run_state.updated_count,
                 run_state.mapped_count,
