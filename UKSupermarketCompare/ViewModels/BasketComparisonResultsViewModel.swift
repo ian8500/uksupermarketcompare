@@ -18,7 +18,7 @@ final class BasketComparisonResultsViewModel: ObservableObject {
     }
 
     var savingsExplanation: String {
-        "You save \(result.savingsVsMostExpensive, format: .currency(code: "GBP")) vs the priciest option and \(result.savingsVsCheapestSingleStore, format: .currency(code: "GBP")) vs the best single-store basket."
+        "You save \(result.savingsVsMostExpensive.asGBP()) vs the priciest option and \(result.savingsVsCheapestSingleStore.asGBP()) vs the best single-store basket."
     }
 
     func saveList() {
