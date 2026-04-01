@@ -97,11 +97,13 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
         "canonicalProducts",
         "mappings",
         "categoriesCovered",
+        "priceSnapshots",
+        "priceDropAlertCandidates",
     }
     assert catalog_payload["canonicalProducts"] > 0
     assert catalog_payload["mappings"] > 0
     assert catalog_payload["productsPerSupermarket"]
 
-    assert set(search_payload.keys()) == {"totalQueries", "missQueries", "missRate", "byEndpoint"}
+    assert set(search_payload.keys()) == {"totalQueries", "missQueries", "missRate", "weakMatches", "avgTopScore", "byEndpoint"}
     assert search_payload["totalQueries"] >= 1
     assert search_payload["missQueries"] >= 1

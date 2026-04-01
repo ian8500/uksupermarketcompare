@@ -15,6 +15,7 @@ from app.services.normalization import (
     normalize_product_name,
     normalize_size,
     normalize_tags,
+    token_fingerprint,
 )
 
 
@@ -42,6 +43,8 @@ class NormalizedProviderProduct:
     category: GroceryCategory
     searchable_text: str
     intent_key: str
+    canonical_aliases: list[str]
+    token_fingerprint: str
 
 
 class CatalogProvider(Protocol):
@@ -89,6 +92,15 @@ class SeedFileProvider:
                 f"{category.value}:{normalized_name}:{normalized_size.normalized_value or ''}"
                 f"{normalized_size.normalized_unit or ''}"
             )
+            canonical_aliases = sorted(
+                set(
+                    [
+                        normalized_name,
+                        normalize_product_name(product.brand),
+                        normalize_product_name(product.subcategory),
+                    ]
+                )
+            )
             normalized_rows.append(
                 NormalizedProviderProduct(
                     raw=product,
@@ -100,6 +112,8 @@ class SeedFileProvider:
                     category=category,
                     searchable_text=searchable_text,
                     intent_key=intent_key,
+                    canonical_aliases=canonical_aliases,
+                    token_fingerprint=token_fingerprint(product.name, product.brand, product.size, " ".join(product.tags)),
                 )
             )
 

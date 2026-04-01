@@ -25,6 +25,8 @@ class SearchCandidate:
     raw_searchable_text: str
     canonical_name: str
     canonical_searchable_text: str
+    canonical_aliases: list[str]
+    token_fingerprint: str
     mapping_confidence: float
 
 
@@ -57,6 +59,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
               cp.category,
               cp.tags,
               cp.searchable_text AS canonical_searchable_text,
+              cp.canonical_aliases,
+              cp.token_fingerprint,
               pm.confidence AS mapping_confidence,
               ps.price,
               ps.unit_description,
@@ -91,6 +95,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
             raw_searchable_text=row["raw_searchable_text"],
             canonical_name=row["canonical_name"],
             canonical_searchable_text=row["canonical_searchable_text"],
+            canonical_aliases=[item for item in row["canonical_aliases"].split(",") if item],
+            token_fingerprint=row["token_fingerprint"],
             mapping_confidence=float(row["mapping_confidence"]),
         )
         for row in rows
@@ -121,7 +127,7 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
     if not query_text:
         return None
 
-    haystack = f"{candidate.raw_searchable_text} {candidate.canonical_searchable_text}"
+    haystack = f"{candidate.raw_searchable_text} {candidate.canonical_searchable_text} {' '.join(candidate.canonical_aliases)}"
     score = 0.0
     matched_terms: list[str] = []
     match_type = "fuzzy"
@@ -157,6 +163,11 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
             match_type = "size"
         matched_terms.extend(size_terms)
 
+    fingerprint_hits = [token for token in expanded_tokens if token in candidate.token_fingerprint]
+    if fingerprint_hits:
+        score += min(0.05 * len(fingerprint_hits), 0.2)
+        matched_terms.extend(fingerprint_hits)
+
     fuzzy_candidates = [
         normalize_text(candidate.product_name),
         normalize_text(candidate.canonical_name),
@@ -183,7 +194,7 @@ def search_catalog(query: str, limit: int = 20) -> list[RankedSearchResult]:
         for candidate in _latest_catalog_candidates()
         if (ranked_row := _score_candidate(candidate, normalized_query, expanded_tokens, size_terms)) is not None
     ]
-    ranked.sort(key=lambda row: (row.score, -row.item.price), reverse=True)
+    ranked.sort(key=lambda row: (row.score, len(row.matched_terms), -row.item.price), reverse=True)
     sliced = ranked[: max(1, min(limit, 50))]
     logger.info(
         "search query=%r normalized=%r results=%d limit=%d",
