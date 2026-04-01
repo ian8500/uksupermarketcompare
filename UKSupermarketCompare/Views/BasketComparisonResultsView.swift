@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct BasketComparisonResultsView: View {
+    @EnvironmentObject private var coordinator: AppCoordinatorViewModel
     @ObservedObject var viewModel: BasketComparisonResultsViewModel
     @State private var didSave = false
 
@@ -8,6 +9,7 @@ struct BasketComparisonResultsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
                 BrandHeader(title: "Optimised basket", subtitle: "Fast overview of your lowest-cost outcome.")
+                DataSourceBadgeView(status: coordinator.dataSourceStatus)
 
                 section("Summary") {
                     summaryCard(

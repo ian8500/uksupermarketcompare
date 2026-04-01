@@ -10,10 +10,15 @@ This backend now serves the Swift app's live catalog payload with the exact JSON
 
 ## `/catalog` response shape
 
-`/catalog` returns:
+`/catalog` returns (plus live metadata marker):
 
 ```json
 {
+  "metadata": {
+    "source": "live-backend",
+    "debugMarker": "LIVE_CATALOG_V1",
+    "generatedAt": "2026-04-01T00:00:00+00:00"
+  },
   "supermarkets": [
     {
       "name": "Tesco",

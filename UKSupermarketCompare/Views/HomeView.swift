@@ -3,12 +3,15 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var coordinator: AppCoordinatorViewModel
     @ObservedObject var viewModel: HomeViewModel
+    @State private var showDataSourceDebug = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 BrandLogoView(subtitle: "Your grocery savings co-pilot")
                     .padding(.top, 8)
+
+                DataSourceBadgeView(status: coordinator.dataSourceStatus)
 
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
@@ -46,6 +49,22 @@ struct HomeView: View {
 
                 BrandCard {
                     VStack(alignment: .leading, spacing: 8) {
+                        Text("Developer debug")
+                            .font(BrandTypography.section)
+                            .foregroundStyle(BrandPalette.navy)
+                        Text("Check whether the app is currently using live backend data or mock fallback data.")
+                            .font(BrandTypography.body)
+                            .foregroundStyle(BrandPalette.textSecondary)
+
+                        Button("Open Data Source Debug") {
+                            showDataSourceDebug = true
+                        }
+                        .buttonStyle(BrandSecondaryButtonStyle())
+                    }
+                }
+
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text("How it works")
                             .font(BrandTypography.section)
                             .foregroundStyle(BrandPalette.navy)
@@ -59,5 +78,10 @@ struct HomeView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Welcome")
+        .sheet(isPresented: $showDataSourceDebug) {
+            NavigationStack {
+                DataSourceDebugView(status: coordinator.dataSourceStatus)
+            }
+        }
     }
 }
