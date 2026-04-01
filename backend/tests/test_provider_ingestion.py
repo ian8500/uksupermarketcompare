@@ -1,8 +1,12 @@
 from pathlib import Path
+from decimal import Decimal
 
 from app import db
+from app.models import GroceryCategory
+from app.services.normalization import NormalizedSize
 from app.services.ingestion import import_catalog_data
 from app.services.providers import AsdaProvider, SainsburysProvider, TescoProvider
+from app.services.providers.base import NormalizedProviderProduct, ProviderProduct
 
 
 def _count(conn, table: str) -> int:
@@ -67,3 +71,121 @@ def test_import_creates_cross_provider_canonical_mappings(tmp_path, monkeypatch)
     assert raw_count > 100
     assert canonical_count < raw_count
     assert heinz_rows >= 2
+
+
+def test_successful_import_run_is_created(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "DB_DIR", tmp_path)
+    monkeypatch.setattr(db, "DB_PATH", tmp_path / "catalog.db")
+
+    db.init_db()
+    import_catalog_data(providers=[TescoProvider()])
+
+    with db.get_connection() as conn:
+        run = conn.execute(
+            "SELECT retailer, source_mode, started_at, completed_at, duration_ms, status FROM import_runs ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+
+    assert run is not None
+    assert run["retailer"] == "Tesco"
+    assert run["source_mode"] in {"seed", "official", "third_party"}
+    assert run["started_at"] is not None
+    assert run["completed_at"] is not None
+    assert run["duration_ms"] is not None
+    assert run["status"] == "success"
+
+
+class FailingProvider:
+    name = "FailMart"
+    description = "Provider that fails during normalization"
+    active_source = "seed"
+
+    def load_products(self) -> list[ProviderProduct]:
+        return []
+
+    def normalize_products(self) -> list[NormalizedProviderProduct]:
+        raise RuntimeError("provider exploded")
+
+
+def test_failed_import_run_is_recorded(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "DB_DIR", tmp_path)
+    monkeypatch.setattr(db, "DB_PATH", tmp_path / "catalog.db")
+
+    db.init_db()
+    import_catalog_data(providers=[FailingProvider()])
+
+    with db.get_connection() as conn:
+        run = conn.execute(
+            "SELECT status, error_count, error_details, fetched_count, mapped_count FROM import_runs ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+
+    assert run is not None
+    assert run["status"] == "failed"
+    assert run["error_count"] == 1
+    assert "provider exploded" in run["error_details"]
+    assert run["fetched_count"] == 0
+    assert run["mapped_count"] == 0
+
+
+class SingleProductProvider:
+    name = "SingleMart"
+    description = "Single product provider"
+    active_source = "seed"
+
+    def load_products(self) -> list[ProviderProduct]:
+        return []
+
+    def normalize_products(self) -> list[NormalizedProviderProduct]:
+        product = ProviderProduct(
+            source_product_id="sku-1",
+            name="Single Milk",
+            subcategory="milk",
+            price=Decimal("1.25"),
+            size="1L",
+            brand="Single",
+            unit_description="per litre",
+            unit_value=Decimal("1"),
+            tags=["milk"],
+            source_metadata={"source": "seed"},
+        )
+        return [
+            NormalizedProviderProduct(
+                raw=product,
+                retailer_name=self.name,
+                normalized_name="single milk",
+                normalized_brand="single",
+                normalized_tags=["milk"],
+                normalized_size=NormalizedSize(original="1L", value=1.0, unit="l", normalized_value=1000.0, normalized_unit="ml"),
+                category=GroceryCategory.milk,
+                searchable_text="single milk single milk 1000ml",
+                intent_key="milk:single milk:1000.0ml",
+                canonical_aliases=["single", "single milk"],
+                token_fingerprint="milk|single",
+            )
+        ]
+
+
+def test_import_run_counts_are_populated(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "DB_DIR", tmp_path)
+    monkeypatch.setattr(db, "DB_PATH", tmp_path / "catalog.db")
+
+    db.init_db()
+    import_catalog_data(providers=[SingleProductProvider()])
+
+    with db.get_connection() as conn:
+        run = conn.execute(
+            """
+            SELECT fetched_count, inserted_count, updated_count, mapped_count, unmapped_count, snapshot_count, error_count
+            FROM import_runs
+            ORDER BY id DESC
+            LIMIT 1
+            """
+        ).fetchone()
+
+    assert run is not None
+    assert run["fetched_count"] == 1
+    assert run["inserted_count"] == 1
+    assert run["updated_count"] == 0
+    assert run["mapped_count"] == 1
+    assert run["unmapped_count"] == 0
+    assert run["snapshot_count"] == 1
+    assert run["error_count"] == 0

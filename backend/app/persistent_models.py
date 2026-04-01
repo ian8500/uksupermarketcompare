@@ -79,6 +79,7 @@ class ImportRun(BaseModel):
     source_mode: str
     started_at: str
     completed_at: str | None = None
+    duration_ms: int | None = None
     status: str
     fetched_count: int = 0
     inserted_count: int = 0

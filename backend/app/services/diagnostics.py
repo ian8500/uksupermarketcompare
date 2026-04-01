@@ -56,6 +56,32 @@ def catalog_diagnostics() -> dict:
         ).fetchall()
         snapshot_rows = conn.execute("SELECT COUNT(*) AS count FROM price_snapshots").fetchone()["count"]
         alert_candidates = conn.execute("SELECT COUNT(*) AS count FROM price_drop_alert_candidates").fetchone()["count"]
+        latest_runs = conn.execute(
+            """
+            SELECT
+                ir.retailer,
+                ir.source_mode,
+                ir.started_at,
+                ir.completed_at,
+                ir.duration_ms,
+                ir.status,
+                ir.fetched_count,
+                ir.inserted_count,
+                ir.updated_count,
+                ir.mapped_count,
+                ir.unmapped_count,
+                ir.snapshot_count,
+                ir.error_count,
+                ir.error_details
+            FROM import_runs ir
+            JOIN (
+                SELECT retailer, MAX(started_at) AS max_started_at
+                FROM import_runs
+                GROUP BY retailer
+            ) latest ON latest.retailer = ir.retailer AND latest.max_started_at = ir.started_at
+            ORDER BY ir.retailer
+            """
+        ).fetchall()
 
     return {
         "productsPerSupermarket": [{"supermarket": row["supermarket"], "products": row["products"]} for row in per_market_rows],
@@ -65,6 +91,25 @@ def catalog_diagnostics() -> dict:
         "priceSnapshots": int(snapshot_rows or 0),
         "priceDropAlertCandidates": int(alert_candidates or 0),
         "retailerFreshness": retailer_freshness_diagnostics(),
+        "latestImportRuns": [
+            {
+                "retailer": row["retailer"],
+                "sourceMode": row["source_mode"],
+                "startedAt": row["started_at"],
+                "completedAt": row["completed_at"],
+                "durationMs": row["duration_ms"],
+                "status": row["status"],
+                "fetchedCount": int(row["fetched_count"] or 0),
+                "insertedCount": int(row["inserted_count"] or 0),
+                "updatedCount": int(row["updated_count"] or 0),
+                "mappedCount": int(row["mapped_count"] or 0),
+                "unmappedCount": int(row["unmapped_count"] or 0),
+                "snapshotCount": int(row["snapshot_count"] or 0),
+                "errorCount": int(row["error_count"] or 0),
+                "errorDetails": row["error_details"] or "[]",
+            }
+            for row in latest_runs
+        ],
     }
 
 

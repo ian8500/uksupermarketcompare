@@ -107,6 +107,7 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
         "priceSnapshots",
         "priceDropAlertCandidates",
         "retailerFreshness",
+        "latestImportRuns",
         "tescoLive",
     }
     assert catalog_payload["canonicalProducts"] > 0
@@ -115,6 +116,10 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
     assert catalog_payload["retailerFreshness"]
     assert {"retailer", "status", "ageHours", "lastAttemptAt", "lastSuccessAt", "lastImportStatus"} <= set(
         catalog_payload["retailerFreshness"][0].keys()
+    )
+    assert catalog_payload["latestImportRuns"]
+    assert {"retailer", "sourceMode", "status", "fetchedCount", "errorCount"} <= set(
+        catalog_payload["latestImportRuns"][0].keys()
     )
 
     assert set(search_payload.keys()) == {"totalQueries", "missQueries", "missRate", "weakMatches", "avgTopScore", "byEndpoint"}
