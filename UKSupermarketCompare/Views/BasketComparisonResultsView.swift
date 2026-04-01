@@ -10,6 +10,20 @@ struct BasketComparisonResultsView: View {
             VStack(alignment: .leading, spacing: 16) {
                 BrandHeader(title: "Premium basket decision", subtitle: "Clear outcomes, practical plan, confident checkout.")
                 DataSourceBadgeView(status: coordinator.dataSourceStatus)
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Your selected plan total")
+                            .font(BrandTypography.caption.weight(.semibold))
+                            .foregroundStyle(BrandPalette.textSecondary)
+                        Text(viewModel.result.selectedBasket.total.asGBP())
+                            .font(BrandTypography.hero)
+                            .foregroundStyle(BrandPalette.navy)
+                        HStack(spacing: 8) {
+                            BrandChip(text: "Save \(viewModel.result.savingsVsMostExpensive.asGBP()) vs highest", tint: BrandPalette.success)
+                            BrandChip(text: "\(viewModel.selectedStoresUsed.count) store(s)", tint: BrandPalette.blue)
+                        }
+                    }
+                }
 
                 section("Decision cards") {
                     decisionSummaryCards
@@ -103,6 +117,9 @@ struct BasketComparisonResultsView: View {
                                                 .font(BrandTypography.section)
                                                 .foregroundStyle(BrandPalette.navy)
                                         }
+                                        .padding(8)
+                                        .background(BrandPalette.cloud.opacity(0.5))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                         if selection.id != group.selections.last?.id {
                                             Divider()
                                         }

@@ -89,9 +89,19 @@ struct SupermarketSelectionView: View {
                 }
                 .padding(.horizontal, 8)
 
-                Button("Compare basket") { viewModel.runComparison() }
+                Button {
+                    viewModel.runComparison()
+                } label: {
+                    HStack {
+                        if viewModel.isComparing {
+                            ProgressView()
+                                .tint(.white)
+                        }
+                        Text(viewModel.isComparing ? "Comparing..." : "Compare basket")
+                    }
+                }
                     .buttonStyle(BrandPrimaryButtonStyle())
-                    .disabled(!viewModel.canCompare)
+                    .disabled(!viewModel.canCompare || viewModel.isComparing)
             }
             .padding()
         }

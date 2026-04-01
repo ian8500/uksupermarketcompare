@@ -8,6 +8,21 @@ struct SavedListsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 12) {
                 BrandHeader(title: "Saved lists", subtitle: "Reuse baskets and compare again in seconds.")
+                if let lastBasket = coordinator.store.lastBasket {
+                    BrandCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Continue your weekly loop")
+                                .font(BrandTypography.section)
+                                .foregroundStyle(BrandPalette.navy)
+                            Text("Last basket: \(lastBasket.title)")
+                                .font(BrandTypography.body)
+                            Button("Rerun last basket now") {
+                                coordinator.openSelection(for: lastBasket)
+                            }
+                            .buttonStyle(BrandPrimaryButtonStyle())
+                        }
+                    }
+                }
 
                 if viewModel.savedLists.isEmpty {
                     BrandCard {

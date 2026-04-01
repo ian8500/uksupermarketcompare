@@ -12,6 +12,7 @@ final class SupermarketSelectionViewModel: ObservableObject {
     @Published var avoidPremium: Bool = false
     @Published var organicOnly: Bool = false
     @Published var maxStores: Int = 0
+    @Published var isComparing: Bool = false
 
     let shoppingList: ShoppingList
     let supermarkets: [Supermarket]
@@ -57,6 +58,8 @@ final class SupermarketSelectionViewModel: ObservableObject {
     }
 
     func runComparison() {
+        guard !isComparing else { return }
+        isComparing = true
         let markets = supermarkets.filter { selectedMarketIDs.contains($0.id) }
         coordinator.store.markCompared(listID: shoppingList.id)
         let result = coordinator.compare(
@@ -66,6 +69,7 @@ final class SupermarketSelectionViewModel: ObservableObject {
             preferences: basketPreferences,
             maxSupermarkets: maxSupermarkets
         )
+        isComparing = false
         coordinator.openResults(result)
     }
 }
