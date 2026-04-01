@@ -239,17 +239,38 @@ class SavedBasketRerunRequest(BaseModel):
     maxSupermarkets: int | None = None
 
 
+class ParsedItemSize(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    value: Decimal
+    unit: str
+
+
 class ParsedItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    name: str
+    rawText: str
     quantity: int
+    intent: str
     brand: str | None = None
-    requestedSizeValue: Decimal | None = None
-    requestedSizeUnit: str | None = None
-    preferenceTags: List[str] = []
-    parsedTokens: List[str] = []
-    corrections: List[str] = []
+    size: ParsedItemSize | None = None
+    preferences: List[str] = []
+
+    @property
+    def name(self) -> str:
+        return self.intent
+
+    @property
+    def requestedSizeValue(self) -> Decimal | None:
+        return self.size.value if self.size else None
+
+    @property
+    def requestedSizeUnit(self) -> str | None:
+        return self.size.unit if self.size else None
+
+    @property
+    def preferenceTags(self) -> List[str]:
+        return self.preferences
 
 
 def build_intent(item_name: str, quantity: int, category: GroceryCategory, keywords: list[str]) -> GroceryIntent:
