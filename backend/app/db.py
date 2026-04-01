@@ -133,6 +133,7 @@ def init_db() -> None:
                 source_mode TEXT NOT NULL DEFAULT 'seed',
                 started_at TEXT NOT NULL,
                 completed_at TEXT,
+                duration_ms INTEGER,
                 status TEXT NOT NULL,
                 fetched_count INTEGER NOT NULL DEFAULT 0,
                 inserted_count INTEGER NOT NULL DEFAULT 0,
@@ -160,6 +161,7 @@ def init_db() -> None:
         _ensure_column(conn, "raw_retailer_products", "last_updated", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "price_snapshots", "promo_price", "REAL")
         _ensure_column(conn, "import_runs", "source_mode", "TEXT NOT NULL DEFAULT 'seed'")
+        _ensure_column(conn, "import_runs", "duration_ms", "INTEGER")
         _ensure_column(conn, "import_runs", "fetched_count", "INTEGER NOT NULL DEFAULT 0")
         _ensure_column(conn, "import_runs", "inserted_count", "INTEGER NOT NULL DEFAULT 0")
         _ensure_column(conn, "import_runs", "updated_count", "INTEGER NOT NULL DEFAULT 0")

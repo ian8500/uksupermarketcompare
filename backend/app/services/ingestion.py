@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 import json
 import logging
+from dataclasses import dataclass
 
 from app.db import get_connection
 from app.services.providers import AsdaProvider, SainsburysProvider, SupermarketPriceProvider, TescoProvider
@@ -14,6 +15,73 @@ DEFAULT_SYNONYMS: dict[str, str] = {
     "fillets": "fillet",
 }
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class ImportRunState:
+    run_id: int
+    retailer: str
+    source_mode: str
+    started_at: datetime
+    fetched_count: int = 0
+    inserted_count: int = 0
+    updated_count: int = 0
+    mapped_count: int = 0
+    snapshot_count: int = 0
+    error_count: int = 0
+    errors: list[str] | None = None
+
+    def __post_init__(self) -> None:
+        if self.errors is None:
+            self.errors = []
+
+    @property
+    def unmapped_count(self) -> int:
+        return max(0, self.fetched_count - self.mapped_count)
+
+    def record_error(self, exc: Exception) -> None:
+        self.error_count += 1
+        self.errors.append(str(exc))
+
+
+def _insert_import_run(conn, *, retailer: str, source_mode: str) -> ImportRunState:
+    started_at = datetime.now(UTC)
+    run_id = conn.execute(
+        """
+        INSERT INTO import_runs(retailer, source_mode, started_at, status)
+        VALUES(?, ?, ?, ?)
+        """,
+        (retailer, source_mode, started_at.isoformat(), "running"),
+    ).lastrowid
+    return ImportRunState(run_id=run_id, retailer=retailer, source_mode=source_mode, started_at=started_at)
+
+
+def _persist_import_run(conn, state: ImportRunState, *, status: str, completed_at: datetime | None = None) -> None:
+    completed = completed_at or datetime.now(UTC)
+    duration_ms = int((completed - state.started_at).total_seconds() * 1000)
+    conn.execute(
+        """
+        UPDATE import_runs
+        SET source_mode = ?, completed_at = ?, duration_ms = ?, status = ?, fetched_count = ?, inserted_count = ?,
+            updated_count = ?, mapped_count = ?, unmapped_count = ?, snapshot_count = ?, error_count = ?, error_details = ?
+        WHERE id = ?
+        """,
+        (
+            state.source_mode,
+            completed.isoformat(),
+            duration_ms,
+            status,
+            state.fetched_count,
+            state.inserted_count,
+            state.updated_count,
+            state.mapped_count,
+            state.unmapped_count,
+            state.snapshot_count,
+            state.error_count,
+            json.dumps(state.errors),
+            state.run_id,
+        ),
+    )
 
 
 def default_providers() -> list[SupermarketPriceProvider]:
@@ -30,23 +98,8 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
 
     with get_connection() as conn:
         for provider in providers:
-            started_at = datetime.now(UTC).isoformat()
             source_mode = getattr(provider, "active_source", "seed")
-            run_id = conn.execute(
-                """
-                INSERT INTO import_runs(retailer, source_mode, started_at, status)
-                VALUES(?, ?, ?, ?)
-                """,
-                (provider.name, source_mode, started_at, "running"),
-            ).lastrowid
-            fetched_count = 0
-            inserted_count = 0
-            updated_count = 0
-            mapped_count = 0
-            unmapped_count = 0
-            snapshot_count = 0
-            error_count = 0
-            errors: list[str] = []
+            run_state = _insert_import_run(conn, retailer=provider.name, source_mode=source_mode)
             logger.info("Starting import for provider=%s replace_existing=%s", provider.name, replace_existing)
             retailer_row = conn.execute("SELECT id FROM retailers WHERE name = ?", (provider.name,)).fetchone()
             if retailer_row:
@@ -70,8 +123,8 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
 
             try:
                 normalized_products = provider.normalize_products()
-                fetched_count = len(normalized_products)
-                source_mode = getattr(provider, "active_source", source_mode)
+                run_state.fetched_count = len(normalized_products)
+                run_state.source_mode = getattr(provider, "active_source", source_mode)
 
                 for product in normalized_products:
                     canonical_row = conn.execute(
@@ -154,7 +207,7 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                             ),
                         )
                         updated_raw += 1
-                        updated_count += 1
+                        run_state.updated_count += 1
                     else:
                         raw_product_id = conn.execute(
                             """
@@ -180,7 +233,7 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                             ),
                         ).lastrowid
                         inserted_raw += 1
-                        inserted_count += 1
+                        run_state.inserted_count += 1
 
                     conn.execute(
                         """
@@ -193,7 +246,7 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                         """,
                         (raw_product_id, canonical_id, 1.0, f"{provider.name.lower()}-normalized"),
                     )
-                    mapped_count += 1
+                    run_state.mapped_count += 1
 
                     latest = conn.execute(
                         """
@@ -232,67 +285,23 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                             (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, new_promo_price, now),
                         )
                         inserted_price_snapshots += 1
-                        snapshot_count += 1
+                        run_state.snapshot_count += 1
             except Exception as exc:
-                error_count += 1
-                errors.append(str(exc))
-                conn.execute(
-                    """
-                    UPDATE import_runs
-                    SET source_mode = ?, completed_at = ?, status = ?, fetched_count = ?, inserted_count = ?, updated_count = ?,
-                        mapped_count = ?, unmapped_count = ?, snapshot_count = ?, error_count = ?, error_details = ?
-                    WHERE id = ?
-                    """,
-                    (
-                        source_mode,
-                        datetime.now(UTC).isoformat(),
-                        "failed",
-                        fetched_count,
-                        inserted_count,
-                        updated_count,
-                        mapped_count,
-                        max(0, fetched_count - mapped_count),
-                        snapshot_count,
-                        error_count,
-                        json.dumps(errors),
-                        run_id,
-                    ),
-                )
+                run_state.record_error(exc)
+                _persist_import_run(conn, run_state, status="failed")
                 logger.exception("Import failed for provider=%s", provider.name)
                 continue
 
-            unmapped_count = max(0, fetched_count - mapped_count)
-            conn.execute(
-                """
-                UPDATE import_runs
-                SET source_mode = ?, completed_at = ?, status = ?, fetched_count = ?, inserted_count = ?, updated_count = ?,
-                    mapped_count = ?, unmapped_count = ?, snapshot_count = ?, error_count = ?, error_details = ?
-                WHERE id = ?
-                """,
-                (
-                    source_mode,
-                    datetime.now(UTC).isoformat(),
-                    "success",
-                    fetched_count,
-                    inserted_count,
-                    updated_count,
-                    mapped_count,
-                    unmapped_count,
-                    snapshot_count,
-                    error_count,
-                    json.dumps(errors),
-                    run_id,
-                ),
-            )
+            _persist_import_run(conn, run_state, status="success")
             logger.info(
                 "Completed import provider=%s fetched=%d inserted=%d updated=%d mapped=%d unmapped=%d snapshots=%d",
                 provider.name,
-                fetched_count,
-                inserted_count,
-                updated_count,
-                mapped_count,
-                unmapped_count,
-                snapshot_count,
+                run_state.fetched_count,
+                run_state.inserted_count,
+                run_state.updated_count,
+                run_state.mapped_count,
+                run_state.unmapped_count,
+                run_state.snapshot_count,
             )
 
         for synonym, canonical in DEFAULT_SYNONYMS.items():
