@@ -1,6 +1,18 @@
 import Foundation
 
 final class BasketComparisonResultsViewModel: ObservableObject {
+    struct StrategyCard: Identifiable {
+        let title: String
+        let total: Decimal
+        let storesUsed: [String]
+        let savingsHeadline: String
+        let explanation: String
+        let isSelected: Bool
+        let tint: String
+
+        var id: String { title }
+    }
+
     struct PurchasePlanStoreGroup: Identifiable {
         let supermarket: Supermarket
         let selections: [ItemSelectionResult]
@@ -66,6 +78,8 @@ final class BasketComparisonResultsViewModel: ObservableObject {
             return "We chose the lowest overall basket total using the supermarkets you selected."
         case .cheapestSingleStoreOnly:
             return "We chose the strongest one-store basket so you can check out in one trip."
+        case .bestConvenienceOption:
+            return "We prioritised a practical one-store checkout while keeping total cost competitive."
         }
     }
 
@@ -96,6 +110,63 @@ final class BasketComparisonResultsViewModel: ObservableObject {
             return "This plan uses \(stores) stores and adds \((-delta).asGBP()) versus the best one-store checkout."
         }
         return "This plan uses \(stores) stores and lands at the same price as the best one-store checkout."
+    }
+
+    var selectedModeTitle: String {
+        result.comparisonMode.title
+    }
+
+    var selectedModeSummary: String {
+        result.comparisonMode.summary
+    }
+
+    var strategyCards: [StrategyCard] {
+        var cards: [StrategyCard] = []
+
+        if let cheapestSingle = result.cheapestSingleStore {
+            cards.append(
+                StrategyCard(
+                    title: "Cheapest Single-Store",
+                    total: cheapestSingle.total,
+                    storesUsed: [cheapestSingle.supermarket.name],
+                    savingsHeadline: "Reference for one-trip checkout",
+                    explanation: "Best one-shop checkout with zero switching between supermarkets.",
+                    isSelected: result.comparisonMode == .cheapestSingleStoreOnly,
+                    tint: "blue"
+                )
+            )
+        }
+
+        cards.append(
+            StrategyCard(
+                title: "Cheapest Mixed Basket",
+                total: result.mixedBasket.total,
+                storesUsed: result.mixedBasket.supermarketsUsed,
+                savingsHeadline: mixedBasketSavingsVsSingleStore > 0
+                    ? "Saves \(mixedBasketSavingsVsSingleStore.asGBP()) vs best single-store"
+                    : "Best raw price across selected stores",
+                explanation: "Lowest total cost by combining strongest prices across supermarkets.",
+                isSelected: result.comparisonMode == .cheapestPossible,
+                tint: "green"
+            )
+        )
+
+        if let convenience = bestConvenienceOption {
+            cards.append(
+                StrategyCard(
+                    title: "Best Convenience Option",
+                    total: convenience.total,
+                    storesUsed: [convenience.supermarket.name],
+                    savingsHeadline: convenience.unavailableItems.isEmpty
+                        ? "Complete one-store basket"
+                        : "\(convenience.unavailableItems.count) missing item(s) possible",
+                    explanation: "Simple near-complete trip with strong value and fewer handoffs.",
+                    isSelected: result.comparisonMode == .bestConvenienceOption,
+                    tint: "navy"
+                )
+            )
+        }
+        return cards
     }
 
     var missingItemsSummary: String {
@@ -131,6 +202,14 @@ final class BasketComparisonResultsViewModel: ObservableObject {
             }
         }
         return unique
+    }
+
+    func decisionExplanation(for selection: ItemSelectionResult) -> String {
+        let topReasons = Array(selection.reasons.prefix(2))
+        if topReasons.isEmpty {
+            return "Chosen as strongest available match."
+        }
+        return topReasons.joined(separator: " ")
     }
 
     func saveList() {

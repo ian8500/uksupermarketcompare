@@ -65,6 +65,9 @@ struct BasketComparisonResultsView: View {
                                     BrandChip(text: "\(viewModel.selectedStoresUsed.count) stores", tint: BrandPalette.blue)
                                     BrandChip(text: "Overall \(viewModel.purchasePlanOverallTotal.asGBP())", tint: BrandPalette.success)
                                 }
+                                Text("Selected strategy: \(viewModel.selectedModeTitle) — \(viewModel.selectedModeSummary)")
+                                    .font(BrandTypography.caption)
+                                    .foregroundStyle(BrandPalette.textSecondary)
                             }
                         }
 
@@ -88,7 +91,10 @@ struct BasketComparisonResultsView: View {
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text("\(selection.quantity)x \(selection.product.name)")
                                                     .font(BrandTypography.body)
-                                                Text(selection.intent.userInput)
+                                                Text("\(selection.intent.userInput) • \(selection.matchQuality.label) match • confidence \(Int((selection.confidence as NSDecimalNumber).doubleValue * 100))%")
+                                                    .font(BrandTypography.caption)
+                                                    .foregroundStyle(BrandPalette.textSecondary)
+                                                Text(viewModel.decisionExplanation(for: selection))
                                                     .font(BrandTypography.caption)
                                                     .foregroundStyle(BrandPalette.textSecondary)
                                             }
@@ -220,45 +226,9 @@ struct BasketComparisonResultsView: View {
 
     private var decisionSummaryCards: some View {
         VStack(alignment: .leading, spacing: 10) {
-            if let cheapestSingle = viewModel.result.cheapestSingleStore {
-                premiumDecisionCard(
-                    title: "Cheapest Single-Store",
-                    total: cheapestSingle.total,
-                    storesUsed: [cheapestSingle.supermarket.name],
-                    savings: viewModel.result.savingsVsMostExpensive,
-                    explanation: "Best one-shop checkout with zero switching between supermarkets.",
-                    tint: BrandPalette.blue
-                )
+            ForEach(viewModel.strategyCards) { card in
+                premiumDecisionCard(card: card)
             }
-
-            premiumDecisionCard(
-                title: "Cheapest Mixed Basket",
-                total: viewModel.result.mixedBasket.total,
-                storesUsed: viewModel.result.mixedBasket.supermarketsUsed,
-                savings: viewModel.mixedBasketSavingsVsSingleStore,
-                explanation: "Lowest total cost by combining strongest prices across supermarkets.",
-                tint: BrandPalette.success
-            )
-
-            if let convenience = viewModel.bestConvenienceOption {
-                premiumDecisionCard(
-                    title: "Best Convenience Option",
-                    total: convenience.total,
-                    storesUsed: [convenience.supermarket.name],
-                    savings: viewModel.convenienceSavingsVsHighest,
-                    explanation: "\(convenience.unavailableItems.count) item(s) missing, but this is the simplest near-complete trip.",
-                    tint: BrandPalette.navy
-                )
-            }
-
-            premiumDecisionCard(
-                title: "Selected Basket",
-                total: viewModel.result.selectedBasket.total,
-                storesUsed: viewModel.selectedStoresUsed,
-                savings: viewModel.result.savingsVsCheapestSingleStore,
-                explanation: "\(viewModel.selectedStoresUsed.count) store(s), tuned for your chosen strategy and preferences.",
-                tint: BrandPalette.red
-            )
         }
     }
 
@@ -271,22 +241,29 @@ struct BasketComparisonResultsView: View {
         }
     }
 
-    private func premiumDecisionCard(title: String, total: Decimal, storesUsed: [String], savings: Decimal, explanation: String, tint: Color) -> some View {
+    private func premiumDecisionCard(card: BasketComparisonResultsViewModel.StrategyCard) -> some View {
+        let tint = card.tint == "green" ? BrandPalette.success : card.tint == "blue" ? BrandPalette.blue : card.tint == "navy" ? BrandPalette.navy : BrandPalette.red
         BrandCard {
             VStack(alignment: .leading, spacing: 8) {
-                Text(title.uppercased())
+                HStack {
+                    Text(card.title.uppercased())
+                    if card.isSelected {
+                        Spacer()
+                        BrandBadge(text: "Selected", tint: BrandPalette.red)
+                    }
+                }
                     .font(BrandTypography.caption.weight(.semibold))
                     .foregroundStyle(tint)
-                Text(total.asGBP())
+                Text(card.total.asGBP())
                     .font(BrandTypography.title)
                     .foregroundStyle(tint)
-                Text("Stores used: \(storesUsed.isEmpty ? "None" : storesUsed.joined(separator: ", "))")
+                Text("Stores used: \(card.storesUsed.isEmpty ? "None" : card.storesUsed.joined(separator: ", "))")
                     .font(BrandTypography.caption)
                     .foregroundStyle(BrandPalette.textSecondary)
-                Text("Savings: \(savings.asGBP())")
+                Text(card.savingsHeadline)
                     .font(BrandTypography.caption.weight(.semibold))
                     .foregroundStyle(BrandPalette.navy)
-                Text(explanation)
+                Text(card.explanation)
                     .font(BrandTypography.caption)
                     .foregroundStyle(BrandPalette.textSecondary)
             }

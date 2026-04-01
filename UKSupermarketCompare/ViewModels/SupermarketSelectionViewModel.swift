@@ -1,6 +1,11 @@
 import Foundation
 
 final class SupermarketSelectionViewModel: ObservableObject {
+    struct ModeOption: Identifiable {
+        let mode: BasketComparisonMode
+        var id: BasketComparisonMode { mode }
+    }
+
     @Published var selectedMarketIDs: Set<UUID> = []
     @Published var comparisonMode: BasketComparisonMode = .cheapestPossible
     @Published var brandPreference: BrandPreference = .neutral
@@ -33,6 +38,14 @@ final class SupermarketSelectionViewModel: ObservableObject {
 
     var maxSupermarkets: Int? {
         maxStores == 0 ? nil : maxStores
+    }
+
+    var modeOptions: [ModeOption] {
+        BasketComparisonMode.allCases.map { ModeOption(mode: $0) }
+    }
+
+    var selectedModeSummary: String {
+        comparisonMode.summary
     }
 
     func toggleSelection(for supermarket: Supermarket) {
