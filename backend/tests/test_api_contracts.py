@@ -55,14 +55,31 @@ def test_compare_contract_contains_summary_and_explanations():
 
 
 def test_saved_basket_create_duplicate_edit_and_rerun_flow():
-    created = create_saved_basket(SavedBasketUpsertRequest(shoppingList=_shopping_list()))
+    created = create_saved_basket(
+        SavedBasketUpsertRequest(
+            shoppingList=_shopping_list(),
+            tags=["weekly", "family"],
+            notes="Baseline weekly basket",
+        )
+    )
+    assert created.tags == ["weekly", "family"]
+    assert created.notes == "Baseline weekly basket"
+    assert created.rerunCount == 0
+    assert created.lastRerunAt is None
 
     duplicate = duplicate_saved_basket(str(created.id))
     assert duplicate.shoppingList.title.endswith("(Copy)")
+    assert duplicate.tags == ["weekly", "family"]
+    assert duplicate.notes == "Baseline weekly basket"
 
     edited_list = _shopping_list().model_copy(update={"id": created.shoppingList.id, "title": "Weekly Edited"})
-    edited = edit_saved_basket(str(created.id), SavedBasketUpsertRequest(shoppingList=edited_list))
+    edited = edit_saved_basket(
+        str(created.id),
+        SavedBasketUpsertRequest(shoppingList=edited_list, tags=["edited"], notes="Updated list"),
+    )
     assert edited.shoppingList.title == "Weekly Edited"
+    assert edited.tags == ["edited"]
+    assert edited.notes == "Updated list"
 
     rerun = rerun_saved_basket(
         str(created.id),
@@ -74,3 +91,5 @@ def test_saved_basket_create_duplicate_edit_and_rerun_flow():
         ),
     )
     assert rerun.lastResult is not None
+    assert rerun.rerunCount == 1
+    assert rerun.lastRerunAt is not None

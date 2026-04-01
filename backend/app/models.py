@@ -302,12 +302,20 @@ class SavedBasketRecord(BaseModel):
     id: UUID
     shoppingList: ShoppingList
     lastResult: Optional[BasketOptimisationResult] = None
+    createdAt: str
+    updatedAt: str
+    lastRerunAt: str | None = None
+    rerunCount: int = 0
+    tags: List[str] = []
+    notes: str | None = None
 
 
 class SavedBasketUpsertRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     shoppingList: ShoppingList
+    tags: List[str] = []
+    notes: str | None = None
 
 
 class SavedBasketRerunRequest(BaseModel):

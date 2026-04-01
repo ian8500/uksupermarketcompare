@@ -4,6 +4,7 @@ import logging
 from dataclasses import dataclass
 from decimal import Decimal
 from difflib import SequenceMatcher
+from itertools import combinations
 from typing import Iterable
 from uuid import uuid4
 
@@ -342,42 +343,61 @@ def _best_options_per_intent(intents, totals: Iterable[SupermarketBasketTotal]):
 
 
 def _build_mixed_basket(intents, totals: list[SupermarketBasketTotal], max_supermarkets: int | None = None) -> MixedBasketResult:
-    selections: list[ItemSelectionResult] = []
+    if not totals:
+        return MixedBasketResult(
+            selections=[],
+            unavailableItems=intents,
+            missingItemsExplanation=_missing_explanation(intents),
+            missingItemDetails=[],
+            total=Decimal("0.00"),
+            storesUsed=0,
+        )
 
-    if max_supermarkets and max_supermarkets > 0:
-        allowed: set[str] = set()
-        for intent, best in _best_options_per_intent(intents, totals):
-            if not best:
-                continue
-            if best.supermarket.name in allowed or len(allowed) < max_supermarkets:
-                allowed.add(best.supermarket.name)
-                selections.append(best)
-                continue
-            constrained = [
+    max_store_cap = max_supermarkets if max_supermarkets and max_supermarkets > 0 else len(totals)
+    max_store_cap = min(max_store_cap, len(totals))
+
+    def build_for_subset(allowed_stores: set[str]) -> MixedBasketResult:
+        selections: list[ItemSelectionResult] = []
+        for intent in intents:
+            candidates = [
                 selection
                 for total in totals
+                if total.supermarket.name in allowed_stores
                 for selection in total.selections
-                if selection.intent.id == intent.id and selection.supermarket.name in allowed
+                if selection.intent.id == intent.id
             ]
-            if constrained:
-                selections.append(min(constrained, key=lambda option: (option.totalPrice, -option.score, -option.matchQuality.value, -option.confidence)))
-    else:
-        for _, best in _best_options_per_intent(intents, totals):
-            if best:
-                selections.append(best)
+            if candidates:
+                selections.append(
+                    min(
+                        candidates,
+                        key=lambda option: (option.totalPrice, -option.score, -option.matchQuality.value, -option.confidence),
+                    )
+                )
+        unavailable = [intent for intent in intents if not any(selection.intent.id == intent.id for selection in selections)]
+        unavailable_ids = {intent.id for intent in unavailable}
+        combined_missing = [detail for total in totals for detail in total.missingItemDetails if detail.intent.id in unavailable_ids]
+        stores_used = len({item.supermarket.name for item in selections})
+        return MixedBasketResult(
+            selections=selections,
+            unavailableItems=unavailable,
+            missingItemsExplanation=_missing_explanation(unavailable),
+            missingItemDetails=combined_missing,
+            total=sum((item.totalPrice for item in selections), Decimal("0.00")),
+            storesUsed=stores_used,
+        )
 
-    unavailable = [intent for intent in intents if not any(selection.intent.id == intent.id for selection in selections)]
-    unavailable_ids = {intent.id for intent in unavailable}
-    combined_missing = [detail for total in totals for detail in total.missingItemDetails if detail.intent.id in unavailable_ids]
-    stores_used = len({item.supermarket.name for item in selections})
-    return MixedBasketResult(
-        selections=selections,
-        unavailableItems=unavailable,
-        missingItemsExplanation=_missing_explanation(unavailable),
-        missingItemDetails=combined_missing,
-        total=sum((item.totalPrice for item in selections), Decimal("0.00")),
-        storesUsed=stores_used,
-    )
+    all_store_names = [total.supermarket.name for total in totals]
+    candidate_baskets: list[MixedBasketResult] = []
+    for size in range(1, max_store_cap + 1):
+        for subset in combinations(all_store_names, size):
+            candidate_baskets.append(build_for_subset(set(subset)))
+
+    def objective(basket: MixedBasketResult) -> Decimal:
+        missing_penalty = Decimal(len(basket.unavailableItems)) * Decimal("8.50")
+        store_penalty = Decimal(max(0, basket.storesUsed - 1)) * Decimal("0.95")
+        return basket.total + missing_penalty + store_penalty
+
+    return min(candidate_baskets, key=lambda basket: (objective(basket), basket.total))
 
 
 
