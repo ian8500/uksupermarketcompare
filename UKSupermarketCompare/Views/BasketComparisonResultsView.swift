@@ -34,6 +34,13 @@ struct BasketComparisonResultsView: View {
                         tint: BrandPalette.red,
                         subtitle: "Across selected supermarkets"
                     )
+
+                    summaryCard(
+                        title: "Savings vs single-store",
+                        value: viewModel.result.savingsVsCheapestSingleStore,
+                        tint: BrandPalette.success,
+                        subtitle: "How much mixed basket saves"
+                    )
                 }
 
                 section("Supermarket totals") {
@@ -102,6 +109,17 @@ struct BasketComparisonResultsView: View {
                                             }
                                         }
                                     }
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        ForEach(Array(selection.reasons.prefix(3).enumerated()), id: \.offset) { _, reason in
+                                            Text("• \(reason)")
+                                                .font(BrandTypography.caption)
+                                                .foregroundStyle(BrandPalette.textSecondary)
+                                        }
+                                        Text("Debug score: \(selection.confidence.description) • \(selection.unitPriceDescription)")
+                                            .font(BrandTypography.caption)
+                                            .foregroundStyle(BrandPalette.textSecondary)
+                                    }
                                 }
                             }
                         }
@@ -118,7 +136,7 @@ struct BasketComparisonResultsView: View {
                     if !viewModel.result.selectedBasket.unavailableItems.isEmpty {
                         ForEach(viewModel.result.selectedBasket.unavailableItems) { intent in
                             BrandCard {
-                                Text("No sensible match found for \(intent.userInput).")
+                                Text("No sensible match found for \(intent.userInput). Try adding a category hint like milk, bread, or rice.")
                                     .font(BrandTypography.body)
                                     .foregroundStyle(BrandPalette.textSecondary)
                             }

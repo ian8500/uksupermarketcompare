@@ -153,6 +153,7 @@ class BasketOptimisationResult(BaseModel):
     selectedBasket: MixedBasketResult
     comparisonMode: BasketComparisonMode
     preferences: BasketUserPreferences
+    maxSupermarkets: int | None = None
 
 
 class CompareRequest(BaseModel):
@@ -162,6 +163,7 @@ class CompareRequest(BaseModel):
     supermarkets: List[Supermarket]
     comparisonMode: BasketComparisonMode
     preferences: BasketUserPreferences
+    maxSupermarkets: int | None = None
 
 
 class CompareResponse(BaseModel):

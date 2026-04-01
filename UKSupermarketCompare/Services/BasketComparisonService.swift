@@ -158,12 +158,14 @@ final class BasketOptimiserService: BasketOptimising {
             reasons.append("Exact category match for \(intent.category.displayName.lowercased()).")
         }
 
-        let keywordHits = intent.acceptedKeywords.filter {
-            product.tags.contains($0) || product.name.lowercased().contains($0)
-        }
-        if !keywordHits.isEmpty {
-            score += Decimal(min(keywordHits.count, 3)) * 0.08
-            reasons.append("Matched keywords: \(keywordHits.prefix(3).joined(separator: ", ")).")
+        let searchableText = ([product.name, product.subcategory, product.category.rawValue] + product.tags).joined(separator: " ").lowercased()
+        let intentTokens = expandedTokens(from: intent.acceptedKeywords + [intent.userInput])
+        let productTokens = expandedTokens(from: [searchableText])
+        let tokenHits = Array(intentTokens.intersection(productTokens)).sorted()
+
+        if !tokenHits.isEmpty {
+            score += Decimal(min(tokenHits.count, 4)) * 0.09
+            reasons.append("Matched tokens: \(tokenHits.prefix(4).joined(separator: ", ")).")
             if quality == .weakSubstitute {
                 quality = .acceptableEquivalent
             }
@@ -205,6 +207,14 @@ final class BasketOptimiserService: BasketOptimising {
 
         let weightedUnit = max(Decimal(0.0001), product.unitValue - (score * 0.02))
         let finalScore = max(0.10, min(0.99, score))
+        if tokenHits.isEmpty && intent.category == .unknown {
+            reasons.append("Rejected as weak unknown-category match.")
+            return nil
+        }
+        if finalScore < 0.22 {
+            reasons.append("Rejected due to low confidence score \(finalScore).")
+            return nil
+        }
         reasons.append("Compared using unit price (\(product.unitDescription)).")
 
         return ProductCandidate(
@@ -219,4 +229,33 @@ final class BasketOptimiserService: BasketOptimising {
             reasons: reasons
         )
     }
+
+    private func expandedTokens(from values: [String]) -> Set<String> {
+        let synonyms: [String: [String]] = [
+            "beanz": ["beans", "baked"],
+            "yoghurt": ["yogurt"],
+            "loaf": ["bread"],
+            "fillets": ["fillet", "breast"]
+        ]
+
+        var tokens = Set<String>()
+        for value in values {
+            for raw in value.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber }) {
+                var token = String(raw)
+                if token.count > 3 && token.hasSuffix("ies") {
+                    token = String(token.dropLast(3)) + "y"
+                } else if token.count > 3 && token.hasSuffix("es") {
+                    token = String(token.dropLast(2))
+                } else if token.count > 2 && token.hasSuffix("s") {
+                    token = String(token.dropLast())
+                }
+                tokens.insert(token)
+                for synonym in synonyms[token, default: []] {
+                    tokens.insert(synonym)
+                }
+            }
+        }
+        return tokens
+    }
+
 }

@@ -33,9 +33,11 @@ final class CreateShoppingListViewModel: ObservableObject {
 
     func addItem() {
         guard canAddItem else { return }
-        let cleanedName = itemName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let parsed = parseQuantityPrefix(from: itemName)
+        let cleanedName = parsed.name
         let resolvedName = catalogService.catalogItem(matching: cleanedName)?.displayName ?? cleanedName.capitalized
-        items.append(ShoppingItem(name: resolvedName, quantity: max(quantity, 1)))
+        let resolvedQuantity = parsed.quantity ?? quantity
+        items.append(ShoppingItem(name: resolvedName, quantity: max(resolvedQuantity, 1)))
         itemName = ""
         quantity = 1
         refreshSuggestions()
@@ -62,6 +64,18 @@ final class CreateShoppingListViewModel: ObservableObject {
     }
 
     private func refreshSuggestions() {
-        suggestions = catalogService.suggestions(for: itemName, limit: 8)
+        suggestions = catalogService.suggestions(for: parseQuantityPrefix(from: itemName).name, limit: 8)
+    }
+
+    private func parseQuantityPrefix(from raw: String) -> (name: String, quantity: Int?) {
+        let cleaned = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tokens = cleaned.split(separator: " ", omittingEmptySubsequences: true)
+        guard let first = tokens.first, let parsedQty = Int(first), parsedQty > 0 else {
+            return (cleaned, nil)
+        }
+
+        let remainder = tokens.dropFirst().joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !remainder.isEmpty else { return (cleaned, nil) }
+        return (remainder, min(parsedQty, 99))
     }
 }
