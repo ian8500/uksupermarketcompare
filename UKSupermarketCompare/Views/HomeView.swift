@@ -44,6 +44,28 @@ struct HomeView: View {
                             coordinator.openSavedLists()
                         }
                         .buttonStyle(BrandSecondaryButtonStyle())
+
+                        if let lastBasket = coordinator.store.lastBasket {
+                            Button("Rerun last basket (\(lastBasket.items.count) items)") {
+                                coordinator.openSelection(for: lastBasket)
+                            }
+                            .buttonStyle(BrandSecondaryButtonStyle())
+                        }
+                    }
+                }
+
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Weekly momentum")
+                            .font(BrandTypography.section)
+                            .foregroundStyle(BrandPalette.navy)
+                        HStack(spacing: 8) {
+                            BrandChip(text: "\(coordinator.store.savedLists.count) saved baskets", tint: BrandPalette.blue)
+                            BrandChip(text: "\(coordinator.store.favoriteItems.count) favorites", tint: BrandPalette.red)
+                        }
+                        Text("Use rerun + favorites to finish your weekly shop setup faster each time.")
+                            .font(BrandTypography.caption)
+                            .foregroundStyle(BrandPalette.textSecondary)
                     }
                 }
 

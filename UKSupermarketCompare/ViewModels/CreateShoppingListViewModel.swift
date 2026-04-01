@@ -10,6 +10,7 @@ final class CreateShoppingListViewModel: ObservableObject {
     @Published private(set) var items: [ShoppingItem] = []
     @Published private(set) var suggestions: [GrocerySuggestion] = []
     @Published private(set) var suggestionSource: SuggestionOrigin = .fallback
+    @Published var selectedEditItemID: UUID?
 
     let weeklyEssentials = ["Milk", "Bread", "Eggs", "Bananas", "Butter", "Pasta"]
     private let popularItems = ["milk", "bread", "eggs", "bananas", "butter", "pasta", "cheese", "chicken", "rice", "tomatoes"]
@@ -44,6 +45,22 @@ final class CreateShoppingListViewModel: ObservableObject {
 
     var recentItems: [String] {
         coordinator.store.recentItems
+    }
+
+    var favoriteItems: [String] {
+        coordinator.store.favoriteItems
+    }
+
+    var stapleItems: [String] {
+        coordinator.store.stapleItems
+    }
+
+    var quickStapleBundles: [[String]] {
+        [
+            ["Milk", "Bread", "Eggs"],
+            ["Pasta", "Tomato Sauce", "Parmesan"],
+            ["Bananas", "Yogurt", "Granola"]
+        ]
     }
 
     func applySuggestion(_ suggestion: GrocerySuggestion) {
@@ -81,6 +98,49 @@ final class CreateShoppingListViewModel: ObservableObject {
         addItem()
     }
 
+    func quickAddBundle(_ bundle: [String]) {
+        for name in bundle {
+            itemName = name
+            quantity = 1
+            addItem()
+        }
+    }
+
+    func toggleFavorite(for name: String) {
+        coordinator.store.toggleFavorite(itemName: name)
+    }
+
+    func isFavorite(_ name: String) -> Bool {
+        coordinator.store.isFavorite(itemName: name)
+    }
+
+    func startEditing(_ item: ShoppingItem) {
+        selectedEditItemID = item.id
+        itemName = item.name
+        quantity = item.quantity
+    }
+
+    func applyEditIfNeeded() {
+        guard let editingID = selectedEditItemID else {
+            addItem()
+            return
+        }
+        guard let index = items.firstIndex(where: { $0.id == editingID }) else {
+            selectedEditItemID = nil
+            addItem()
+            return
+        }
+        guard canAddItem else { return }
+        let parsed = parseQuantityPrefix(from: itemName)
+        let cleanedName = parsed.name
+        let resolvedName = catalogService.catalogItem(matching: cleanedName)?.displayName ?? cleanedName.capitalized
+        items[index].name = resolvedName
+        items[index].quantity = parsed.quantity ?? quantity
+        selectedEditItemID = nil
+        itemName = ""
+        quantity = 1
+    }
+
     func updateQuantity(for itemID: UUID, delta: Int) {
         guard let index = items.firstIndex(where: { $0.id == itemID }) else { return }
         items[index].quantity = max(1, items[index].quantity + delta)
@@ -99,6 +159,8 @@ final class CreateShoppingListViewModel: ObservableObject {
         guard canContinue else { return }
         let list = ShoppingList(title: listTitle.trimmingCharacters(in: .whitespacesAndNewlines), items: items)
         coordinator.store.rememberItems(from: items)
+        coordinator.store.updateLastBasket(list)
+        coordinator.store.saveStaples(stapleItems)
         coordinator.openSelection(for: list)
         print("[Analytics] basket_started items=\(items.count)")
     }

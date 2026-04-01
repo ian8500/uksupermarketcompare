@@ -96,8 +96,8 @@ struct CreateShoppingListView: View {
                             quantityStepper
                         }
 
-                        Button("Add Item") {
-                            viewModel.addItem()
+                        Button(viewModel.selectedEditItemID == nil ? "Add Item" : "Update Item") {
+                            viewModel.applyEditIfNeeded()
                             focusedField = .itemName
                         }
                         .buttonStyle(BrandSecondaryButtonStyle())
@@ -116,6 +116,16 @@ struct CreateShoppingListView: View {
                                 }
                             }
                         }
+
+                        Text("Quick bundles")
+                            .font(BrandTypography.caption.weight(.semibold))
+                            .foregroundStyle(BrandPalette.textSecondary)
+                        ForEach(viewModel.quickStapleBundles, id: \.self) { bundle in
+                            Button("Add \(bundle.joined(separator: " + "))") {
+                                viewModel.quickAddBundle(bundle)
+                            }
+                            .buttonStyle(BrandSecondaryButtonStyle())
+                        }
                     }
                 }
 
@@ -132,6 +142,27 @@ struct CreateShoppingListView: View {
                                         }
                                             .buttonStyle(.bordered)
                                             .tint(BrandPalette.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if !viewModel.favoriteItems.isEmpty {
+                    BrandCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            sectionTitle("Favorites")
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(viewModel.favoriteItems.prefix(10), id: \.self) { item in
+                                        Button {
+                                            viewModel.addRecentItem(item)
+                                        } label: {
+                                            Label(item, systemImage: "star.fill")
+                                        }
+                                        .buttonStyle(.borderedProminent)
+                                        .tint(BrandPalette.red)
                                     }
                                 }
                             }
@@ -164,6 +195,22 @@ struct CreateShoppingListView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(item.name)
                                             .font(BrandTypography.body)
+                                        HStack(spacing: 4) {
+                                            Button {
+                                                viewModel.toggleFavorite(for: item.name)
+                                            } label: {
+                                                Image(systemName: viewModel.isFavorite(item.name) ? "star.fill" : "star")
+                                                    .foregroundStyle(BrandPalette.red)
+                                            }
+                                            .buttonStyle(.plain)
+                                            Button("Edit") {
+                                                viewModel.startEditing(item)
+                                                focusedField = .itemName
+                                            }
+                                            .font(BrandTypography.caption)
+                                            .buttonStyle(.plain)
+                                            .foregroundStyle(BrandPalette.blue)
+                                        }
                                         Text("Quantity")
                                             .font(BrandTypography.caption)
                                             .foregroundStyle(BrandPalette.textSecondary)
