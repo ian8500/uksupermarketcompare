@@ -80,12 +80,14 @@ enum BrandPreference: String, Codable, CaseIterable, Hashable {
     case neutral
     case ownBrandPreferred
     case brandedPreferred
+    case brandedOnly
 
     var title: String {
         switch self {
         case .neutral: return "No preference"
         case .ownBrandPreferred: return "Own-brand preferred"
         case .brandedPreferred: return "Branded preferred"
+        case .brandedOnly: return "Branded only"
         }
     }
 }
@@ -257,6 +259,7 @@ struct BasketOptimisationResult: Codable, Hashable {
     let selectedBasket: MixedBasketResult
     let comparisonMode: BasketComparisonMode
     let preferences: BasketUserPreferences
+    let preferenceEffects: [String]?
 
     var mostExpensiveCompleteStoreTotal: Decimal? {
         let complete = supermarketTotals.filter { $0.unavailableItems.isEmpty }

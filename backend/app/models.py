@@ -49,6 +49,7 @@ class BrandPreference(str, Enum):
     neutral = "neutral"
     ownBrandPreferred = "ownBrandPreferred"
     brandedPreferred = "brandedPreferred"
+    brandedOnly = "brandedOnly"
 
 
 class ShoppingItem(BaseModel):
@@ -270,6 +271,7 @@ class BasketOptimisationResult(BaseModel):
     comparisonMode: BasketComparisonMode
     preferences: BasketUserPreferences
     maxSupermarkets: int | None = None
+    preferenceEffects: List[str] = []
     summaryCards: List[BasketSummaryCard] = []
     strategyResults: List[BasketStrategyResult] = []
     selectedStrategyMode: BasketDecisionMode | None = None

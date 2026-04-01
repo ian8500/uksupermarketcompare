@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from decimal import Decimal
 from difflib import SequenceMatcher
 from typing import Iterable
@@ -44,6 +45,17 @@ SYNONYM_MAP: dict[str, list[str]] = {
     "fillets": ["fillet", "breast"],
     "loaf": ["bread"],
 }
+
+@dataclass
+class PreferenceContext:
+    own_brand_preferred: bool = False
+    branded_preferred: bool = False
+    branded_only: bool = False
+    avoid_premium: bool = False
+    organic_only: bool = False
+    max_supermarkets: int | None = None
+    selected_supermarkets: list[str] | None = None
+    effects: list[str] | None = None
 
 
 def _normalize_token(token: str) -> str:
@@ -124,7 +136,7 @@ def _similarity_score(a: str, b: str) -> Decimal:
     return Decimal(str(round(SequenceMatcher(None, a, b).ratio(), 3)))
 
 
-def _rank_candidate(intent, product: SupermarketProduct):
+def _rank_candidate(intent, product: SupermarketProduct, preferences: PreferenceContext):
     reasons: list[str] = []
     tradeoffs: list[str] = []
     intent_tokens = set(intent.acceptedKeywords)
@@ -159,6 +171,23 @@ def _rank_candidate(intent, product: SupermarketProduct):
     if product.isOwnBrand:
         score += Decimal("0.03")
         reasons.append("Own-brand value signal applied.")
+    if preferences.own_brand_preferred:
+        if product.isOwnBrand:
+            score += Decimal("0.08")
+            reasons.append("Own-brand preference applied.")
+        else:
+            score -= Decimal("0.06")
+            tradeoffs.append("Non-own-brand product deprioritised.")
+    if preferences.branded_preferred:
+        if not product.isOwnBrand:
+            score += Decimal("0.08")
+            reasons.append("Branded preference applied.")
+        else:
+            score -= Decimal("0.06")
+            tradeoffs.append("Own-brand item deprioritised for branded preference.")
+    if preferences.branded_only and product.isOwnBrand:
+        reasons.append("Rejected: branded-only preference.")
+        return None
 
     if intent.category == GroceryCategory.unknown and token_score < 2 and intent.normalizedInput not in product.name.lower():
         reasons.append("Rejected: weak unknown-category match.")
@@ -172,6 +201,13 @@ def _rank_candidate(intent, product: SupermarketProduct):
     if product.isPremium:
         score -= PREMIUM_PENALTY
         tradeoffs.append("Premium product penalty applied.")
+    if preferences.avoid_premium and product.isPremium:
+        score -= Decimal("0.45")
+        reasons.append("Premium products excluded by preference.")
+        return None
+    if preferences.organic_only and not product.isOrganic:
+        reasons.append("Rejected: organic-only preference.")
+        return None
 
     if any(size_token in intent.normalizedInput for size_token in ["kg", "g", "l", "ml"]) and product.size not in intent.normalizedInput:
         score -= SIZE_MISMATCH_PENALTY
@@ -211,7 +247,7 @@ def _missing_explanation(unavailable_items) -> str:
     return f"Missing {len(unavailable_items)} item(s): {item_names}. Try broader names, category hints, or add more supermarkets."
 
 
-def _build_market_total(supermarket: Supermarket, intents, inventory: list[SupermarketProduct]) -> SupermarketBasketTotal:
+def _build_market_total(supermarket: Supermarket, intents, inventory: list[SupermarketProduct], preferences: PreferenceContext) -> SupermarketBasketTotal:
     selections: list[ItemSelectionResult] = []
     unavailable = []
     missing_details: list[MissingItemDetail] = []
@@ -219,7 +255,7 @@ def _build_market_total(supermarket: Supermarket, intents, inventory: list[Super
     for intent in intents:
         ranked: list[tuple[MatchQuality, Decimal, Decimal, SupermarketProduct, list[str], list[str], list[str]]] = []
         for product in inventory:
-            scored = _rank_candidate(intent, product)
+            scored = _rank_candidate(intent, product, preferences)
             if scored is None:
                 continue
             quality, confidence, score, matched_tokens, reasons, tradeoffs = scored
@@ -451,6 +487,7 @@ def _build_strategy_results(
     mixed: MixedBasketResult,
     convenience: MixedBasketResult,
     max_two: MixedBasketResult,
+    preference_effects: list[str],
 ) -> list[BasketStrategyResult]:
     cheapest_total = mixed.total
     cheapest_single_total = cheapest_single.total if cheapest_single else Decimal("0.00")
@@ -475,6 +512,7 @@ def _build_strategy_results(
             f"Missing {len(basket.unavailableItems)} item(s).",
             f"Costs £{price_delta:.2f} more than the cheapest mixed basket." if price_delta >= 0 else f"Saves £{abs(price_delta):.2f} vs cheapest mixed basket.",
         ]
+        tradeoffs.extend(preference_effects)
         won_because = (
             "Lowest total cost across all item-level allocations."
             if mode == BasketDecisionMode.cheapestMixedBasket
@@ -530,25 +568,59 @@ def _build_strategy_results(
     return results
 
 def build_comparison(request: CompareRequest) -> CompareResponse:
+    preference_effects: list[str] = []
+    parsed_preferences = set()
     product_map = _seeded_product_map()
     intents = []
     for item in request.shoppingList.items:
         parsed = parse_item_input(item.name, fallback_quantity=item.quantity)
+        parsed_preferences.update(parsed.preferenceTags)
         intents.append(_intent_from_item(parsed))
 
+    own_brand_preferred = request.preferences.brandPreference.value == "ownBrandPreferred" or "own brand" in parsed_preferences or "own" in parsed_preferences
+    branded_only = request.preferences.brandPreference.value == "brandedOnly" or "branded only" in parsed_preferences
+    branded_preferred = request.preferences.brandPreference.value == "brandedPreferred" or "branded" in parsed_preferences
+    avoid_premium = request.preferences.avoidPremium or "avoid premium" in parsed_preferences
+    organic_only = request.preferences.organicOnly or "organic only" in parsed_preferences or "organic" in parsed_preferences
+
+    if own_brand_preferred:
+        preference_effects.append("Own-brand preference applied")
+    if branded_preferred:
+        preference_effects.append("Branded preference applied")
+    if branded_only:
+        preference_effects.append("Branded-only filter applied")
+    if avoid_premium:
+        preference_effects.append("Premium products excluded")
+    if organic_only:
+        preference_effects.append("Organic-only filter applied")
+    if request.supermarkets:
+        preference_effects.append(f"Limited to selected supermarkets ({', '.join(market.name for market in request.supermarkets)})")
+
     totals = []
+    preference_context = PreferenceContext(
+        own_brand_preferred=own_brand_preferred,
+        branded_preferred=branded_preferred,
+        branded_only=branded_only,
+        avoid_premium=avoid_premium,
+        organic_only=organic_only,
+        max_supermarkets=request.maxSupermarkets,
+        selected_supermarkets=[market.name for market in request.supermarkets],
+        effects=preference_effects,
+    )
     for supermarket in request.supermarkets:
         inventory = product_map.get(supermarket.name.lower(), [])
-        totals.append(_build_market_total(supermarket, intents, inventory))
+        totals.append(_build_market_total(supermarket, intents, inventory, preference_context))
 
     totals = sorted(totals, key=lambda x: x.total)
     cheapest_single = next((total for total in totals if not total.unavailableItems), totals[0] if totals else None)
 
     max_supermarkets = request.maxSupermarkets if getattr(request, "maxSupermarkets", None) else None
+    if max_supermarkets:
+        preference_effects.append(f"Limited to {max_supermarkets} store{'s' if max_supermarkets != 1 else ''}")
     mixed = _build_mixed_basket(intents, totals, max_supermarkets=max_supermarkets)
     max_two = _build_mixed_basket(intents, totals, max_supermarkets=2)
     convenience = _best_convenience_basket(intents, totals)
-    strategy_results = _build_strategy_results(intents, totals, cheapest_single, mixed, convenience, max_two)
+    strategy_results = _build_strategy_results(intents, totals, cheapest_single, mixed, convenience, max_two, preference_effects)
 
     selected = mixed if request.comparisonMode.value == "cheapestPossible" else _single_store_as_mixed(cheapest_single, intents)
     if request.comparisonMode.value == "bestConvenienceOption":
@@ -572,6 +644,7 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
         comparisonMode=request.comparisonMode,
         preferences=request.preferences,
         maxSupermarkets=max_supermarkets,
+        preferenceEffects=preference_effects,
         summaryCards=[
             BasketSummaryCard(title="Cheapest mixed basket", total=mixed.total, subtitle="Lowest total across stores"),
             BasketSummaryCard(title="Cheapest single-store basket", total=cheapest_single.total if cheapest_single else Decimal("0.00"), subtitle=cheapest_single.supermarket.name if cheapest_single else "No complete store"),

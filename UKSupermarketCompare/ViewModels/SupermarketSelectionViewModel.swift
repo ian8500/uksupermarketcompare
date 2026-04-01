@@ -6,6 +6,7 @@ final class SupermarketSelectionViewModel: ObservableObject {
     @Published var brandPreference: BrandPreference = .neutral
     @Published var avoidPremium: Bool = false
     @Published var organicOnly: Bool = false
+    @Published var maxStores: Int = 0
 
     let shoppingList: ShoppingList
     let supermarkets: [Supermarket]
@@ -30,6 +31,10 @@ final class SupermarketSelectionViewModel: ObservableObject {
         )
     }
 
+    var maxSupermarkets: Int? {
+        maxStores == 0 ? nil : maxStores
+    }
+
     func toggleSelection(for supermarket: Supermarket) {
         if selectedMarketIDs.contains(supermarket.id) {
             selectedMarketIDs.remove(supermarket.id)
@@ -45,7 +50,8 @@ final class SupermarketSelectionViewModel: ObservableObject {
             list: shoppingList,
             markets: markets,
             mode: comparisonMode,
-            preferences: basketPreferences
+            preferences: basketPreferences,
+            maxSupermarkets: maxSupermarkets
         )
         coordinator.openResults(result)
     }

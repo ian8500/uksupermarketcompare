@@ -15,6 +15,20 @@ struct BasketComparisonResultsView: View {
                     decisionSummaryCards
                 }
 
+                if !viewModel.preferenceEffects.isEmpty {
+                    section("Applied preferences") {
+                        BrandCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(viewModel.preferenceEffects, id: \.self) { effect in
+                                    Text("• \(effect)")
+                                        .font(BrandTypography.caption)
+                                        .foregroundStyle(BrandPalette.textSecondary)
+                                }
+                            }
+                        }
+                    }
+                }
+
                 section("Purchase plan") {
                     if viewModel.purchasePlanByStore.isEmpty {
                         BrandCard {
