@@ -13,7 +13,7 @@ def main() -> None:
     parser.add_argument(
         "--tesco-live",
         action="store_true",
-        help="Use Tesco live source mode (requires TESCO_API_KEY and optional TESCO_SOURCE_BASE_URL)",
+        help="Use Tesco live source mode (requires TESCO_THIRD_PARTY_API_KEY or TESCO_OFFICIAL_API_KEY + related base URL settings)",
     )
     args = parser.parse_args()
 
