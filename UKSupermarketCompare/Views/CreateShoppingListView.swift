@@ -54,9 +54,15 @@ struct CreateShoppingListView: View {
 
                         if !viewModel.suggestions.isEmpty {
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("Suggestions")
-                                    .font(BrandTypography.caption.weight(.semibold))
-                                    .foregroundStyle(BrandPalette.textSecondary)
+                                HStack {
+                                    Text("Suggestions")
+                                        .font(BrandTypography.caption.weight(.semibold))
+                                        .foregroundStyle(BrandPalette.textSecondary)
+                                    Spacer()
+                                    Text(viewModel.suggestionSource == .backend ? "LIVE" : "OFFLINE")
+                                        .font(BrandTypography.caption.weight(.semibold))
+                                        .foregroundStyle(viewModel.suggestionSource == .backend ? BrandPalette.success : BrandPalette.textSecondary)
+                                }
                                 ForEach(viewModel.suggestions.prefix(6)) { suggestion in
                                     Button {
                                         viewModel.addSuggestion(suggestion)
@@ -64,7 +70,7 @@ struct CreateShoppingListView: View {
                                     } label: {
                                         HStack {
                                             VStack(alignment: .leading, spacing: 2) {
-                                                Text(suggestion.item.displayName)
+                                                Text(suggestion.primaryText)
                                                 Text(suggestion.hintText)
                                                     .font(BrandTypography.caption)
                                                     .foregroundStyle(BrandPalette.textSecondary)

@@ -1,24 +1,37 @@
 import Foundation
 
+@MainActor
 final class CreateShoppingListViewModel: ObservableObject {
     @Published var listTitle = "Weekly Shop"
     @Published var itemName = "" {
-        didSet { refreshSuggestions() }
+        didSet { scheduleSuggestionRefresh() }
     }
     @Published var quantity = 1
     @Published private(set) var items: [ShoppingItem] = []
     @Published private(set) var suggestions: [GrocerySuggestion] = []
+    @Published private(set) var suggestionSource: SuggestionOrigin = .fallback
 
     let weeklyEssentials = ["Milk", "Bread", "Eggs", "Bananas", "Butter", "Pasta"]
     private let popularItems = ["milk", "bread", "eggs", "bananas", "butter", "pasta", "cheese", "chicken", "rice", "tomatoes"]
 
     private let coordinator: AppCoordinatorViewModel
     private let catalogService: GroceryCatalogServing
+    private let backendAutocompleteService: BackendAutocompleteServing?
+    private var suggestionTask: Task<Void, Never>?
 
-    init(coordinator: AppCoordinatorViewModel, catalogService: GroceryCatalogServing) {
+    init(
+        coordinator: AppCoordinatorViewModel,
+        catalogService: GroceryCatalogServing,
+        backendAutocompleteService: BackendAutocompleteServing? = nil
+    ) {
         self.coordinator = coordinator
         self.catalogService = catalogService
+        self.backendAutocompleteService = backendAutocompleteService
         self.suggestions = catalogService.suggestions(for: "", limit: 6)
+    }
+
+    deinit {
+        suggestionTask?.cancel()
     }
 
     var canAddItem: Bool {
@@ -52,7 +65,7 @@ final class CreateShoppingListViewModel: ObservableObject {
         items.append(ShoppingItem(name: resolvedName, quantity: max(resolvedQuantity, 1)))
         itemName = ""
         quantity = 1
-        refreshSuggestions()
+        refreshFallbackSuggestions(for: "")
         print("[Analytics] item_added name=\(resolvedName) qty=\(resolvedQuantity)")
     }
 
@@ -90,10 +103,50 @@ final class CreateShoppingListViewModel: ObservableObject {
         print("[Analytics] basket_started items=\(items.count)")
     }
 
-    private func refreshSuggestions() {
-        let query = parseQuantityPrefix(from: itemName).name
+    private func scheduleSuggestionRefresh() {
+        suggestionTask?.cancel()
+        let parsed = parseQuantityPrefix(from: itemName)
+        refreshFallbackSuggestions(for: parsed.name)
+
+        let query = parsed.name
+        guard !query.isEmpty else { return }
+
+        suggestionTask = Task { [weak self] in
+            do {
+                try await Task.sleep(nanoseconds: 200_000_000)
+                guard !Task.isCancelled else { return }
+                await self?.loadBackendSuggestions(for: query)
+            } catch {
+                // Cancellation only.
+            }
+        }
+    }
+
+    private func loadBackendSuggestions(for query: String) async {
+        guard let backendAutocompleteService else { return }
+
+        do {
+            let remote = try await backendAutocompleteService.autocomplete(query: query, limit: 8)
+            guard !Task.isCancelled else { return }
+            if !remote.isEmpty {
+                suggestions = rankSuggestions(remote, query: query).prefix(8).map { $0 }
+                suggestionSource = .backend
+                print("[Suggestions][source] backend query=\(query) count=\(suggestions.count)")
+                return
+            }
+            suggestionSource = .fallback
+            print("[Suggestions][source] fallback query=\(query) reason=empty_backend")
+        } catch {
+            suggestionSource = .fallback
+            print("[Suggestions][backend][error] query=\(query) message=\(error.localizedDescription)")
+        }
+    }
+
+    private func refreshFallbackSuggestions(for query: String) {
         let base = catalogService.suggestions(for: query, limit: 40)
         suggestions = rankSuggestions(base, query: query).prefix(8).map { $0 }
+        suggestionSource = .fallback
+        print("[Suggestions][source] fallback query=\(query) count=\(suggestions.count)")
     }
 
     private func parseQuantityPrefix(from raw: String) -> (name: String, quantity: Int?) {
@@ -119,6 +172,11 @@ final class CreateShoppingListViewModel: ObservableObject {
                 let recentBoost = recentItems.firstIndex(where: { normalize($0) == itemName }).map { max(8, 70 - ($0 * 7)) } ?? 0
                 let popularityBoost = popularItems.contains(where: { itemName.contains($0) }) ? 32 : 0
                 let exactBoost = itemName == normalizedQuery ? 260 : 0
+                let brandBoost = {
+                    let brand = suggestion.item.preferredMatchingTags.joined(separator: " ").lowercased()
+                    guard !brand.isEmpty, !normalizedQuery.isEmpty else { return 0 }
+                    return brand.contains(normalizedQuery) ? 30 : 0
+                }()
 
                 let fuzzyBoost: Int = {
                     guard !normalizedQuery.isEmpty else { return 0 }
@@ -133,8 +191,8 @@ final class CreateShoppingListViewModel: ObservableObject {
                     else if itemName.contains(token) { total += 16 }
                 }
 
-                let adjustedScore = suggestion.score + groceryIntentBoost + recentBoost + popularityBoost + exactBoost + fuzzyBoost + partialTokenBoost
-                return GrocerySuggestion(id: suggestion.id, item: suggestion.item, score: adjustedScore)
+                let adjustedScore = suggestion.score + groceryIntentBoost + recentBoost + popularityBoost + exactBoost + fuzzyBoost + partialTokenBoost + brandBoost
+                return GrocerySuggestion(id: suggestion.id, item: suggestion.item, score: adjustedScore, origin: suggestion.origin)
             }
             .sorted {
                 if $0.score == $1.score {
