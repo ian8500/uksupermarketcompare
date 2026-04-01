@@ -16,4 +16,12 @@ final class SavedListsViewModel: ObservableObject {
     func delete(at offsets: IndexSet) {
         store.delete(indexSet: offsets)
     }
+
+    func duplicate(_ list: ShoppingList) {
+        store.duplicate(listID: list.id)
+    }
+
+    func update(_ list: ShoppingList) {
+        store.update(list: list)
+    }
 }

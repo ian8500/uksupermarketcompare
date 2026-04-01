@@ -41,6 +41,21 @@ struct BasketComparisonResultsView: View {
                         tint: BrandPalette.success,
                         subtitle: "How much mixed basket saves"
                     )
+
+                    if let convenience = viewModel.bestConvenienceOption {
+                        summaryCard(
+                            title: "Best convenience option",
+                            value: convenience.total,
+                            tint: BrandPalette.navy,
+                            subtitle: "\(convenience.supermarket.name) • \(convenience.unavailableItems.count) missing"
+                        )
+                    }
+
+                    BrandCard {
+                        Text(viewModel.savingsExplanation)
+                            .font(BrandTypography.body)
+                            .foregroundStyle(BrandPalette.textSecondary)
+                    }
                 }
 
                 section("Supermarket totals") {

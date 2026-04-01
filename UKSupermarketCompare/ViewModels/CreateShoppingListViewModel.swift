@@ -9,6 +9,8 @@ final class CreateShoppingListViewModel: ObservableObject {
     @Published private(set) var items: [ShoppingItem] = []
     @Published private(set) var suggestions: [GrocerySuggestion] = []
 
+    let weeklyEssentials = ["Milk", "Bread", "Eggs", "Butter", "Bananas", "Rice"]
+
     private let coordinator: AppCoordinatorViewModel
     private let catalogService: GroceryCatalogServing
 
@@ -26,6 +28,10 @@ final class CreateShoppingListViewModel: ObservableObject {
         !items.isEmpty && !listTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    var recentItems: [String] {
+        coordinator.store.recentItems
+    }
+
     func applySuggestion(_ suggestion: GrocerySuggestion) {
         itemName = suggestion.item.displayName
         quantity = max(1, suggestion.item.defaultQuantityStep)
@@ -41,6 +47,19 @@ final class CreateShoppingListViewModel: ObservableObject {
         itemName = ""
         quantity = 1
         refreshSuggestions()
+        print("[Analytics] item_added name=\(resolvedName) qty=\(resolvedQuantity)")
+    }
+
+    func addRecentItem(_ name: String) {
+        itemName = name
+        quantity = 1
+        addItem()
+    }
+
+    func quickAddEssential(_ name: String) {
+        itemName = name
+        quantity = 1
+        addItem()
     }
 
     func quickAddSuggestion(_ suggestion: GrocerySuggestion) {
@@ -60,7 +79,9 @@ final class CreateShoppingListViewModel: ObservableObject {
     func continueToSupermarketSelection() {
         guard canContinue else { return }
         let list = ShoppingList(title: listTitle.trimmingCharacters(in: .whitespacesAndNewlines), items: items)
+        coordinator.store.rememberItems(from: items)
         coordinator.openSelection(for: list)
+        print("[Analytics] basket_started items=\(items.count)")
     }
 
     private func refreshSuggestions() {
