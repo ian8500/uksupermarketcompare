@@ -4,6 +4,7 @@ struct BasketComparisonResultsView: View {
     @EnvironmentObject private var coordinator: AppCoordinatorViewModel
     @ObservedObject var viewModel: BasketComparisonResultsViewModel
     @State private var didSave = false
+    @State private var revealSections = false
 
     var body: some View {
         ScrollView {
@@ -15,12 +16,13 @@ struct BasketComparisonResultsView: View {
                         Text("Your selected plan total")
                             .font(BrandTypography.caption.weight(.semibold))
                             .foregroundStyle(BrandPalette.textSecondary)
-                        Text(viewModel.result.selectedBasket.total.asGBP())
+                        AnimatedCurrencyText(value: viewModel.result.selectedBasket.total)
                             .font(BrandTypography.hero)
                             .foregroundStyle(BrandPalette.navy)
                         HStack(spacing: 8) {
                             BrandChip(text: "Save \(viewModel.result.savingsVsMostExpensive.asGBP()) vs highest", tint: BrandPalette.success)
                             BrandChip(text: "\(viewModel.selectedStoresUsed.count) store(s)", tint: BrandPalette.blue)
+                            BrandChip(text: viewModel.selectedModeTitle, tint: BrandPalette.red)
                         }
                     }
                 }
@@ -224,6 +226,7 @@ struct BasketComparisonResultsView: View {
                 VStack(spacing: 10) {
                     Button(didSave ? "Saved to your baskets" : "Save this basket") {
                         viewModel.saveList()
+                        HapticFeedbackService.saveBasket()
                         didSave = true
                     }
                     .buttonStyle(BrandPrimaryButtonStyle())
@@ -239,6 +242,11 @@ struct BasketComparisonResultsView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Results")
+        .onAppear {
+            revealSections = true
+            HapticFeedbackService.bestOptionSelected()
+        }
+        .animation(.easeOut(duration: 0.25), value: revealSections)
     }
 
     private var decisionSummaryCards: some View {
@@ -255,6 +263,8 @@ struct BasketComparisonResultsView: View {
                 .font(BrandTypography.section)
                 .foregroundStyle(BrandPalette.navy)
             content()
+                .opacity(revealSections ? 1 : 0)
+                .offset(y: revealSections ? 0 : 8)
         }
     }
 
@@ -289,5 +299,21 @@ struct BasketComparisonResultsView: View {
 
     private func isCheapestSingleStore(_ total: SupermarketBasketTotal) -> Bool {
         viewModel.result.cheapestSingleStore?.supermarket.id == total.supermarket.id
+    }
+}
+
+
+private struct AnimatedCurrencyText: View {
+    let value: Decimal
+    @State private var displayedValue: Double = 0
+
+    var body: some View {
+        Text(Decimal(displayedValue).asGBP())
+            .contentTransition(.numericText(value: displayedValue))
+            .onAppear {
+                withAnimation(.easeOut(duration: 0.5)) {
+                    displayedValue = (value as NSDecimalNumber).doubleValue
+                }
+            }
     }
 }

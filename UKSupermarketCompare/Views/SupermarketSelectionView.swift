@@ -89,6 +89,18 @@ struct SupermarketSelectionView: View {
                 }
                 .padding(.horizontal, 8)
 
+                if viewModel.isComparing {
+                    BrandCard {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text(viewModel.comparePhase)
+                                .font(BrandTypography.body)
+                                .foregroundStyle(BrandPalette.textSecondary)
+                        }
+                    }
+                    .transition(.opacity)
+                }
+
                 Button {
                     viewModel.runComparison()
                 } label: {
@@ -107,5 +119,6 @@ struct SupermarketSelectionView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Supermarkets")
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isComparing)
     }
 }

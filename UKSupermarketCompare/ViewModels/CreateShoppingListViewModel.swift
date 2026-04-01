@@ -10,6 +10,8 @@ final class CreateShoppingListViewModel: ObservableObject {
     @Published private(set) var items: [ShoppingItem] = []
     @Published private(set) var suggestions: [GrocerySuggestion] = []
     @Published private(set) var suggestionSource: SuggestionOrigin = .fallback
+    @Published private(set) var isSuggestionLoading = false
+    @Published private(set) var searchPhaseText = "Type to search faster"
     @Published var selectedEditItemID: UUID?
 
     let weeklyEssentials = ["Milk", "Bread", "Eggs", "Bananas", "Butter", "Pasta"]
@@ -19,6 +21,8 @@ final class CreateShoppingListViewModel: ObservableObject {
     private let catalogService: GroceryCatalogServing
     private let backendAutocompleteService: BackendAutocompleteServing?
     private var suggestionTask: Task<Void, Never>?
+    private var suggestionGeneration = 0
+    private let searchCache = SearchSuggestionCache.shared
 
     init(
         coordinator: AppCoordinatorViewModel,
@@ -29,6 +33,7 @@ final class CreateShoppingListViewModel: ObservableObject {
         self.catalogService = catalogService
         self.backendAutocompleteService = backendAutocompleteService
         self.suggestions = catalogService.suggestions(for: "", limit: 6)
+        self.searchPhaseText = "Popular items ready"
     }
 
     deinit {
@@ -80,6 +85,7 @@ final class CreateShoppingListViewModel: ObservableObject {
         let resolvedName = catalogService.catalogItem(matching: cleanedName)?.displayName ?? cleanedName.capitalized
         let resolvedQuantity = parsed.quantity ?? quantity
         items.append(ShoppingItem(name: resolvedName, quantity: max(resolvedQuantity, 1)))
+        HapticFeedbackService.addItem()
         itemName = ""
         quantity = 1
         refreshFallbackSuggestions(for: "")
@@ -167,39 +173,71 @@ final class CreateShoppingListViewModel: ObservableObject {
 
     private func scheduleSuggestionRefresh() {
         suggestionTask?.cancel()
+        suggestionGeneration += 1
+        let generation = suggestionGeneration
         let parsed = parseQuantityPrefix(from: itemName)
-        refreshFallbackSuggestions(for: parsed.name)
-
         let query = parsed.name
-        guard !query.isEmpty else { return }
+
+        if query.isEmpty {
+            searchPhaseText = "Popular items ready"
+            refreshFallbackSuggestions(for: "")
+            isSuggestionLoading = false
+            return
+        }
+
+        isSuggestionLoading = true
+        searchPhaseText = "Searching \(query)…"
 
         suggestionTask = Task { [weak self] in
+            guard let self else { return }
             do {
-                try await Task.sleep(nanoseconds: 200_000_000)
+                try await Task.sleep(nanoseconds: 250_000_000)
                 guard !Task.isCancelled else { return }
-                await self?.loadBackendSuggestions(for: query)
+
+                if let cached = await self.searchCache.suggestions(for: query), generation == self.suggestionGeneration {
+                    self.suggestions = Array(cached.prefix(8))
+                    self.suggestionSource = .backend
+                    self.searchPhaseText = "Instant result"
+                    self.isSuggestionLoading = false
+                    return
+                }
+
+                await self.refreshFallbackSuggestionsAsync(for: query, generation: generation)
+                await self.loadBackendSuggestions(for: query, generation: generation)
             } catch {
                 // Cancellation only.
             }
         }
     }
 
-    private func loadBackendSuggestions(for query: String) async {
-        guard let backendAutocompleteService else { return }
+    private func loadBackendSuggestions(for query: String, generation: Int) async {
+        defer {
+            if generation == suggestionGeneration {
+                isSuggestionLoading = false
+            }
+        }
+
+        guard let backendAutocompleteService else {
+            searchPhaseText = "Offline smart matches"
+            return
+        }
 
         do {
             let remote = try await backendAutocompleteService.autocomplete(query: query, limit: 8)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled, generation == suggestionGeneration else { return }
             if !remote.isEmpty {
                 suggestions = rankSuggestions(remote, query: query).prefix(8).map { $0 }
                 suggestionSource = .backend
+                searchPhaseText = "Live suggestions ready"
                 print("[Suggestions][source] backend query=\(query) count=\(suggestions.count)")
                 return
             }
             suggestionSource = .fallback
+            searchPhaseText = "Using local suggestions"
             print("[Suggestions][source] fallback query=\(query) reason=empty_backend")
         } catch {
             suggestionSource = .fallback
+            searchPhaseText = "Network slow, local suggestions shown"
             print("[Suggestions][backend][error] query=\(query) message=\(error.localizedDescription)")
         }
     }
@@ -209,6 +247,19 @@ final class CreateShoppingListViewModel: ObservableObject {
         suggestions = rankSuggestions(base, query: query).prefix(8).map { $0 }
         suggestionSource = .fallback
         print("[Suggestions][source] fallback query=\(query) count=\(suggestions.count)")
+    }
+
+    private func refreshFallbackSuggestionsAsync(for query: String, generation: Int) async {
+        let base = await Task.detached(priority: .userInitiated) { [catalogService] in
+            catalogService.suggestions(for: query, limit: 40)
+        }.value
+
+        guard generation == suggestionGeneration else { return }
+
+        suggestions = rankSuggestions(base, query: query).prefix(8).map { $0 }
+        suggestionSource = .fallback
+        searchPhaseText = "Local matches ready"
+        await searchCache.store(suggestions, for: query)
     }
 
     private func parseQuantityPrefix(from raw: String) -> (name: String, quantity: Int?) {

@@ -63,6 +63,20 @@ struct CreateShoppingListView: View {
                                         .font(BrandTypography.caption.weight(.semibold))
                                         .foregroundStyle(viewModel.suggestionSource == .backend ? BrandPalette.success : BrandPalette.textSecondary)
                                 }
+                                Text(viewModel.searchPhaseText)
+                                    .font(BrandTypography.caption)
+                                    .foregroundStyle(BrandPalette.textSecondary)
+
+                                if viewModel.isSuggestionLoading {
+                                    ForEach(0..<3, id: \.self) { _ in
+                                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                            .fill(BrandPalette.blue.opacity(0.12))
+                                            .frame(height: 46)
+                                            .redacted(reason: .placeholder)
+                                            .shimmering()
+                                    }
+                                }
+
                                 ForEach(viewModel.suggestions.prefix(6)) { suggestion in
                                     Button {
                                         viewModel.addSuggestion(suggestion)
@@ -225,6 +239,7 @@ struct CreateShoppingListView: View {
                                     }
                                 }
                                 .padding(.vertical, 2)
+                                .transition(.move(edge: .top).combined(with: .opacity))
                             }
                         }
                     }
@@ -240,6 +255,8 @@ struct CreateShoppingListView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Create Shopping List")
+        .animation(.spring(response: 0.28, dampingFraction: 0.85), value: viewModel.items.count)
+        .animation(.easeInOut(duration: 0.2), value: viewModel.isSuggestionLoading)
     }
 
     private var quantityStepper: some View {

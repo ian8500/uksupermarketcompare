@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class BasketComparisonResultsViewModel: ObservableObject {
     struct StrategyCard: Identifiable {
         let title: String
@@ -24,10 +25,23 @@ final class BasketComparisonResultsViewModel: ObservableObject {
 
     let result: BasketOptimisationResult
     private let store: ShoppingListStore
+    private let cachedPurchasePlan: [PurchasePlanStoreGroup]
+    private let cachedPurchasePlanTotal: Decimal
 
     init(result: BasketOptimisationResult, store: ShoppingListStore) {
         self.result = result
         self.store = store
+
+        let grouped = Dictionary(grouping: result.selectedBasket.selections, by: \.supermarket)
+            .map { supermarket, selections in
+                let sortedSelections = selections.sorted { $0.intent.userInput.localizedCaseInsensitiveCompare($1.intent.userInput) == .orderedAscending }
+                let total = sortedSelections.reduce(Decimal.zero) { $0 + $1.totalPrice }
+                return PurchasePlanStoreGroup(supermarket: supermarket, selections: sortedSelections, subtotal: total)
+            }
+            .sorted { $0.subtotal < $1.subtotal }
+
+        self.cachedPurchasePlan = grouped
+        self.cachedPurchasePlanTotal = grouped.reduce(Decimal.zero) { $0 + $1.subtotal }
     }
 
     var bestConvenienceOption: SupermarketBasketTotal? {
@@ -58,19 +72,13 @@ final class BasketComparisonResultsViewModel: ObservableObject {
     }
 
     var purchasePlanByStore: [PurchasePlanStoreGroup] {
-        let grouped = Dictionary(grouping: result.selectedBasket.selections, by: \.supermarket)
-        return grouped
-            .map { supermarket, selections in
-                let sortedSelections = selections.sorted { $0.intent.userInput.localizedCaseInsensitiveCompare($1.intent.userInput) == .orderedAscending }
-                let total = sortedSelections.reduce(Decimal.zero) { $0 + $1.totalPrice }
-                return PurchasePlanStoreGroup(supermarket: supermarket, selections: sortedSelections, subtotal: total)
-            }
-            .sorted { $0.subtotal < $1.subtotal }
+        cachedPurchasePlan
     }
 
     var purchasePlanOverallTotal: Decimal {
-        purchasePlanByStore.reduce(Decimal.zero) { $0 + $1.subtotal }
+        cachedPurchasePlanTotal
     }
+
 
     var selectedStrategyReason: String {
         switch result.comparisonMode {

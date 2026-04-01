@@ -78,6 +78,24 @@ final class AppCoordinatorViewModel: ObservableObject {
         )
     }
 
+
+    func compareAsync(
+        list: ShoppingList,
+        markets: [Supermarket],
+        mode: BasketComparisonMode,
+        preferences: BasketUserPreferences,
+        maxSupermarkets: Int?
+    ) async -> BasketOptimisationResult {
+        await Task.detached(priority: .userInitiated) { [basketService] in
+            basketService.optimise(
+                shoppingList: list,
+                supermarkets: markets,
+                mode: mode,
+                preferences: preferences,
+                maxSupermarkets: maxSupermarkets
+            )
+        }.value
+    }
     func openCreateList() { path.append(.createList) }
     func openSavedLists() { path.append(.savedLists) }
     func openSelection(for list: ShoppingList) { path.append(.supermarketSelection(list)) }

@@ -29,6 +29,32 @@ This repository contains a native iPhone app built with Swift and SwiftUI, plus 
   - Missing-item guidance and close alternatives
 - MVVM architecture (`Models`, `ViewModels`, `Services`, `Views`).
 
+
+## Stage 5 premium performance + visual polish
+
+This milestone focused on *felt quality*: speed, responsiveness, hierarchy, and delight.
+
+### What feels faster
+
+- Debounced live search/autocomplete in the Add Item flow, with local-first progressive suggestions.
+- Search suggestion caching (live + local ranked suggestions) to make repeated queries instant.
+- Async comparison execution off the main thread to keep UI responsive during compare flows.
+- Recent basket comparison result caching so reruns with same inputs return immediately.
+- Reduced repeated computation in Results view model by precomputing purchase-plan groupings once.
+
+### What looks and feels more premium
+
+- Skeleton/shimmer loading rows for suggestion loading.
+- Progressive loading messages (“Searching…”, “Local matches ready”, “Live suggestions ready”).
+- Subtle haptics for add item, run comparison, save basket, and opening best-option results.
+- Refined results hierarchy with animated total reveal, stronger strategy chips, and staged section reveal.
+- Saved baskets and home surfaces refined with stronger badges/chips and subtle entrance animation.
+
+### UX reliability and fallback tone
+
+- Offline/live suggestion transitions now communicate status in user-friendly language.
+- Compare flow now shows explicit progress phase text rather than a static spinner.
+
 ## Live vs mock data selection
 
 The app chooses a data source at launch in `AppCoordinatorViewModel`:

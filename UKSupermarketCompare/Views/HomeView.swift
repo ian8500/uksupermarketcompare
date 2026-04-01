@@ -4,12 +4,15 @@ struct HomeView: View {
     @EnvironmentObject private var coordinator: AppCoordinatorViewModel
     @ObservedObject var viewModel: HomeViewModel
     @State private var showDataSourceDebug = false
+    @State private var animateHero = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 BrandLogoView(subtitle: "Your grocery savings co-pilot")
                     .padding(.top, 8)
+                    .scaleEffect(animateHero ? 1 : 0.98)
+                    .opacity(animateHero ? 1 : 0.85)
 
                 DataSourceBadgeView(status: coordinator.dataSourceStatus)
 
@@ -25,6 +28,7 @@ struct HomeView: View {
                         HStack(spacing: 8) {
                             BrandChip(text: "Live basket planning", tint: BrandPalette.blue)
                             BrandChip(text: "Store-by-store totals", tint: BrandPalette.red)
+                            BrandChip(text: "Faster search", tint: BrandPalette.success)
                         }
                     }
                 }
@@ -100,6 +104,11 @@ struct HomeView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Welcome")
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.35)) {
+                animateHero = true
+            }
+        }
         .sheet(isPresented: $showDataSourceDebug) {
             NavigationStack {
                 DataSourceDebugView(status: coordinator.dataSourceStatus)
