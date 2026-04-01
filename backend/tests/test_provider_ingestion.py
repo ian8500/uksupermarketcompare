@@ -106,6 +106,21 @@ class FailingProvider:
         raise RuntimeError("provider exploded")
 
 
+class BrokenSetupProvider:
+    name = "BrokenSetupMart"
+    active_source = "seed"
+
+    @property
+    def description(self) -> str:
+        raise RuntimeError("description missing")
+
+    def load_products(self) -> list[ProviderProduct]:
+        return []
+
+    def normalize_products(self) -> list[NormalizedProviderProduct]:
+        return []
+
+
 def test_failed_import_run_is_recorded(tmp_path, monkeypatch):
     monkeypatch.setattr(db, "DB_DIR", tmp_path)
     monkeypatch.setattr(db, "DB_PATH", tmp_path / "catalog.db")
@@ -124,6 +139,24 @@ def test_failed_import_run_is_recorded(tmp_path, monkeypatch):
     assert "provider exploded" in run["error_details"]
     assert run["fetched_count"] == 0
     assert run["mapped_count"] == 0
+
+
+def test_failed_import_run_is_recorded_for_setup_failures(tmp_path, monkeypatch):
+    monkeypatch.setattr(db, "DB_DIR", tmp_path)
+    monkeypatch.setattr(db, "DB_PATH", tmp_path / "catalog.db")
+
+    db.init_db()
+    import_catalog_data(providers=[BrokenSetupProvider()])
+
+    with db.get_connection() as conn:
+        run = conn.execute(
+            "SELECT status, error_count, error_details FROM import_runs ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+
+    assert run is not None
+    assert run["status"] == "failed"
+    assert run["error_count"] == 1
+    assert "description missing" in run["error_details"]
 
 
 class SingleProductProvider:
