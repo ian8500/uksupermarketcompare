@@ -8,6 +8,8 @@ This backend now serves the Swift app's live catalog payload with the exact JSON
 - `GET /catalog`
 - `GET /search`
 - `GET /autocomplete`
+- `GET /diagnostics/catalog`
+- `GET /diagnostics/search`
 - `POST /compare` *(existing mock comparison route retained; app can ignore for now)*
 
 ## Comparison quality (Phase 1)
@@ -203,7 +205,47 @@ Open:
 - API root: `http://localhost:8000`
 - Health: `http://localhost:8000/health`
 - Catalog: `http://localhost:8000/catalog`
+- Diagnostics (catalog): `http://localhost:8000/diagnostics/catalog`
+- Diagnostics (search): `http://localhost:8000/diagnostics/search`
 - Swagger docs: `http://localhost:8000/docs`
+
+## Diagnostics and catalog/search health
+
+### Catalog diagnostics (`GET /diagnostics/catalog`)
+
+Returns a compact health snapshot:
+
+- `productsPerSupermarket`: raw product coverage by retailer
+- `canonicalProducts`: canonical intent rows
+- `mappings`: raw-to-canonical mapping rows
+- `categoriesCovered`: distinct canonical categories currently represented
+
+Use this to quickly spot import issues (for example, a retailer showing `0` products or unexpectedly low mappings).
+
+### Search diagnostics (`GET /diagnostics/search`)
+
+Telemetry from `/search` + `/autocomplete` requests:
+
+- `totalQueries`
+- `missQueries` (queries with `0` results)
+- `missRate`
+- `byEndpoint` split (`/search` vs `/autocomplete`)
+
+This gives a basic measurable signal of search health and potential intent-gaps.
+
+## Troubleshooting
+
+- If `/catalog` looks incomplete, run `python -m scripts.import_catalog --replace`, then re-check `/diagnostics/catalog`.
+- If search quality regresses, inspect `/diagnostics/search` miss rate and review backend logs for `search_miss` / `autocomplete_miss`.
+- If mappings drift, inspect logs for `Failed mappings detected` warnings.
+
+## Validation checklist (Stage 3 Step 5)
+
+1. Run tests: `pytest`.
+2. Verify `/catalog` contract and category compatibility tests pass.
+3. Verify `/search` and `/autocomplete` contract tests pass.
+4. Hit `/diagnostics/catalog` and confirm expected non-zero counts.
+5. Hit `/search` with known miss terms, then confirm `/diagnostics/search` miss metrics update.
 
 ## Swift setup
 

@@ -54,7 +54,7 @@ Set an environment variable in your Xcode Run scheme:
 The Swift decoder expects `products[].category` to be one of these exact raw values:
 `milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
 
-The `/catalog` response includes `metadata.debugMarker` so you can verify live payloads are being used (`LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH`).
+The `/catalog` response includes `metadata.debugMarker` so you can verify live payloads are being used (`LIVE_CATALOG_V3_MATCHING_INTELLIGENCE`).
 
 Example payload shape:
 
@@ -84,7 +84,7 @@ Example payload shape:
   ],
   "metadata": {
     "source": "backend.catalog",
-    "debugMarker": "LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH",
+    "debugMarker": "LIVE_CATALOG_V3_MATCHING_INTELLIGENCE",
     "generatedAt": "2026-04-01T00:00:00Z"
   }
 }
@@ -95,7 +95,7 @@ Example payload shape:
 1. Start backend locally (`backend/README.md` has commands).
 2. Set `LIVE_SUPERMARKET_DATA_URL` in the scheme.
 3. Run app and verify badge shows `LIVE DATA`.
-4. Open **Data Source Debug** and confirm marker `LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH`.
+4. Open **Data Source Debug** and confirm marker `LIVE_CATALOG_V3_MATCHING_INTELLIGENCE`.
 5. Stop backend (or break URL), relaunch app, and verify badge shows `LIVE FAILED → USING MOCK` plus the captured error.
 
 ## Project structure
@@ -107,3 +107,12 @@ Example payload shape:
 - `UKSupermarketCompare/Services`
 - `UKSupermarketCompare/Views`
 - `backend/`
+
+## Backend diagnostics (Stage 3 Step 5)
+
+For live catalog/search health checks, use:
+
+- `GET /diagnostics/catalog`
+- `GET /diagnostics/search`
+
+See `backend/README.md` for troubleshooting and validation steps.

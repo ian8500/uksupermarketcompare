@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import difflib
+import logging
 from dataclasses import dataclass
 
 from app.db import get_connection
 from app.services.normalization import normalize_product_name, normalize_size, normalize_text
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -36,6 +38,11 @@ class RankedSearchResult:
 
 def _latest_catalog_candidates() -> list[SearchCandidate]:
     with get_connection() as conn:
+        unmapped_count = conn.execute(
+            "SELECT COUNT(*) AS count FROM raw_retailer_products raw LEFT JOIN product_mappings pm ON pm.raw_product_id = raw.id WHERE pm.id IS NULL"
+        ).fetchone()["count"]
+        if unmapped_count:
+            logger.warning("Detected failed mappings raw_products_without_mapping=%d", unmapped_count)
         rows = conn.execute(
             """
             SELECT
@@ -177,7 +184,17 @@ def search_catalog(query: str, limit: int = 20) -> list[RankedSearchResult]:
         if (ranked_row := _score_candidate(candidate, normalized_query, expanded_tokens, size_terms)) is not None
     ]
     ranked.sort(key=lambda row: (row.score, -row.item.price), reverse=True)
-    return ranked[: max(1, min(limit, 50))]
+    sliced = ranked[: max(1, min(limit, 50))]
+    logger.info(
+        "search query=%r normalized=%r results=%d limit=%d",
+        query,
+        normalized_query,
+        len(sliced),
+        limit,
+    )
+    if not sliced:
+        logger.warning("search_miss query=%r normalized=%r", query, normalized_query)
+    return sliced
 
 
 def autocomplete_catalog(query: str, limit: int = 8) -> list[dict[str, str | float]]:
@@ -206,4 +223,7 @@ def autocomplete_catalog(query: str, limit: int = 8) -> list[dict[str, str | flo
         if len(suggestions) >= max(1, min(limit, 20)):
             break
 
+    logger.info("autocomplete query=%r suggestions=%d limit=%d", query, len(suggestions), limit)
+    if not suggestions:
+        logger.warning("autocomplete_miss query=%r", query)
     return suggestions

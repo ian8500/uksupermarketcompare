@@ -1,0 +1,80 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime
+
+from app.db import get_connection
+
+
+def record_search_event(*, query: str, normalized_query: str, result_count: int, endpoint: str) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO search_telemetry(query, normalized_query, result_count, endpoint, created_at)
+            VALUES(?, ?, ?, ?, ?)
+            """,
+            (query, normalized_query, result_count, endpoint, datetime.now(UTC).isoformat()),
+        )
+        conn.commit()
+
+
+def catalog_diagnostics() -> dict:
+    with get_connection() as conn:
+        per_market_rows = conn.execute(
+            """
+            SELECT r.name AS supermarket, COUNT(raw.id) AS products
+            FROM retailers r
+            LEFT JOIN raw_retailer_products raw ON raw.retailer_id = r.id
+            GROUP BY r.id, r.name
+            ORDER BY r.name
+            """
+        ).fetchall()
+        canonical_count = conn.execute("SELECT COUNT(*) AS count FROM canonical_products").fetchone()["count"]
+        mapping_count = conn.execute("SELECT COUNT(*) AS count FROM product_mappings").fetchone()["count"]
+        categories = conn.execute(
+            "SELECT DISTINCT category FROM canonical_products WHERE TRIM(category) <> '' ORDER BY category"
+        ).fetchall()
+
+    return {
+        "productsPerSupermarket": [{"supermarket": row["supermarket"], "products": row["products"]} for row in per_market_rows],
+        "canonicalProducts": canonical_count,
+        "mappings": mapping_count,
+        "categoriesCovered": [row["category"] for row in categories],
+    }
+
+
+def search_diagnostics() -> dict:
+    with get_connection() as conn:
+        totals = conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total_queries,
+                SUM(CASE WHEN result_count = 0 THEN 1 ELSE 0 END) AS miss_queries
+            FROM search_telemetry
+            """
+        ).fetchone()
+        per_endpoint = conn.execute(
+            """
+            SELECT endpoint, COUNT(*) AS total, SUM(CASE WHEN result_count = 0 THEN 1 ELSE 0 END) AS misses
+            FROM search_telemetry
+            GROUP BY endpoint
+            ORDER BY endpoint
+            """
+        ).fetchall()
+
+    total_queries = int(totals["total_queries"] or 0)
+    miss_queries = int(totals["miss_queries"] or 0)
+    miss_rate = round((miss_queries / total_queries), 4) if total_queries else 0.0
+
+    return {
+        "totalQueries": total_queries,
+        "missQueries": miss_queries,
+        "missRate": miss_rate,
+        "byEndpoint": [
+            {
+                "endpoint": row["endpoint"],
+                "totalQueries": int(row["total"] or 0),
+                "missQueries": int(row["misses"] or 0),
+            }
+            for row in per_endpoint
+        ],
+    }
