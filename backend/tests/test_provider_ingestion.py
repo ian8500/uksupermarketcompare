@@ -32,11 +32,15 @@ def test_import_is_repeatable_and_avoids_duplicate_raw_products(tmp_path, monkey
         raw_count = _count(conn, "raw_retailer_products")
         map_count = _count(conn, "product_mappings")
         price_count = _count(conn, "price_snapshots")
+        run_count = _count(conn, "import_runs")
+        successful_runs = conn.execute("SELECT COUNT(*) AS count FROM import_runs WHERE status = 'success'").fetchone()["count"]
 
     assert first["inserted_raw"] > 0
     assert second["inserted_raw"] == 0
     assert raw_count == map_count
     assert price_count == raw_count
+    assert run_count == 6
+    assert successful_runs == run_count
 
 
 def test_import_creates_cross_provider_canonical_mappings(tmp_path, monkeypatch):

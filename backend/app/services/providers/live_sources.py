@@ -6,6 +6,7 @@ import os
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
+import socket
 from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -29,6 +30,7 @@ class TescoLiveSourceConfig:
     third_party_base_url: str
     third_party_api_key: str | None
     query_terms: list[str]
+    timeout_seconds: int
 
     @classmethod
     def from_env(cls) -> "TescoLiveSourceConfig":
@@ -41,6 +43,7 @@ class TescoLiveSourceConfig:
             third_party_base_url=os.getenv("TESCO_THIRD_PARTY_BASE_URL", "https://api.trolley.co.uk/api/v1/products").strip(),
             third_party_api_key=os.getenv("TESCO_THIRD_PARTY_API_KEY") or os.getenv("TESCO_API_KEY"),
             query_terms=query_terms,
+            timeout_seconds=max(5, int(os.getenv("TESCO_SOURCE_TIMEOUT_SECONDS", "20"))),
         )
 
 
@@ -70,6 +73,7 @@ class TescoOfficialApiSource:
             query_terms=self.config.query_terms,
             source_name=self.source_name,
             extra_headers={"X-Partner-Id": str(self.config.official_partner_id)},
+            timeout_seconds=self.config.timeout_seconds,
         )
 
 
@@ -90,6 +94,7 @@ class TescoThirdPartyApiSource:
             api_key=self.config.third_party_api_key,
             query_terms=self.config.query_terms,
             source_name=self.source_name,
+            timeout_seconds=self.config.timeout_seconds,
         )
 
 
@@ -141,23 +146,45 @@ def _fetch_structured_products(
     query_terms: list[str],
     source_name: str,
     extra_headers: dict[str, str] | None = None,
+    timeout_seconds: int = 20,
 ) -> list[ProviderProduct]:
     if not api_key:
         raise LiveSourceError("API key is required")
 
     rows: list[ProviderProduct] = []
+    failures: list[str] = []
     for term in query_terms:
-        rows.extend(_fetch_for_query(base_url, api_key, term, source_name, extra_headers or {}))
+        try:
+            rows.extend(_fetch_for_query(base_url, api_key, term, source_name, extra_headers or {}, timeout_seconds))
+        except LiveSourceError as exc:
+            failures.append(f"{term}:{exc}")
+            logger.warning("Tesco upstream query failed source=%s query=%r error=%s", source_name, term, exc)
 
     deduped: dict[str, ProviderProduct] = {}
     for row in rows:
         dedupe_key = row.source_product_id or f"{row.name}|{row.size}|{row.brand}"
         deduped[dedupe_key] = row
 
+    if not deduped and failures:
+        raise LiveSourceError(f"All Tesco upstream queries failed source={source_name}")
+    if failures:
+        logger.warning(
+            "Tesco upstream partial failure source=%s failed_queries=%d total_queries=%d",
+            source_name,
+            len(failures),
+            len(query_terms),
+        )
     return list(deduped.values())
 
 
-def _fetch_for_query(base_url: str, api_key: str, term: str, source_name: str, extra_headers: dict[str, str]) -> list[ProviderProduct]:
+def _fetch_for_query(
+    base_url: str,
+    api_key: str,
+    term: str,
+    source_name: str,
+    extra_headers: dict[str, str],
+    timeout_seconds: int,
+) -> list[ProviderProduct]:
     url = f"{base_url}?query={quote(term)}&retailer=tesco"
     headers = {
         "User-Agent": "UKSupermarketCompare/1.0",
@@ -168,36 +195,64 @@ def _fetch_for_query(base_url: str, api_key: str, term: str, source_name: str, e
     req = Request(url, headers=headers)
 
     try:
-        with urlopen(req, timeout=20) as response:
+        with urlopen(req, timeout=timeout_seconds) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except HTTPError as exc:
+        if exc.code == 429:
+            raise LiveSourceError(f"Tesco {source_name} source rate limited") from exc
         raise LiveSourceError(f"Tesco {source_name} source HTTP error: {exc.code}") from exc
+    except TimeoutError as exc:
+        raise LiveSourceError(f"Tesco {source_name} source timeout") from exc
+    except socket.timeout as exc:
+        raise LiveSourceError(f"Tesco {source_name} source timeout") from exc
     except URLError as exc:
         raise LiveSourceError(f"Tesco {source_name} source connection error: {exc.reason}") from exc
 
+    if not isinstance(payload, dict):
+        raise LiveSourceError(f"Tesco {source_name} source invalid payload root")
     items = payload.get("products") or payload.get("items") or []
+    if not isinstance(items, list):
+        raise LiveSourceError(f"Tesco {source_name} source invalid products field")
     now = datetime.now(UTC).isoformat()
     products: list[ProviderProduct] = []
     for item in items:
+        if not isinstance(item, dict):
+            continue
         price_value = item.get("price") or item.get("current_price")
         if price_value in (None, ""):
             continue
+        try:
+            parsed_price = Decimal(str(price_value))
+        except Exception:
+            logger.warning("Tesco upstream skipped malformed price source=%s query=%r", source_name, term)
+            continue
         unit_value = item.get("unit_price") or item.get("unit_value") or 0
+        try:
+            parsed_unit_value = Decimal(str(unit_value or 0))
+        except Exception:
+            parsed_unit_value = Decimal("0")
         tags = item.get("tags") or item.get("category_tags") or []
         if isinstance(tags, str):
             tags = [t.strip() for t in tags.split(",") if t.strip()]
+        promo_price_raw = item.get("promo_price")
+        promo_price = None
+        if promo_price_raw not in (None, ""):
+            try:
+                promo_price = Decimal(str(promo_price_raw))
+            except Exception:
+                promo_price = None
         products.append(
             ProviderProduct(
                 source_product_id=str(item.get("id") or item.get("product_id") or "") or None,
                 name=str(item.get("name") or item.get("title") or "Unknown Tesco item"),
                 subcategory=str(item.get("subcategory") or item.get("category") or "Groceries"),
-                price=Decimal(str(price_value)),
+                price=parsed_price,
                 size=str(item.get("size") or item.get("package_size") or "1 item"),
                 brand=str(item.get("brand") or "Tesco"),
                 unit_description=str(item.get("unit_description") or "per item"),
-                unit_value=Decimal(str(unit_value or 0)),
+                unit_value=parsed_unit_value,
                 tags=[str(tag) for tag in tags],
-                promo_price=Decimal(str(item.get("promo_price"))) if item.get("promo_price") not in (None, "") else None,
+                promo_price=promo_price,
                 image_url=item.get("image") or item.get("image_url"),
                 availability=item.get("availability"),
                 source_metadata={"upstream": source_name, "raw_id": item.get("id")},

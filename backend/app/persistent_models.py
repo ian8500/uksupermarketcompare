@@ -69,3 +69,22 @@ class SearchSynonym(BaseModel):
     synonym: str
     canonical_term: str
     term_type: str = "catalog"
+
+
+class ImportRun(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: int | None = None
+    retailer: str
+    source_mode: str
+    started_at: str
+    completed_at: str | None = None
+    status: str
+    fetched_count: int = 0
+    inserted_count: int = 0
+    updated_count: int = 0
+    mapped_count: int = 0
+    unmapped_count: int = 0
+    snapshot_count: int = 0
+    error_count: int = 0
+    error_details: str = "[]"
