@@ -182,12 +182,44 @@ class StoreAllocationSummary(BaseModel):
     totalSpend: Decimal
 
 
+class SavingsSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    versusCheapestMixedBasket: Decimal = Field(default=Decimal("0.00"))
+    versusCheapestSingleStore: Decimal = Field(default=Decimal("0.00"))
+    versusMostExpensiveSingleStore: Decimal = Field(default=Decimal("0.00"))
+    explanation: str = ""
+
+
+class MissingItemsSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    count: int = 0
+    itemNames: List[str] = []
+    explanation: str = "All requested items were matched."
+
+
+class PurchasePlanItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    originalUserItem: GroceryIntent
+    selectedProduct: SupermarketProduct | None = None
+    selectedStore: Supermarket | None = None
+    quantity: int
+    price: Decimal
+    explanation: str
+    matchConfidence: Decimal | None = None
+
+
 class PurchasePlan(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     mode: BasketDecisionMode
     basket: MixedBasketResult
+    items: List[PurchasePlanItem] = []
     allocation: List[StoreAllocationSummary]
+    savings: SavingsSummary = SavingsSummary()
+    missingItems: MissingItemsSummary = MissingItemsSummary()
     unavailableItemsCount: int
 
 
@@ -196,6 +228,14 @@ class BasketStrategyResult(BaseModel):
 
     mode: BasketDecisionMode
     plan: PurchasePlan
+    totalPrice: Decimal = Field(default=Decimal("0.00"))
+    storesUsed: List[str] = []
+    storeCount: int = 0
+    savings: SavingsSummary = SavingsSummary()
+    missingItemsCount: int = 0
+    chosenItems: List[PurchasePlanItem] = []
+    explanation: str = ""
+    tradeoffSummary: str = ""
     wonBecause: str
     tradeoffs: List[str] = []
     score: Decimal

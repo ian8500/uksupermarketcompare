@@ -19,8 +19,11 @@ from app.models import (
     MissingItemCandidate,
     MissingItemDetail,
     MixedBasketResult,
+    MissingItemsSummary,
     PurchasePlan,
+    PurchasePlanItem,
     SavingsExplanation,
+    SavingsSummary,
     StoreAllocationSummary,
     Supermarket,
     SupermarketBasketTotal,
@@ -402,8 +405,56 @@ def _allocation_summary(selections: list[ItemSelectionResult]) -> list[StoreAllo
     ]
 
 
-def _build_strategy_results(intents, cheapest_single: SupermarketBasketTotal | None, mixed: MixedBasketResult, convenience: MixedBasketResult, max_two: MixedBasketResult) -> list[BasketStrategyResult]:
+def _build_purchase_plan_items(intents, selections: list[ItemSelectionResult], unavailable_items) -> list[PurchasePlanItem]:
+    selected_by_intent = {selection.intent.id: selection for selection in selections}
+    unavailable_ids = {intent.id for intent in unavailable_items}
+    items: list[PurchasePlanItem] = []
+    for intent in intents:
+        selected = selected_by_intent.get(intent.id)
+        if selected:
+            items.append(
+                PurchasePlanItem(
+                    originalUserItem=intent,
+                    selectedProduct=selected.product,
+                    selectedStore=selected.supermarket,
+                    quantity=selected.quantity,
+                    price=selected.totalPrice,
+                    explanation="Selected as best available option for this strategy.",
+                    matchConfidence=selected.confidence,
+                )
+            )
+            continue
+        if intent.id in unavailable_ids:
+            items.append(
+                PurchasePlanItem(
+                    originalUserItem=intent,
+                    quantity=intent.quantity,
+                    price=Decimal("0.00"),
+                    explanation="No suitable product could be matched for this item in the chosen strategy.",
+                )
+            )
+    return items
+
+
+def _build_missing_summary(unavailable_items) -> MissingItemsSummary:
+    return MissingItemsSummary(
+        count=len(unavailable_items),
+        itemNames=[item.userInput for item in unavailable_items],
+        explanation=_missing_explanation(unavailable_items),
+    )
+
+
+def _build_strategy_results(
+    intents,
+    totals: list[SupermarketBasketTotal],
+    cheapest_single: SupermarketBasketTotal | None,
+    mixed: MixedBasketResult,
+    convenience: MixedBasketResult,
+    max_two: MixedBasketResult,
+) -> list[BasketStrategyResult]:
     cheapest_total = mixed.total
+    cheapest_single_total = cheapest_single.total if cheapest_single else Decimal("0.00")
+    most_expensive_single_total = totals[-1].total if totals else Decimal("0.00")
     single_plan = _single_store_as_mixed(cheapest_single, intents)
     candidates = [
         (BasketDecisionMode.cheapestSingleStore, single_plan),
@@ -433,15 +484,44 @@ def _build_strategy_results(intents, cheapest_single: SupermarketBasketTotal | N
             if mode == BasketDecisionMode.bestConvenienceOption
             else "Limits shopping to at most two stores while keeping cost low."
         )
+        stores_used = sorted({selection.supermarket.name for selection in basket.selections})
+        savings = SavingsSummary(
+            versusCheapestMixedBasket=cheapest_total - basket.total,
+            versusCheapestSingleStore=cheapest_single_total - basket.total,
+            versusMostExpensiveSingleStore=most_expensive_single_total - basket.total,
+            explanation=(
+                f"Compared with alternatives: £{(cheapest_total - basket.total):.2f} vs mixed, "
+                f"£{(cheapest_single_total - basket.total):.2f} vs single-store, "
+                f"£{(most_expensive_single_total - basket.total):.2f} vs most expensive single-store."
+            ),
+        )
+        plan_items = _build_purchase_plan_items(intents, basket.selections, basket.unavailableItems)
+        missing_summary = _build_missing_summary(basket.unavailableItems)
+        explanation = (
+            f"{won_because} Uses {len(stores_used)} store(s), total £{basket.total:.2f}, "
+            f"and leaves {missing_summary.count} item(s) unmatched."
+        )
+        tradeoff_summary = " | ".join(tradeoffs)
         results.append(
             BasketStrategyResult(
                 mode=mode,
                 plan=PurchasePlan(
                     mode=mode,
                     basket=basket,
+                    items=plan_items,
                     allocation=_allocation_summary(basket.selections),
+                    savings=savings,
+                    missingItems=missing_summary,
                     unavailableItemsCount=len(basket.unavailableItems),
                 ),
+                totalPrice=basket.total,
+                storesUsed=stores_used,
+                storeCount=len(stores_used),
+                savings=savings,
+                missingItemsCount=missing_summary.count,
+                chosenItems=plan_items,
+                explanation=explanation,
+                tradeoffSummary=tradeoff_summary,
                 wonBecause=won_because,
                 tradeoffs=tradeoffs,
                 score=score,
@@ -468,7 +548,7 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
     mixed = _build_mixed_basket(intents, totals, max_supermarkets=max_supermarkets)
     max_two = _build_mixed_basket(intents, totals, max_supermarkets=2)
     convenience = _best_convenience_basket(intents, totals)
-    strategy_results = _build_strategy_results(intents, cheapest_single, mixed, convenience, max_two)
+    strategy_results = _build_strategy_results(intents, totals, cheapest_single, mixed, convenience, max_two)
 
     selected = mixed if request.comparisonMode.value == "cheapestPossible" else _single_store_as_mixed(cheapest_single, intents)
     if request.comparisonMode.value == "bestConvenienceOption":

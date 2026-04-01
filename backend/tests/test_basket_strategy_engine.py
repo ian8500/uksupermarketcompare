@@ -61,3 +61,40 @@ def test_best_convenience_prefers_fewer_stores_while_remaining_price_aware():
         if strategy.mode.value == "bestConvenienceOption"
         for tradeoff in strategy.tradeoffs
     )
+
+
+def test_strategy_results_include_richer_decision_oriented_fields():
+    response = build_comparison(_request(mode=BasketComparisonMode.cheapestPossible))
+
+    strategies = response.result.strategyResults
+    assert len(strategies) == 4
+
+    mixed = next(strategy for strategy in strategies if strategy.mode.value == "cheapestMixedBasket")
+    assert mixed.totalPrice == mixed.plan.basket.total
+    assert mixed.storeCount == len(mixed.storesUsed)
+    assert mixed.missingItemsCount == mixed.plan.missingItems.count
+    assert mixed.chosenItems == mixed.plan.items
+    assert mixed.explanation
+    assert mixed.tradeoffSummary
+    assert mixed.savings.versusCheapestMixedBasket == 0
+    assert mixed.plan.savings.versusCheapestMixedBasket == 0
+
+    first_item = mixed.chosenItems[0]
+    assert first_item.originalUserItem.userInput
+    assert first_item.quantity >= 1
+    assert first_item.explanation
+    if first_item.selectedProduct is not None:
+        assert first_item.selectedStore is not None
+        assert first_item.price > 0
+        assert first_item.matchConfidence is not None
+
+
+def test_strategy_savings_calculation_matches_totals():
+    response = build_comparison(_request(mode=BasketComparisonMode.cheapestPossible))
+    strategies = {strategy.mode.value: strategy for strategy in response.result.strategyResults}
+    mixed = strategies["cheapestMixedBasket"]
+    single = strategies["cheapestSingleStore"]
+
+    expected_vs_mixed = mixed.totalPrice - single.totalPrice
+    assert single.savings.versusCheapestMixedBasket == expected_vs_mixed
+    assert single.plan.savings.versusCheapestMixedBasket == expected_vs_mixed

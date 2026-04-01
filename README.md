@@ -116,3 +116,17 @@ For live catalog/search health checks, use:
 - `GET /diagnostics/search`
 
 See `backend/README.md` for troubleshooting and validation steps.
+
+## Stage 4 Step 2: richer basket strategy result model
+
+`POST /compare` now returns decision-oriented strategy results so the app can explain *why* a basket was chosen, not just the total.
+
+Each strategy (cheapest single-store, cheapest mixed, convenience, max-two-store mixed) includes:
+
+- total price + stores used/store count
+- savings vs key alternatives
+- missing-item summary
+- chosen purchase-plan items (requested item, selected product/store, quantity, price, explanation, match confidence when available)
+- human-readable explanation and trade-off summary
+
+This extends compare payloads while preserving `/catalog` contract compatibility and current live catalog data flow.
