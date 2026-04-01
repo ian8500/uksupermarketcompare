@@ -109,13 +109,13 @@ struct BasketComparisonResultsView: View {
                 }
 
                 section("Unmatched items") {
-                    if viewModel.result.selectedBasket.unavailableItems.isEmpty {
-                        BrandCard {
-                            Text("All requested items were matched.")
-                                .font(BrandTypography.body)
-                                .foregroundStyle(BrandPalette.success)
-                        }
-                    } else {
+                    BrandCard {
+                        Text(viewModel.result.selectedBasket.missingItemsExplanation)
+                            .font(BrandTypography.body)
+                            .foregroundStyle(viewModel.result.selectedBasket.unavailableItems.isEmpty ? BrandPalette.success : BrandPalette.textSecondary)
+                    }
+
+                    if !viewModel.result.selectedBasket.unavailableItems.isEmpty {
                         ForEach(viewModel.result.selectedBasket.unavailableItems) { intent in
                             BrandCard {
                                 Text("No sensible match found for \(intent.userInput).")

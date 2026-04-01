@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from decimal import Decimal
 from uuid import uuid4
 
@@ -16,29 +17,73 @@ from app.models import (
     SupermarketProduct,
     build_intent,
 )
+from app.services.seed_catalog import COMMON_KEYWORD_MAP, SEEDED_SUPERMARKETS
+
+logger = logging.getLogger(__name__)
 
 
-def _sample_product(supermarket: Supermarket, name: str, category: GroceryCategory, price: str, brand: str, own_brand: bool) -> SupermarketProduct:
-    unit_value = Decimal(price)
-    return SupermarketProduct(
-        id=uuid4(),
-        supermarketName=supermarket.name,
-        name=name,
-        category=category,
-        subcategory="standard",
-        price=Decimal(price),
-        size="1 unit",
-        brand=brand,
-        isOwnBrand=own_brand,
-        isPremium=False,
-        isOrganic=False,
-        unitDescription="£/unit",
-        unitValue=unit_value,
-        tags=[category.value, name.lower()],
-    )
+def _seeded_product_map() -> dict[str, list[SupermarketProduct]]:
+    mapped: dict[str, list[SupermarketProduct]] = {}
+    for market in SEEDED_SUPERMARKETS:
+        mapped[market["name"].lower()] = [
+            SupermarketProduct(
+                id=uuid4(),
+                supermarketName=market["name"],
+                **product,
+            )
+            for product in market["products"]
+        ]
+    return mapped
 
 
-def _selection(intent, supermarket: Supermarket, product: SupermarketProduct) -> ItemSelectionResult:
+def _categorize(name: str) -> GroceryCategory:
+    normalized = name.strip().lower()
+    rules = [
+        (GroceryCategory.milk, ["milk"]),
+        (GroceryCategory.bread, ["bread", "loaf"]),
+        (GroceryCategory.eggs, ["egg", "eggs"]),
+        (GroceryCategory.butter, ["butter", "spread"]),
+        (GroceryCategory.pasta, ["pasta", "penne", "spaghetti"]),
+        (GroceryCategory.bakedBeans, ["beans"]),
+        (GroceryCategory.rice, ["rice"]),
+        (GroceryCategory.cheese, ["cheese", "cheddar"]),
+    ]
+    for category, keywords in rules:
+        if any(keyword in normalized for keyword in keywords):
+            return category
+    return GroceryCategory.unknown
+
+
+def _intent_from_item(item_name: str, quantity: int):
+    category = _categorize(item_name)
+    keywords = COMMON_KEYWORD_MAP.get(category, [item_name.lower()])
+    return build_intent(item_name, quantity, category, keywords)
+
+
+def _rank_candidate(intent, product: SupermarketProduct):
+    reasons: list[str] = []
+    if intent.category != GroceryCategory.unknown and product.category != intent.category:
+        return None
+
+    quality = MatchQuality.exact if product.category == intent.category else MatchQuality.acceptableEquivalent
+    confidence = Decimal("0.45")
+
+    keyword_hits = [kw for kw in intent.acceptedKeywords if kw in product.name.lower() or kw in product.tags]
+    if keyword_hits:
+        confidence += Decimal(min(len(keyword_hits), 3)) * Decimal("0.12")
+        reasons.append(f"Keyword hits: {', '.join(keyword_hits[:3])}.")
+    else:
+        reasons.append("No keyword hits; category-only match.")
+
+    if product.isOwnBrand:
+        confidence += Decimal("0.05")
+        reasons.append("Own-brand value signal applied.")
+
+    reasons.append(f"Unit comparison basis: {product.unitDescription} {product.unitValue}.")
+    return quality, max(Decimal("0.10"), min(Decimal("0.99"), confidence)), reasons
+
+
+def _selection(intent, supermarket: Supermarket, product: SupermarketProduct, quality: MatchQuality, confidence: Decimal, reasons: list[str]) -> ItemSelectionResult:
     quantity = intent.quantity
     total = product.price * Decimal(quantity)
     return ItemSelectionResult(
@@ -50,76 +95,99 @@ def _selection(intent, supermarket: Supermarket, product: SupermarketProduct) ->
         unitPrice=product.price,
         unitPriceDescription=f"{product.unitDescription} {product.unitValue}",
         totalPrice=total,
-        matchQuality=MatchQuality.exact,
-        confidence=Decimal("0.91"),
-        reasons=["Exact category match.", "Mock response for live API wiring."],
+        matchQuality=quality,
+        confidence=confidence,
+        reasons=reasons,
+    )
+
+
+def _missing_explanation(unavailable_items) -> str:
+    if not unavailable_items:
+        return "All requested items were matched."
+    item_names = ", ".join(intent.userInput for intent in unavailable_items)
+    return f"Missing {len(unavailable_items)} item(s): {item_names}. Try broader names or add more supermarkets."
+
+
+def _build_market_total(supermarket: Supermarket, intents, inventory: list[SupermarketProduct]) -> SupermarketBasketTotal:
+    selections: list[ItemSelectionResult] = []
+    unavailable = []
+
+    for intent in intents:
+        ranked: list[tuple[MatchQuality, Decimal, SupermarketProduct, list[str]]] = []
+        for product in inventory:
+            scored = _rank_candidate(intent, product)
+            if scored is None:
+                continue
+            quality, confidence, reasons = scored
+            ranked.append((quality, confidence, product, reasons))
+
+        ranked.sort(key=lambda item: (-item[0].value, item[2].unitValue, item[2].price, -item[1]))
+
+        if not ranked:
+            unavailable.append(intent)
+            logger.info("no-match supermarket=%s item=%s category=%s reason=no candidates survived filters", supermarket.name, intent.userInput, intent.category.value)
+            continue
+
+        quality, confidence, product, reasons = ranked[0]
+        selections.append(_selection(intent, supermarket, product, quality, confidence, reasons))
+        logger.info(
+            "match supermarket=%s item=%s product=%s quality=%s confidence=%s",
+            supermarket.name,
+            intent.userInput,
+            product.name,
+            quality.name,
+            confidence,
+        )
+
+    return SupermarketBasketTotal(
+        id=uuid4(),
+        supermarket=supermarket,
+        selections=selections,
+        unavailableItems=unavailable,
+        missingItemsExplanation=_missing_explanation(unavailable),
+        total=sum((item.totalPrice for item in selections), Decimal("0.00")),
     )
 
 
 def build_comparison(request: CompareRequest) -> CompareResponse:
-    markets = request.supermarkets
-    if len(markets) < 2:
-        fallback = Supermarket(id=uuid4(), name="Tesco", description="Tesco Extra")
-        markets = markets + [fallback]
+    product_map = _seeded_product_map()
 
-    market_a = markets[0]
-    market_b = markets[1]
+    intents = [_intent_from_item(item.name, item.quantity) for item in request.shoppingList.items]
 
-    milk_intent = build_intent("Semi-skimmed milk", 2, GroceryCategory.milk, ["milk", "semi skimmed"])
-    bread_intent = build_intent("Wholemeal bread", 1, GroceryCategory.bread, ["bread", "wholemeal"])
-    eggs_intent = build_intent("Free-range eggs", 1, GroceryCategory.eggs, ["eggs", "free range"])
-    intents = [milk_intent, bread_intent, eggs_intent]
+    totals = []
+    for supermarket in request.supermarkets:
+        inventory = product_map.get(supermarket.name.lower(), [])
+        totals.append(_build_market_total(supermarket, intents, inventory))
 
-    a_milk = _sample_product(market_a, f"{market_a.name} Semi-Skimmed Milk 2L", GroceryCategory.milk, "1.65", market_a.name, True)
-    a_bread = _sample_product(market_a, f"{market_a.name} Wholemeal Bread", GroceryCategory.bread, "1.30", market_a.name, True)
-    a_eggs = _sample_product(market_a, f"{market_a.name} Free-Range Eggs 12", GroceryCategory.eggs, "2.75", market_a.name, True)
+    totals = sorted(totals, key=lambda x: x.total)
+    cheapest_single = next((total for total in totals if not total.unavailableItems), totals[0] if totals else None)
 
-    b_milk = _sample_product(market_b, f"{market_b.name} Semi-Skimmed Milk 2L", GroceryCategory.milk, "1.55", market_b.name, True)
-    b_bread = _sample_product(market_b, f"{market_b.name} Wholemeal Bread", GroceryCategory.bread, "1.42", market_b.name, True)
-    b_eggs = _sample_product(market_b, f"{market_b.name} Free-Range Eggs 12", GroceryCategory.eggs, "2.49", market_b.name, False)
+    mixed_selections: list[ItemSelectionResult] = []
+    for intent in intents:
+        options = [selection for total in totals for selection in total.selections if selection.intent.id == intent.id]
+        if options:
+            best = min(options, key=lambda option: (option.totalPrice, -option.matchQuality.value, -option.confidence))
+            mixed_selections.append(best)
 
-    selections_a = [_selection(milk_intent, market_a, a_milk), _selection(bread_intent, market_a, a_bread), _selection(eggs_intent, market_a, a_eggs)]
-    selections_b = [_selection(milk_intent, market_b, b_milk), _selection(bread_intent, market_b, b_bread), _selection(eggs_intent, market_b, b_eggs)]
-
-    total_a = sum((item.totalPrice for item in selections_a), Decimal("0.00"))
-    total_b = sum((item.totalPrice for item in selections_b), Decimal("0.00"))
-
-    market_total_a = SupermarketBasketTotal(
-        id=uuid4(),
-        supermarket=market_a,
-        selections=selections_a,
-        unavailableItems=[],
-        total=total_a,
+    mixed_unavailable = [intent for intent in intents if not any(selection.intent.id == intent.id for selection in mixed_selections)]
+    mixed = MixedBasketResult(
+        selections=mixed_selections,
+        unavailableItems=mixed_unavailable,
+        missingItemsExplanation=_missing_explanation(mixed_unavailable),
+        total=sum((item.totalPrice for item in mixed_selections), Decimal("0.00")),
     )
-    market_total_b = SupermarketBasketTotal(
-        id=uuid4(),
-        supermarket=market_b,
-        selections=selections_b,
-        unavailableItems=[],
-        total=total_b,
-    )
-
-    supermarket_totals = sorted([market_total_a, market_total_b], key=lambda x: x.total)
-    cheapest_single = supermarket_totals[0]
-
-    mixed_selections = [
-        _selection(milk_intent, market_b, b_milk),
-        _selection(bread_intent, market_a, a_bread),
-        _selection(eggs_intent, market_b, b_eggs),
-    ]
-    mixed_total = sum((item.totalPrice for item in mixed_selections), Decimal("0.00"))
-    mixed = MixedBasketResult(selections=mixed_selections, unavailableItems=[], total=mixed_total)
 
     selected = mixed if request.comparisonMode.value == "cheapestPossible" else MixedBasketResult(
-        selections=cheapest_single.selections,
-        unavailableItems=cheapest_single.unavailableItems,
-        total=cheapest_single.total,
+        selections=cheapest_single.selections if cheapest_single else [],
+        unavailableItems=cheapest_single.unavailableItems if cheapest_single else intents,
+        missingItemsExplanation=cheapest_single.missingItemsExplanation if cheapest_single else _missing_explanation(intents),
+        total=cheapest_single.total if cheapest_single else Decimal("0.00"),
     )
 
     result = BasketOptimisationResult(
         shoppingList=request.shoppingList,
         intents=intents,
-        supermarketTotals=supermarket_totals,
+        supermarketTotals=totals,
         cheapestSingleStore=cheapest_single,
         mixedBasket=mixed,
         selectedBasket=selected,
@@ -127,9 +195,9 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
         preferences=request.preferences,
     )
 
-    most_expensive_total = supermarket_totals[-1].total
+    most_expensive_total = totals[-1].total if totals else Decimal("0.00")
     savings_vs_most_expensive = most_expensive_total - selected.total
-    savings_vs_cheapest_single = cheapest_single.total - selected.total
+    savings_vs_cheapest_single = (cheapest_single.total - selected.total) if cheapest_single else Decimal("0.00")
 
     return CompareResponse(
         result=result,

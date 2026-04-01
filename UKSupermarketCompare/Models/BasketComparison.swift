@@ -212,13 +212,21 @@ struct SupermarketBasketTotal: Identifiable, Codable, Hashable {
     let selections: [ItemSelectionResult]
     let unavailableItems: [GroceryIntent]
     let total: Decimal
+    let missingItemsExplanation: String
 
-    init(supermarket: Supermarket, selections: [ItemSelectionResult], unavailableItems: [GroceryIntent]) {
+    init(supermarket: Supermarket, selections: [ItemSelectionResult], unavailableItems: [GroceryIntent], missingItemsExplanation: String? = nil) {
         self.id = UUID()
         self.supermarket = supermarket
         self.selections = selections
         self.unavailableItems = unavailableItems
         self.total = selections.reduce(Decimal.zero) { $0 + $1.totalPrice }
+        self.missingItemsExplanation = missingItemsExplanation ?? Self.defaultMissingItemsExplanation(for: unavailableItems)
+    }
+
+    static func defaultMissingItemsExplanation(for unavailableItems: [GroceryIntent]) -> String {
+        guard !unavailableItems.isEmpty else { return "All requested items were matched." }
+        let names = unavailableItems.map(\.userInput).joined(separator: ", ")
+        return "Missing \(unavailableItems.count) item(s): \(names). Try broadening item names or adding more supermarkets."
     }
 }
 
@@ -226,11 +234,13 @@ struct MixedBasketResult: Codable, Hashable {
     let selections: [ItemSelectionResult]
     let unavailableItems: [GroceryIntent]
     let total: Decimal
+    let missingItemsExplanation: String
 
-    init(selections: [ItemSelectionResult], unavailableItems: [GroceryIntent]) {
+    init(selections: [ItemSelectionResult], unavailableItems: [GroceryIntent], missingItemsExplanation: String? = nil) {
         self.selections = selections
         self.unavailableItems = unavailableItems
         self.total = selections.reduce(Decimal.zero) { $0 + $1.totalPrice }
+        self.missingItemsExplanation = missingItemsExplanation ?? SupermarketBasketTotal.defaultMissingItemsExplanation(for: unavailableItems)
     }
 
     var supermarketsUsed: [String] {
