@@ -20,13 +20,36 @@ struct GroceryCatalogItem: Identifiable, Codable, Hashable {
     }
 }
 
+enum SuggestionOrigin: String {
+    case backend
+    case fallback
+}
+
 struct GrocerySuggestion: Identifiable, Hashable {
     let id: String
     let item: GroceryCatalogItem
     let score: Int
+    let origin: SuggestionOrigin
+
+    init(id: String, item: GroceryCatalogItem, score: Int, origin: SuggestionOrigin = .fallback) {
+        self.id = id
+        self.item = item
+        self.score = score
+        self.origin = origin
+    }
+
+    var primaryText: String {
+        item.displayName
+    }
 
     var hintText: String {
         let size = item.commonSizes.first ?? "Common pack"
+        let brand = item.preferredMatchingTags.first(where: { !$0.isEmpty })
+
+        if let brand {
+            return "\(item.category.capitalized) • \(brand.capitalized) • \(size)"
+        }
+
         return "\(item.category.capitalized) • \(size)"
     }
 }

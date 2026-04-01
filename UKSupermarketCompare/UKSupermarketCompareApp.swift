@@ -14,7 +14,8 @@ struct UKSupermarketCompareApp: App {
                             CreateShoppingListView(
                                 viewModel: CreateShoppingListViewModel(
                                     coordinator: coordinator,
-                                    catalogService: coordinator.groceryCatalogService
+                                    catalogService: coordinator.groceryCatalogService,
+                                    backendAutocompleteService: BackendAutocompleteService()
                                 )
                             )
                         case .supermarketSelection(let shoppingList):

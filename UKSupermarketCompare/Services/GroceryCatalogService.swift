@@ -6,6 +6,58 @@ protocol GroceryCatalogServing {
     func catalogItem(matching rawText: String) -> GroceryCatalogItem?
 }
 
+protocol BackendAutocompleteServing {
+    func autocomplete(query: String, limit: Int) async throws -> [GrocerySuggestion]
+}
+
+final class BackendAutocompleteService: BackendAutocompleteServing {
+    private let session: URLSession
+    private let autocompleteURL: URL
+
+    init?(session: URLSession = .shared) {
+        let environment = ProcessInfo.processInfo.environment
+
+        if let searchURL = environment["LIVE_SUPERMARKET_SEARCH_URL"], let parsed = URL(string: searchURL) {
+            self.autocompleteURL = parsed
+        } else if
+            let catalogURLRaw = environment["LIVE_SUPERMARKET_DATA_URL"],
+            let catalogURL = URL(string: catalogURLRaw)
+        {
+            self.autocompleteURL = catalogURL.deletingLastPathComponent().appendingPathComponent("autocomplete")
+        } else {
+            return nil
+        }
+
+        self.session = session
+    }
+
+    func autocomplete(query: String, limit: Int) async throws -> [GrocerySuggestion] {
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+
+        var components = URLComponents(url: autocompleteURL, resolvingAgainstBaseURL: false)
+        components?.queryItems = [
+            URLQueryItem(name: "q", value: query),
+            URLQueryItem(name: "limit", value: String(limit))
+        ]
+
+        guard let url = components?.url else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 2.0
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse, (200..<300).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
+        }
+
+        let payload = try JSONDecoder().decode(AutocompleteResponse.self, from: data)
+        return payload.suggestions.map { $0.asSuggestion }
+    }
+}
+
 final class GroceryCatalogService: GroceryCatalogServing {
     let allItems: [GroceryCatalogItem]
 
@@ -124,5 +176,42 @@ final class GroceryCatalogService: GroceryCatalogServing {
             previous = current
         }
         return previous[b.count]
+    }
+}
+
+private struct AutocompleteResponse: Decodable {
+    let suggestions: [BackendAutocompleteSuggestion]
+}
+
+private struct BackendAutocompleteSuggestion: Decodable {
+    let suggestion: String
+    let displayName: String
+    let brand: String
+    let size: String
+    let category: String
+    let score: Double
+
+    var asSuggestion: GrocerySuggestion {
+        let cleanedBrand = brand.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tags = cleanedBrand.isEmpty ? [] : [cleanedBrand]
+        let item = GroceryCatalogItem(
+            id: suggestion,
+            displayName: displayName,
+            genericName: displayName,
+            category: category,
+            subcategory: category,
+            commonSizes: size.isEmpty ? [] : [size],
+            commonUnits: [],
+            keywords: [displayName],
+            defaultQuantityStep: 1,
+            preferredMatchingTags: tags
+        )
+
+        return GrocerySuggestion(
+            id: suggestion,
+            item: item,
+            score: Int(score * 1_000),
+            origin: .backend
+        )
     }
 }
