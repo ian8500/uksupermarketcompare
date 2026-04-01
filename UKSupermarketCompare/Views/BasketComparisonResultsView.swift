@@ -7,12 +7,28 @@ struct BasketComparisonResultsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 16) {
                 BrandHeader(title: "Premium basket decision", subtitle: "Clear outcomes, practical plan, confident checkout.")
                 DataSourceBadgeView(status: coordinator.dataSourceStatus)
 
                 section("Decision cards") {
                     decisionSummaryCards
+                }
+
+                section("Why this plan") {
+                    BrandCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text(viewModel.selectedStrategyReason)
+                                .font(BrandTypography.body)
+                                .foregroundStyle(BrandPalette.textPrimary)
+                            Text(viewModel.strategyTradeOffSummary)
+                                .font(BrandTypography.caption)
+                                .foregroundStyle(BrandPalette.textSecondary)
+                            Text(viewModel.convenienceVsSavingsSummary)
+                                .font(BrandTypography.caption)
+                                .foregroundStyle(BrandPalette.textSecondary)
+                        }
+                    }
                 }
 
                 if !viewModel.preferenceEffects.isEmpty {
@@ -38,26 +54,33 @@ struct BasketComparisonResultsView: View {
                         }
                     } else {
                         BrandCard {
-                            VStack(alignment: .leading, spacing: 8) {
+                            VStack(alignment: .leading, spacing: 10) {
                                 Text("Action plan")
                                     .font(BrandTypography.section)
                                     .foregroundStyle(BrandPalette.navy)
-                                Text("Follow this store-by-store list to complete your basket quickly.")
+                                Text("Grouped by store for quick checkout.")
                                     .font(BrandTypography.caption)
                                     .foregroundStyle(BrandPalette.textSecondary)
+                                HStack(spacing: 8) {
+                                    BrandChip(text: "\(viewModel.selectedStoresUsed.count) stores", tint: BrandPalette.blue)
+                                    BrandChip(text: "Overall \(viewModel.purchasePlanOverallTotal.asGBP())", tint: BrandPalette.success)
+                                }
                             }
                         }
 
-                        ForEach(viewModel.purchasePlanByStore, id: \.supermarket.id) { group in
+                        ForEach(viewModel.purchasePlanByStore) { group in
                             BrandCard {
                                 VStack(alignment: .leading, spacing: 10) {
-                                    HStack {
-                                        Text(group.supermarket.name)
-                                            .font(BrandTypography.section)
+                                    HStack(alignment: .top) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(group.supermarket.name)
+                                                .font(BrandTypography.section)
+                                            HStack(spacing: 8) {
+                                                BrandBadge(text: "\(group.itemCount) items", tint: BrandPalette.navy)
+                                                BrandBadge(text: "Subtotal \(group.subtotal.asGBP())", tint: BrandPalette.blue)
+                                            }
+                                        }
                                         Spacer()
-                                        Text(group.total.asGBP())
-                                            .font(BrandTypography.section)
-                                            .foregroundStyle(BrandPalette.blue)
                                     }
 
                                     ForEach(group.selections) { selection in
@@ -81,6 +104,14 @@ struct BasketComparisonResultsView: View {
                                 }
                             }
                         }
+                    }
+                }
+
+                section("Savings story") {
+                    BrandCard {
+                        Text(viewModel.savingsStory)
+                            .font(BrandTypography.body)
+                            .foregroundStyle(BrandPalette.textPrimary)
                     }
                 }
 
@@ -116,9 +147,16 @@ struct BasketComparisonResultsView: View {
 
                 section("Missing items and alternatives") {
                     BrandCard {
-                        Text(viewModel.result.selectedBasket.missingItemsExplanation)
-                            .font(BrandTypography.body)
-                            .foregroundStyle(viewModel.result.selectedBasket.unavailableItems.isEmpty ? BrandPalette.success : BrandPalette.textSecondary)
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(viewModel.missingItemsSummary)
+                                .font(BrandTypography.body)
+                                .foregroundStyle(viewModel.result.selectedBasket.unavailableItems.isEmpty ? BrandPalette.success : BrandPalette.textSecondary)
+                            if !viewModel.result.selectedBasket.unavailableItems.isEmpty {
+                                Text(viewModel.result.selectedBasket.missingItemsExplanation)
+                                    .font(BrandTypography.caption)
+                                    .foregroundStyle(BrandPalette.textSecondary)
+                            }
+                        }
                     }
 
                     if !viewModel.result.selectedBasket.unavailableItems.isEmpty {
@@ -128,7 +166,7 @@ struct BasketComparisonResultsView: View {
                                     Text("Could not confidently match: \(intent.quantity)x \(intent.userInput)")
                                         .font(BrandTypography.section)
                                         .foregroundStyle(BrandPalette.navy)
-                                    Text("Try broadening the wording or adding a category hint (for example: milk, bread, pasta, rice).")
+                                    Text("Try broader wording or a category hint, for example: milk, bread, pasta, rice.")
                                         .font(BrandTypography.caption)
                                         .foregroundStyle(BrandPalette.textSecondary)
 
@@ -160,12 +198,19 @@ struct BasketComparisonResultsView: View {
                     }
                 }
 
-                Button(didSave ? "Saved" : "Save List") {
-                    viewModel.saveList()
-                    didSave = true
+                VStack(spacing: 10) {
+                    Button(didSave ? "Saved to your baskets" : "Save this basket") {
+                        viewModel.saveList()
+                        didSave = true
+                    }
+                    .buttonStyle(BrandPrimaryButtonStyle())
+                    .disabled(didSave)
+
+                    Button("Build another basket") {
+                        coordinator.path.removeAll()
+                    }
+                    .buttonStyle(BrandSecondaryButtonStyle())
                 }
-                .buttonStyle(BrandPrimaryButtonStyle())
-                .disabled(didSave)
             }
             .padding()
         }
@@ -207,11 +252,11 @@ struct BasketComparisonResultsView: View {
             }
 
             premiumDecisionCard(
-                title: "Savings Summary",
+                title: "Selected Basket",
                 total: viewModel.result.selectedBasket.total,
                 storesUsed: viewModel.selectedStoresUsed,
                 savings: viewModel.result.savingsVsCheapestSingleStore,
-                explanation: viewModel.savingsExplanation,
+                explanation: "\(viewModel.selectedStoresUsed.count) store(s), tuned for your chosen strategy and preferences.",
                 tint: BrandPalette.red
             )
         }

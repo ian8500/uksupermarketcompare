@@ -1,6 +1,15 @@
 import Foundation
 
 final class BasketComparisonResultsViewModel: ObservableObject {
+    struct PurchasePlanStoreGroup: Identifiable {
+        let supermarket: Supermarket
+        let selections: [ItemSelectionResult]
+        let subtotal: Decimal
+
+        var id: UUID { supermarket.id }
+        var itemCount: Int { selections.reduce(0) { $0 + $1.quantity } }
+    }
+
     let result: BasketOptimisationResult
     private let store: ShoppingListStore
 
@@ -15,10 +24,6 @@ final class BasketComparisonResultsViewModel: ObservableObject {
             let rhsScore = $1.total + Decimal($1.unavailableItems.count * 5)
             return lhsScore < rhsScore
         }
-    }
-
-    var savingsExplanation: String {
-        "You save \(result.savingsVsMostExpensive.asGBP()) vs the priciest option and \(result.savingsVsCheapestSingleStore.asGBP()) vs the best single-store basket."
     }
 
     var preferenceEffects: [String] {
@@ -40,15 +45,74 @@ final class BasketComparisonResultsViewModel: ObservableObject {
         return mostExpensive - convenience.total
     }
 
-    var purchasePlanByStore: [(supermarket: Supermarket, selections: [ItemSelectionResult], total: Decimal)] {
+    var purchasePlanByStore: [PurchasePlanStoreGroup] {
         let grouped = Dictionary(grouping: result.selectedBasket.selections, by: \.supermarket)
         return grouped
             .map { supermarket, selections in
                 let sortedSelections = selections.sorted { $0.intent.userInput.localizedCaseInsensitiveCompare($1.intent.userInput) == .orderedAscending }
                 let total = sortedSelections.reduce(Decimal.zero) { $0 + $1.totalPrice }
-                return (supermarket: supermarket, selections: sortedSelections, total: total)
+                return PurchasePlanStoreGroup(supermarket: supermarket, selections: sortedSelections, subtotal: total)
             }
-            .sorted { $0.total < $1.total }
+            .sorted { $0.subtotal < $1.subtotal }
+    }
+
+    var purchasePlanOverallTotal: Decimal {
+        purchasePlanByStore.reduce(Decimal.zero) { $0 + $1.subtotal }
+    }
+
+    var selectedStrategyReason: String {
+        switch result.comparisonMode {
+        case .cheapestPossible:
+            return "We chose the lowest overall basket total using the supermarkets you selected."
+        case .cheapestSingleStoreOnly:
+            return "We chose the strongest one-store basket so you can check out in one trip."
+        }
+    }
+
+    var strategyTradeOffSummary: String {
+        guard let cheapestSingle = result.cheapestSingleStore else {
+            return "No fully matched single-store basket was available, so this strategy prioritised completion and value."
+        }
+
+        let delta = (result.selectedBasket.total - cheapestSingle.total)
+        if delta < .zero {
+            return "Compared with the best single-store basket, this plan saves an extra \((-delta).asGBP())."
+        } else if delta > .zero {
+            return "Compared with the best single-store basket, this plan costs \(delta.asGBP()) more for your selected strategy."
+        }
+        return "This matches the best single-store total while following your chosen strategy."
+    }
+
+    var convenienceVsSavingsSummary: String {
+        let stores = max(selectedStoresUsed.count, 1)
+        if stores == 1 {
+            return "You only need one store, so convenience is high without extra travel time."
+        }
+
+        let delta = result.savingsVsCheapestSingleStore
+        if delta > .zero {
+            return "This plan uses \(stores) stores to save \(delta.asGBP()) versus the best one-store checkout."
+        } else if delta < .zero {
+            return "This plan uses \(stores) stores and adds \((-delta).asGBP()) versus the best one-store checkout."
+        }
+        return "This plan uses \(stores) stores and lands at the same price as the best one-store checkout."
+    }
+
+    var missingItemsSummary: String {
+        let missing = result.selectedBasket.unavailableItems.count
+        guard missing > 0 else {
+            return "Everything in your basket was matched with confident options."
+        }
+        return "\(missing) item(s) were not confidently matched. Try broader names or add another supermarket for fuller coverage."
+    }
+
+    var savingsStory: String {
+        let expensive = result.savingsVsMostExpensive
+        let singleStore = result.savingsVsCheapestSingleStore
+        let conveniencePremium = max(result.selectedBasket.total - (result.cheapestSingleStore?.total ?? result.selectedBasket.total), .zero)
+        let stores = max(selectedStoresUsed.count, 1)
+
+        return "You save \(expensive.asGBP()) vs the most expensive complete option, \(singleStore.asGBP()) vs the cheapest single-store basket, with \(stores) store(s) in this plan and \(conveniencePremium.asGBP()) extra for convenience mode where applicable."
     }
 
     func alternatives(for intent: GroceryIntent, limit: Int = 2) -> [ItemSelectionResult] {
