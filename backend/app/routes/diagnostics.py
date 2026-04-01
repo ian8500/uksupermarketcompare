@@ -35,6 +35,7 @@ class CatalogDiagnosticsResponse(BaseModel):
     categoriesCovered: list[str]
     priceSnapshots: int
     priceDropAlertCandidates: int
+    retailerFreshness: list[dict[str, str | int | None]]
     tescoLive: TescoLiveDiagnostics
 
 

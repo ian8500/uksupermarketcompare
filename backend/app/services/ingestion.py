@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import json
 import logging
 
 from app.db import get_connection
@@ -29,6 +30,23 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
 
     with get_connection() as conn:
         for provider in providers:
+            started_at = datetime.now(UTC).isoformat()
+            source_mode = getattr(provider, "active_source", "seed")
+            run_id = conn.execute(
+                """
+                INSERT INTO import_runs(retailer, source_mode, started_at, status)
+                VALUES(?, ?, ?, ?)
+                """,
+                (provider.name, source_mode, started_at, "running"),
+            ).lastrowid
+            fetched_count = 0
+            inserted_count = 0
+            updated_count = 0
+            mapped_count = 0
+            unmapped_count = 0
+            snapshot_count = 0
+            error_count = 0
+            errors: list[str] = []
             logger.info("Starting import for provider=%s replace_existing=%s", provider.name, replace_existing)
             retailer_row = conn.execute("SELECT id FROM retailers WHERE name = ?", (provider.name,)).fetchone()
             if retailer_row:
@@ -50,94 +68,60 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                 )
                 conn.execute("DELETE FROM raw_retailer_products WHERE retailer_id = ?", (retailer_id,))
 
-            for product in provider.normalize_products():
-                canonical_row = conn.execute(
-                    "SELECT id FROM canonical_products WHERE intent_key = ?", (product.intent_key,)
-                ).fetchone()
-                if canonical_row:
-                    canonical_id = canonical_row[0]
-                    conn.execute(
-                        """
-                        UPDATE canonical_products
-                        SET searchable_text = ?, tags = ?, canonical_aliases = ?, token_fingerprint = ?
-                        WHERE id = ?
-                        """,
-                        (
-                            product.searchable_text,
-                            ",".join(product.normalized_tags),
-                            ",".join(product.canonical_aliases),
-                            product.token_fingerprint,
-                            canonical_id,
-                        ),
-                    )
-                else:
-                    canonical_id = conn.execute(
-                        """
-                        INSERT INTO canonical_products(
-                            canonical_name, intent_key, category, normalized_brand,
-                            normalized_unit, normalized_size_value, tags, searchable_text, token_fingerprint, canonical_aliases
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        (
-                            product.normalized_name,
-                            product.intent_key,
-                            product.category.value,
-                            product.normalized_brand,
-                            product.normalized_size.normalized_unit or "",
-                            product.normalized_size.normalized_value,
-                            ",".join(product.normalized_tags),
-                            product.searchable_text,
-                            product.token_fingerprint,
-                            ",".join(product.canonical_aliases),
-                        ),
-                    ).lastrowid
-                    inserted_canonical += 1
+            try:
+                normalized_products = provider.normalize_products()
+                fetched_count = len(normalized_products)
+                source_mode = getattr(provider, "active_source", source_mode)
 
-                raw_row = conn.execute(
-                    """
-                    SELECT id FROM raw_retailer_products
-                    WHERE retailer_id = ?
-                    AND COALESCE(source_product_id, '') = COALESCE(?, '')
-                    AND source_name = ? AND source_brand = ? AND source_size = ?
-                    """,
-                    (
-                        retailer_id,
-                        product.raw.source_product_id,
-                        product.raw.name,
-                        product.raw.brand,
-                        product.raw.size,
-                    ),
-                ).fetchone()
+                for product in normalized_products:
+                    canonical_row = conn.execute(
+                        "SELECT id FROM canonical_products WHERE intent_key = ?", (product.intent_key,)
+                    ).fetchone()
+                    if canonical_row:
+                        canonical_id = canonical_row[0]
+                        conn.execute(
+                            """
+                            UPDATE canonical_products
+                            SET searchable_text = ?, tags = ?, canonical_aliases = ?, token_fingerprint = ?
+                            WHERE id = ?
+                            """,
+                            (
+                                product.searchable_text,
+                                ",".join(product.normalized_tags),
+                                ",".join(product.canonical_aliases),
+                                product.token_fingerprint,
+                                canonical_id,
+                            ),
+                        )
+                    else:
+                        canonical_id = conn.execute(
+                            """
+                            INSERT INTO canonical_products(
+                                canonical_name, intent_key, category, normalized_brand,
+                                normalized_unit, normalized_size_value, tags, searchable_text, token_fingerprint, canonical_aliases
+                            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            (
+                                product.normalized_name,
+                                product.intent_key,
+                                product.category.value,
+                                product.normalized_brand,
+                                product.normalized_size.normalized_unit or "",
+                                product.normalized_size.normalized_value,
+                                ",".join(product.normalized_tags),
+                                product.searchable_text,
+                                product.token_fingerprint,
+                                ",".join(product.canonical_aliases),
+                            ),
+                        ).lastrowid
+                        inserted_canonical += 1
 
-                now = datetime.now(UTC).isoformat()
-                if raw_row:
-                    raw_product_id = raw_row[0]
-                    conn.execute(
+                    raw_row = conn.execute(
                         """
-                        UPDATE raw_retailer_products
-                        SET source_subcategory = ?, searchable_text = ?, image_url = ?, category_tags = ?, availability = ?, source_metadata = ?, last_updated = ?, created_at = ?
-                        WHERE id = ?
-                        """,
-                        (
-                            product.raw.subcategory,
-                            product.searchable_text,
-                            product.raw.image_url or "",
-                            ",".join(product.normalized_tags),
-                            product.raw.availability or "",
-                            str(product.raw.source_metadata or {}),
-                            product.raw.last_updated or now,
-                            now,
-                            raw_product_id,
-                        ),
-                    )
-                    updated_raw += 1
-                else:
-                    raw_product_id = conn.execute(
-                        """
-                        INSERT INTO raw_retailer_products(
-                            retailer_id, source_product_id, source_name, source_brand, source_size, source_subcategory,
-                            image_url, category_tags, availability, source_metadata, last_updated, searchable_text, created_at
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        SELECT id FROM raw_retailer_products
+                        WHERE retailer_id = ?
+                        AND COALESCE(source_product_id, '') = COALESCE(?, '')
+                        AND source_name = ? AND source_brand = ? AND source_size = ?
                         """,
                         (
                             retailer_id,
@@ -145,69 +129,170 @@ def import_catalog_data(providers: list[SupermarketPriceProvider] | None = None,
                             product.raw.name,
                             product.raw.brand,
                             product.raw.size,
-                            product.raw.subcategory,
-                            product.raw.image_url or "",
-                            ",".join(product.normalized_tags),
-                            product.raw.availability or "",
-                            str(product.raw.source_metadata or {}),
-                            product.raw.last_updated or now,
-                            product.searchable_text,
-                            now,
                         ),
-                    ).lastrowid
-                    inserted_raw += 1
+                    ).fetchone()
 
-                conn.execute(
-                    """
-                    INSERT INTO product_mappings(raw_product_id, canonical_product_id, confidence, method)
-                    VALUES(?, ?, ?, ?)
-                    ON CONFLICT(raw_product_id) DO UPDATE SET
-                        canonical_product_id = excluded.canonical_product_id,
-                        confidence = excluded.confidence,
-                        method = excluded.method
-                    """,
-                    (raw_product_id, canonical_id, 1.0, f"{provider.name.lower()}-normalized"),
-                )
+                    now = datetime.now(UTC).isoformat()
+                    if raw_row:
+                        raw_product_id = raw_row[0]
+                        conn.execute(
+                            """
+                            UPDATE raw_retailer_products
+                            SET source_subcategory = ?, searchable_text = ?, image_url = ?, category_tags = ?, availability = ?, source_metadata = ?, last_updated = ?, created_at = ?
+                            WHERE id = ?
+                            """,
+                            (
+                                product.raw.subcategory,
+                                product.searchable_text,
+                                product.raw.image_url or "",
+                                ",".join(product.normalized_tags),
+                                product.raw.availability or "",
+                                json.dumps(product.raw.source_metadata or {}, sort_keys=True),
+                                product.raw.last_updated or now,
+                                now,
+                                raw_product_id,
+                            ),
+                        )
+                        updated_raw += 1
+                        updated_count += 1
+                    else:
+                        raw_product_id = conn.execute(
+                            """
+                            INSERT INTO raw_retailer_products(
+                                retailer_id, source_product_id, source_name, source_brand, source_size, source_subcategory,
+                                image_url, category_tags, availability, source_metadata, last_updated, searchable_text, created_at
+                            ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            (
+                                retailer_id,
+                                product.raw.source_product_id,
+                                product.raw.name,
+                                product.raw.brand,
+                                product.raw.size,
+                                product.raw.subcategory,
+                                product.raw.image_url or "",
+                                ",".join(product.normalized_tags),
+                                product.raw.availability or "",
+                                json.dumps(product.raw.source_metadata or {}, sort_keys=True),
+                                product.raw.last_updated or now,
+                                product.searchable_text,
+                                now,
+                            ),
+                        ).lastrowid
+                        inserted_raw += 1
+                        inserted_count += 1
 
-                latest = conn.execute(
-                    """
-                    SELECT price, unit_value, promo_price FROM price_snapshots
-                    WHERE raw_product_id = ?
-                    ORDER BY captured_at DESC LIMIT 1
-                    """,
-                    (raw_product_id,),
-                ).fetchone()
-                new_price = float(product.raw.price)
-                new_unit_value = float(product.raw.unit_value)
-                new_promo_price = float(product.raw.promo_price) if product.raw.promo_price is not None else None
-                if not latest or latest["price"] != new_price or latest["unit_value"] != new_unit_value or latest["promo_price"] != new_promo_price:
-                    if latest and latest["price"] > 0 and new_price < latest["price"]:
-                        change_ratio = round((latest["price"] - new_price) / latest["price"], 4)
-                        if change_ratio >= 0.05:
-                            conn.execute(
-                                """
-                                INSERT INTO price_drop_alert_candidates(
-                                    raw_product_id, previous_price, latest_price, change_ratio, status, detected_at
-                                ) VALUES(?, ?, ?, ?, ?, ?)
-                                """,
-                                (raw_product_id, latest["price"], new_price, change_ratio, "candidate", now),
-                            )
-                            inserted_price_drop_candidates += 1
                     conn.execute(
                         """
-                        INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, promo_price, captured_at)
-                        VALUES(?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO product_mappings(raw_product_id, canonical_product_id, confidence, method)
+                        VALUES(?, ?, ?, ?)
+                        ON CONFLICT(raw_product_id) DO UPDATE SET
+                            canonical_product_id = excluded.canonical_product_id,
+                            confidence = excluded.confidence,
+                            method = excluded.method
                         """,
-                        (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, new_promo_price, now),
+                        (raw_product_id, canonical_id, 1.0, f"{provider.name.lower()}-normalized"),
                     )
-                    inserted_price_snapshots += 1
+                    mapped_count += 1
+
+                    latest = conn.execute(
+                        """
+                        SELECT price, unit_value, promo_price FROM price_snapshots
+                        WHERE raw_product_id = ?
+                        ORDER BY captured_at DESC LIMIT 1
+                        """,
+                        (raw_product_id,),
+                    ).fetchone()
+                    new_price = float(product.raw.price)
+                    new_unit_value = float(product.raw.unit_value)
+                    new_promo_price = float(product.raw.promo_price) if product.raw.promo_price is not None else None
+                    if (
+                        not latest
+                        or latest["price"] != new_price
+                        or latest["unit_value"] != new_unit_value
+                        or latest["promo_price"] != new_promo_price
+                    ):
+                        if latest and latest["price"] > 0 and new_price < latest["price"]:
+                            change_ratio = round((latest["price"] - new_price) / latest["price"], 4)
+                            if change_ratio >= 0.05:
+                                conn.execute(
+                                    """
+                                    INSERT INTO price_drop_alert_candidates(
+                                        raw_product_id, previous_price, latest_price, change_ratio, status, detected_at
+                                    ) VALUES(?, ?, ?, ?, ?, ?)
+                                    """,
+                                    (raw_product_id, latest["price"], new_price, change_ratio, "candidate", now),
+                                )
+                                inserted_price_drop_candidates += 1
+                        conn.execute(
+                            """
+                            INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, promo_price, captured_at)
+                            VALUES(?, ?, ?, ?, ?, ?, ?)
+                            """,
+                            (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, new_promo_price, now),
+                        )
+                        inserted_price_snapshots += 1
+                        snapshot_count += 1
+            except Exception as exc:
+                error_count += 1
+                errors.append(str(exc))
+                conn.execute(
+                    """
+                    UPDATE import_runs
+                    SET source_mode = ?, completed_at = ?, status = ?, fetched_count = ?, inserted_count = ?, updated_count = ?,
+                        mapped_count = ?, unmapped_count = ?, snapshot_count = ?, error_count = ?, error_details = ?
+                    WHERE id = ?
+                    """,
+                    (
+                        source_mode,
+                        datetime.now(UTC).isoformat(),
+                        "failed",
+                        fetched_count,
+                        inserted_count,
+                        updated_count,
+                        mapped_count,
+                        max(0, fetched_count - mapped_count),
+                        snapshot_count,
+                        error_count,
+                        json.dumps(errors),
+                        run_id,
+                    ),
+                )
+                logger.exception("Import failed for provider=%s", provider.name)
+                continue
+
+            unmapped_count = max(0, fetched_count - mapped_count)
+            conn.execute(
+                """
+                UPDATE import_runs
+                SET source_mode = ?, completed_at = ?, status = ?, fetched_count = ?, inserted_count = ?, updated_count = ?,
+                    mapped_count = ?, unmapped_count = ?, snapshot_count = ?, error_count = ?, error_details = ?
+                WHERE id = ?
+                """,
+                (
+                    source_mode,
+                    datetime.now(UTC).isoformat(),
+                    "success",
+                    fetched_count,
+                    inserted_count,
+                    updated_count,
+                    mapped_count,
+                    unmapped_count,
+                    snapshot_count,
+                    error_count,
+                    json.dumps(errors),
+                    run_id,
+                ),
+            )
             logger.info(
-                "Completed import provider=%s inserted_raw=%d updated_raw=%d inserted_canonical=%d inserted_price_snapshots=%d",
+                "Completed import provider=%s fetched=%d inserted=%d updated=%d mapped=%d unmapped=%d snapshots=%d",
                 provider.name,
-                inserted_raw,
-                updated_raw,
-                inserted_canonical,
-                inserted_price_snapshots,
+                fetched_count,
+                inserted_count,
+                updated_count,
+                mapped_count,
+                unmapped_count,
+                snapshot_count,
             )
 
         for synonym, canonical in DEFAULT_SYNONYMS.items():

@@ -126,6 +126,23 @@ def init_db() -> None:
                 detected_at TEXT NOT NULL,
                 FOREIGN KEY(raw_product_id) REFERENCES raw_retailer_products(id)
             );
+
+            CREATE TABLE IF NOT EXISTS import_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                retailer TEXT NOT NULL,
+                source_mode TEXT NOT NULL DEFAULT 'seed',
+                started_at TEXT NOT NULL,
+                completed_at TEXT,
+                status TEXT NOT NULL,
+                fetched_count INTEGER NOT NULL DEFAULT 0,
+                inserted_count INTEGER NOT NULL DEFAULT 0,
+                updated_count INTEGER NOT NULL DEFAULT 0,
+                mapped_count INTEGER NOT NULL DEFAULT 0,
+                unmapped_count INTEGER NOT NULL DEFAULT 0,
+                snapshot_count INTEGER NOT NULL DEFAULT 0,
+                error_count INTEGER NOT NULL DEFAULT 0,
+                error_details TEXT NOT NULL DEFAULT '[]'
+            );
             """
         )
         conn.execute(
@@ -142,6 +159,15 @@ def init_db() -> None:
         _ensure_column(conn, "raw_retailer_products", "source_metadata", "TEXT NOT NULL DEFAULT '{}'")
         _ensure_column(conn, "raw_retailer_products", "last_updated", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "price_snapshots", "promo_price", "REAL")
+        _ensure_column(conn, "import_runs", "source_mode", "TEXT NOT NULL DEFAULT 'seed'")
+        _ensure_column(conn, "import_runs", "fetched_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "inserted_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "updated_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "mapped_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "unmapped_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "snapshot_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "error_count", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(conn, "import_runs", "error_details", "TEXT NOT NULL DEFAULT '[]'")
         conn.commit()
 
 

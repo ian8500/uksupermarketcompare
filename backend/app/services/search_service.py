@@ -172,6 +172,9 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
         token_score = 0.12 * len(token_matches)
         score += min(token_score, 0.48)
         matched_terms.extend(token_matches)
+        primary_token = expanded_tokens[0]
+        if primary_token in token_matches:
+            score += 0.2
 
     brand_token = normalize_text(candidate.brand)
     brand_hits = [token for token in expanded_tokens if token in brand_token]
@@ -203,7 +206,7 @@ def _score_candidate(candidate: SearchCandidate, normalized_query: str, expanded
         if match_type == "fuzzy":
             match_type = "fuzzy"
 
-    if score < 0.4:
+    if score < 0.35:
         return None
 
     final_score = min(score * (0.8 + (0.2 * candidate.mapping_confidence)), 1.0)

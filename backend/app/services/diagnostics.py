@@ -64,6 +64,7 @@ def catalog_diagnostics() -> dict:
         "categoriesCovered": [row["category"] for row in categories],
         "priceSnapshots": int(snapshot_rows or 0),
         "priceDropAlertCandidates": int(alert_candidates or 0),
+        "retailerFreshness": retailer_freshness_diagnostics(),
     }
 
 
@@ -144,3 +145,69 @@ def tesco_live_diagnostics() -> dict:
     else:
         status = "active"
     return {"mode": active_source, "activeSource": active_source, "status": status, "lastUpdated": row["last_updated"] or None}
+
+
+def retailer_freshness_diagnostics() -> list[dict[str, str | int | None]]:
+    now = datetime.now(UTC)
+    with get_connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT
+                r.name AS retailer,
+                (
+                    SELECT ir.started_at
+                    FROM import_runs ir
+                    WHERE ir.retailer = r.name
+                    ORDER BY ir.started_at DESC
+                    LIMIT 1
+                ) AS last_attempt_at,
+                (
+                    SELECT ir.status
+                    FROM import_runs ir
+                    WHERE ir.retailer = r.name
+                    ORDER BY ir.started_at DESC
+                    LIMIT 1
+                ) AS last_status,
+                (
+                    SELECT ir.completed_at
+                    FROM import_runs ir
+                    WHERE ir.retailer = r.name AND ir.status = 'success'
+                    ORDER BY ir.completed_at DESC
+                    LIMIT 1
+                ) AS last_success_at
+            FROM retailers r
+            ORDER BY r.name
+            """
+        ).fetchall()
+
+    payload: list[dict[str, str | int | None]] = []
+    for row in rows:
+        last_success_at = row["last_success_at"]
+        last_status = row["last_status"] or "unknown"
+        age_hours: int | None = None
+        if last_success_at:
+            success_dt = datetime.fromisoformat(last_success_at.replace("Z", "+00:00"))
+            age_hours = int((now - success_dt).total_seconds() // 3600)
+
+        if last_status == "failed" and (age_hours is None or age_hours > 24):
+            freshness = "failed"
+        elif age_hours is None:
+            freshness = "critical"
+        elif age_hours <= 24:
+            freshness = "healthy"
+        elif age_hours <= 72:
+            freshness = "stale"
+        else:
+            freshness = "critical"
+
+        payload.append(
+            {
+                "retailer": row["retailer"],
+                "status": freshness,
+                "ageHours": age_hours,
+                "lastAttemptAt": row["last_attempt_at"],
+                "lastSuccessAt": last_success_at,
+                "lastImportStatus": last_status,
+            }
+        )
+    return payload
