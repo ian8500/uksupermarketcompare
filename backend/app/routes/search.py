@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 class SearchResultItem(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    internalProductId: str
+    retailerProductId: str | None = None
     supermarket: str
     supermarketDescription: str
     name: str
@@ -28,6 +30,10 @@ class SearchResultItem(BaseModel):
     price: float
     unitDescription: str
     unitValue: float
+    promoPrice: float | None = None
+    image: str | None = None
+    availability: str | None = None
+    lastUpdated: str | None = None
     score: float
     matchType: str
     matchedTerms: list[str]
@@ -84,6 +90,8 @@ def search(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50
         total=len(ranked),
         results=[
             SearchResultItem(
+                internalProductId=str(row.item.product_row_id),
+                retailerProductId=row.item.source_product_id,
                 supermarket=row.item.retailer,
                 supermarketDescription=row.item.retailer_description,
                 name=row.item.product_name,
@@ -96,6 +104,10 @@ def search(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50
                 price=row.item.price,
                 unitDescription=row.item.unit_description,
                 unitValue=row.item.unit_value,
+                promoPrice=row.item.promo_price,
+                image=row.item.image_url,
+                availability=row.item.availability,
+                lastUpdated=row.item.last_updated,
                 score=row.score,
                 matchType=row.match_type,
                 matchedTerms=row.matched_terms,

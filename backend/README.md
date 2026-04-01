@@ -335,3 +335,92 @@ Cached fields now include retailer product id, price, promo price, size, unit pr
 - Implement parallel live adapters equivalent to Tesco live source.
 - Add scheduler/background jobs for periodic refresh and stale-data monitoring.
 - Expand retailer-specific promo mechanics and unit normalization edge-cases.
+
+## Stage 6: Tesco live provider + enrichment architecture
+
+### Provider abstractions
+
+The backend now separates supermarket pricing and enrichment concerns:
+
+- `SupermarketPriceProvider`: normalized price/search data ingestion contract
+- `ProductMetadataEnrichmentProvider`: optional metadata enrichment contract
+
+Concrete implementations shipped in this milestone:
+
+- `TescoProvider` (live-first with fallback)
+- `OpenFoodFactsProvider` (barcode enrichment only)
+
+### Tesco upstream priority and configuration
+
+Tesco ingestion supports three tiers, with no app-facing coupling to any upstream schema:
+
+1. **Official partner integration** (if official credentials are configured)
+2. **Structured third-party integration** (currently first practical live source)
+3. **Local seeded fallback**
+
+Set environment variables (examples):
+
+```bash
+# Source mode: auto | official | thirdparty | structured | seed
+export TESCO_SOURCE_MODE=auto
+
+# Official Tesco partner path
+export TESCO_OFFICIAL_BASE_URL=https://partner-api.example.com/products
+export TESCO_OFFICIAL_API_KEY=***
+export TESCO_OFFICIAL_PARTNER_ID=***
+
+# Third-party structured Tesco path
+export TESCO_THIRD_PARTY_BASE_URL=https://api.trolley.co.uk/api/v1/products
+export TESCO_THIRD_PARTY_API_KEY=***
+
+# Query seed list for import refresh
+export TESCO_QUERY_TERMS="milk,bread,eggs,butter,beans"
+
+# Open Food Facts enrichment (optional)
+export OFF_BASE_URL=https://world.openfoodfacts.org
+```
+
+> Secrets must be supplied via environment variables. Never hardcode credentials.
+
+### Live data ingestion + caching/persistence
+
+Tesco data is persisted to local SQLite tables and served from normalized internal rows (`raw_retailer_products`, `canonical_products`, `price_snapshots`) so app endpoints do not require an upstream round trip.
+
+Refresh options:
+
+```bash
+cd backend
+python -m scripts.import_catalog
+python -m scripts.import_catalog --replace
+python -m scripts.import_catalog --tesco-live
+```
+
+Imports are idempotent where practical:
+
+- product upsert based on retailer/source identity
+- canonical mapping upsert
+- snapshot insert only on price/unit change
+
+### App-facing endpoint behavior
+
+The Swift app still talks **only** to this backend.
+
+- `/autocomplete` and `/search` return normalized internal response shapes (never raw upstream payloads)
+- `/product/{id}` returns normalized product detail and optional OFF enrichment (`?barcode=...&enrich=true`)
+- `/compare` remains backend-owned and app-compatible
+- `/catalog` remains supported for existing flows
+
+### Diagnostics and safety
+
+- `/diagnostics/catalog` now includes `tescoLive` status to indicate active/fallback mode and latest timestamp
+- logging added around upstream fetches, imports, enrichment calls, search misses, and compare failures
+- logs never print API secrets
+
+### What remains for adding a second supermarket
+
+To add ASDA or Sainsbury's live feeds next:
+
+1. implement upstream adapters matching `SupermarketPriceProvider`
+2. map their payloads into `ProviderProduct`
+3. wire provider selection via env vars
+4. add import-refresh tests and endpoint contract assertions for new live source data

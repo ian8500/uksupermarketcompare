@@ -1,10 +1,20 @@
 from __future__ import annotations
 
+import logging
+
 from app.db import get_connection
-from app.services.providers import OpenFoodFactsProvider
+from app.services.providers import OpenFoodFactsProvider, ProductMetadataEnrichmentProvider
+
+logger = logging.getLogger(__name__)
 
 
-def get_product_detail(product_id: str, barcode: str | None = None, *, enrich: bool = True) -> dict | None:
+def get_product_detail(
+    product_id: str,
+    barcode: str | None = None,
+    *,
+    enrich: bool = True,
+    enrichment_provider: ProductMetadataEnrichmentProvider | None = None,
+) -> dict | None:
     with get_connection() as conn:
         row = conn.execute(
             """
@@ -17,9 +27,13 @@ def get_product_detail(product_id: str, barcode: str | None = None, *, enrich: b
               raw.source_subcategory,
               raw.image_url,
               raw.category_tags,
+              raw.availability,
+              raw.source_metadata,
               raw.last_updated,
               cp.category,
               cp.canonical_name,
+              cp.normalized_unit,
+              cp.normalized_size_value,
               ps.price,
               ps.promo_price,
               ps.currency,
@@ -55,6 +69,8 @@ def get_product_detail(product_id: str, barcode: str | None = None, *, enrich: b
         "canonicalName": row["canonical_name"],
         "brand": row["source_brand"],
         "size": row["source_size"],
+        "normalizedUnit": row["normalized_unit"],
+        "normalizedUnitAmount": row["normalized_size_value"],
         "subcategory": row["source_subcategory"],
         "category": row["category"],
         "price": row["price"],
@@ -64,9 +80,13 @@ def get_product_detail(product_id: str, barcode: str | None = None, *, enrich: b
         "unitValue": row["unit_value"],
         "image": row["image_url"] or None,
         "tags": [tag for tag in (row["category_tags"] or "").split(",") if tag],
+        "availability": row["availability"] or None,
+        "sourceMetadata": row["source_metadata"] or None,
         "lastUpdated": row["last_updated"],
     }
 
     if enrich and barcode:
-        payload["enrichment"] = OpenFoodFactsProvider().enrich_barcode(barcode)
+        provider = enrichment_provider or OpenFoodFactsProvider()
+        logger.info("enrichment lookup provider=%s barcode=%s", provider.provider_name, barcode)
+        payload["enrichment"] = provider.enrich_barcode(barcode)
     return payload

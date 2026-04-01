@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
 from app.models import GroceryCategory
 from app.services.normalization import (
@@ -32,6 +32,8 @@ class ProviderProduct:
     tags: list[str]
     promo_price: Decimal | None = None
     image_url: str | None = None
+    availability: str | None = None
+    source_metadata: dict[str, Any] | None = None
     last_updated: str | None = None
 
 
@@ -50,13 +52,19 @@ class NormalizedProviderProduct:
     token_fingerprint: str
 
 
-class CatalogProvider(Protocol):
+class SupermarketPriceProvider(Protocol):
     name: str
     description: str
 
     def load_products(self) -> list[ProviderProduct]: ...
 
     def normalize_products(self) -> list[NormalizedProviderProduct]: ...
+
+
+class ProductMetadataEnrichmentProvider(Protocol):
+    provider_name: str
+
+    def enrich_barcode(self, barcode: str) -> dict[str, Any]: ...
 
 
 class SeedFileProvider:
@@ -80,6 +88,8 @@ class SeedFileProvider:
                 tags=item["tags"],
                 promo_price=Decimal(str(item["promoPrice"])) if item.get("promoPrice") is not None else None,
                 image_url=item.get("imageUrl"),
+                availability=item.get("availability"),
+                source_metadata=item.get("sourceMetadata") or {"source": "seed"},
                 last_updated=item.get("lastUpdated"),
             )
             for item in self._payload_products

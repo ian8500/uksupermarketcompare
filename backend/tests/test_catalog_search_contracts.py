@@ -1,5 +1,6 @@
 from app.routes.catalog import catalog
 from app.routes.diagnostics import catalog_metrics, search_metrics
+from app.routes.product import product_detail
 from app.routes.search import autocomplete, search
 
 SWIFT_CATEGORIES = {
@@ -53,6 +54,8 @@ def test_search_contract_shape_is_stable() -> None:
     assert set(payload.keys()) == {"query", "normalizedQuery", "total", "results"}
     for item in payload["results"]:
         assert set(item.keys()) == {
+            "internalProductId",
+            "retailerProductId",
             "supermarket",
             "supermarketDescription",
             "name",
@@ -65,6 +68,10 @@ def test_search_contract_shape_is_stable() -> None:
             "price",
             "unitDescription",
             "unitValue",
+            "promoPrice",
+            "image",
+            "availability",
+            "lastUpdated",
             "score",
             "matchType",
             "matchedTerms",
@@ -99,6 +106,7 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
         "categoriesCovered",
         "priceSnapshots",
         "priceDropAlertCandidates",
+        "tescoLive",
     }
     assert catalog_payload["canonicalProducts"] > 0
     assert catalog_payload["mappings"] > 0
@@ -107,3 +115,24 @@ def test_diagnostics_endpoints_expose_catalog_and_search_health() -> None:
     assert set(search_payload.keys()) == {"totalQueries", "missQueries", "missRate", "weakMatches", "avgTopScore", "byEndpoint"}
     assert search_payload["totalQueries"] >= 1
     assert search_payload["missQueries"] >= 1
+
+
+def test_product_contract_shape_is_stable() -> None:
+    search_payload = search(q="milk", limit=1).model_dump(mode="json")
+    product_id = search_payload["results"][0]["internalProductId"]
+    payload = product_detail(product_id=product_id, enrich=False).model_dump(mode="json")
+
+    assert set(payload.keys()) >= {
+        "id",
+        "retailerProductId",
+        "supermarket",
+        "name",
+        "canonicalName",
+        "brand",
+        "size",
+        "category",
+        "price",
+        "unitDescription",
+        "unitValue",
+        "lastUpdated",
+    }
