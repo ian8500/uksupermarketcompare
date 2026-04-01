@@ -31,4 +31,4 @@ def test_catalog_categories_are_swift_compatible_for_key_supermarkets():
 
 
 def test_catalog_includes_live_debug_marker_metadata():
-    assert CATALOG.metadata.debugMarker == "LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH"
+    assert CATALOG.metadata.debugMarker == "LIVE_CATALOG_V3_MATCHING_INTELLIGENCE"
