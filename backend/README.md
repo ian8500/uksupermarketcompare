@@ -6,6 +6,8 @@ This backend now serves the Swift app's live catalog payload with the exact JSON
 
 - `GET /health`
 - `GET /catalog`
+- `GET /search`
+- `GET /autocomplete`
 - `POST /compare` *(existing mock comparison route retained; app can ignore for now)*
 
 ## Comparison quality (Phase 1)
@@ -59,6 +61,90 @@ This is intentionally structured for future product phases (autocomplete ranking
 Categories are constrained to the Swift `GroceryCategory` raw values:
 
 `milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
+
+
+## Stage 3 Step 3: backend search + autocomplete
+
+### `GET /search`
+
+Backend-driven catalog search over normalized products and canonical mappings.
+
+**Query parameters**
+
+- `q` *(required, string)*: user search text
+- `limit` *(optional, int, default `20`, max `50`)*: number of ranked product rows to return
+
+**Behavior**
+
+- exact + partial matching against normalized raw/canonical catalog text
+- synonym expansion (via `search_synonyms`)
+- fuzzy typo tolerance
+- brand + size/unit token boosts
+- ranking score that incorporates mapping confidence
+
+**Response shape**
+
+```json
+{
+  "query": "oatly milk",
+  "normalizedQuery": "oatly milk",
+  "total": 3,
+  "results": [
+    {
+      "supermarket": "Tesco",
+      "supermarketDescription": "...",
+      "name": "Oatly Barista Oat Milk",
+      "canonicalName": "oatly barista oat milk",
+      "brand": "Oatly",
+      "size": "1L",
+      "category": "milk",
+      "subcategory": "Dairy & Alternatives",
+      "tags": ["oat", "barista"],
+      "price": 2.0,
+      "unitDescription": "per litre",
+      "unitValue": 1.0,
+      "score": 0.91,
+      "matchType": "brand",
+      "matchedTerms": ["milk", "oatly"]
+    }
+  ]
+}
+```
+
+### `GET /autocomplete`
+
+Fast add-item suggestions for iOS text entry. Uses search ranking then deduplicates by canonical item intent for short lists.
+
+**Query parameters**
+
+- `q` *(required, string)*: partial user input
+- `limit` *(optional, int, default `8`, max `20`)*: number of suggestions
+
+**Response shape**
+
+```json
+{
+  "query": "semi skim",
+  "total": 3,
+  "suggestions": [
+    {
+      "suggestion": "tesco semi skimmed milk",
+      "displayName": "Tesco Semi Skimmed Milk",
+      "brand": "Tesco",
+      "size": "2L",
+      "category": "milk",
+      "score": 0.87,
+      "matchType": "partial"
+    }
+  ]
+}
+```
+
+### iOS usage guidance
+
+- Call `/autocomplete` on debounced keystrokes (e.g. 150–250ms).
+- When the user submits search or taps “see all”, call `/search` for richer ranked rows.
+- Continue using `/catalog` for full browsing and compatibility with existing Swift models.
 
 ## Stage 3 Step 2: provider architecture + import pipeline
 
