@@ -6,25 +6,48 @@ final class LiveSupermarketDataService: SupermarketDataProviding {
         let timeout: TimeInterval
 
         static func fromEnvironment() -> Config? {
-            guard let raw = ProcessInfo.processInfo.environment["LIVE_SUPERMARKET_DATA_URL"],
-                  let url = URL(string: raw)
-            else {
+            let key = "LIVE_SUPERMARKET_DATA_URL"
+            guard let raw = ProcessInfo.processInfo.environment[key], !raw.isEmpty else {
+                print("[LiveSupermarketDataService][config] \(key) not set; app will use mock service.")
                 return nil
             }
 
+            guard let url = URL(string: raw) else {
+                print("[LiveSupermarketDataService][config] \(key) has invalid URL value: \(raw)")
+                return nil
+            }
+
+            print("[LiveSupermarketDataService][config] \(key) found: \(url.absoluteString)")
             return Config(url: url, timeout: 8)
+        }
+    }
+
+    struct Diagnostics {
+        let liveURL: URL
+        let requestedAt: Date
+        let completedAt: Date
+        let httpStatusCode: Int?
+        let supermarketCount: Int
+        let errorDescription: String?
+        let backendMarker: String?
+
+        var wasSuccessful: Bool {
+            errorDescription == nil && supermarketCount > 0
         }
     }
 
     private let markets: [Supermarket]
     private let productsByStore: [String: [SupermarketProduct]]
+    let diagnostics: Diagnostics
 
     init(config: Config) {
-        let payload = Self.loadPayload(config: config)
-        self.markets = payload.supermarkets.map { Supermarket(name: $0.name, description: $0.description) }
+        let report = Self.loadPayload(config: config)
+        diagnostics = report.diagnostics
+
+        self.markets = report.payload.supermarkets.map { Supermarket(name: $0.name, description: $0.description) }
 
         var builtProducts: [String: [SupermarketProduct]] = [:]
-        for market in payload.supermarkets {
+        for market in report.payload.supermarkets {
             builtProducts[market.name] = market.products.map { product in
                 SupermarketProduct(
                     supermarketName: market.name,
@@ -55,70 +78,160 @@ final class LiveSupermarketDataService: SupermarketDataProviding {
         productsByStore[supermarket.name, default: []]
     }
 
-    private static func loadPayload(config: Config) -> LivePayload {
+    private static func loadPayload(config: Config) -> LiveLoadReport {
+        let requestedAt = Date()
+        print("[LiveSupermarketDataService][request] GET \(config.url.absoluteString)")
+
         var request = URLRequest(url: config.url)
         request.timeoutInterval = config.timeout
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        let semaphore = DispatchSemaphore(value: 0)
-        var result: Result<LivePayload, Error>?
+        let group = DispatchGroup()
+        group.enter()
+
+        var httpStatusCode: Int?
+        var outcome: Result<LivePayload, Error>?
 
         URLSession.shared.dataTask(with: request) { data, response, error in
-            defer { semaphore.signal() }
+            defer { group.leave() }
 
             if let error {
-                result = .failure(error)
+                outcome = .failure(error)
                 return
             }
 
-            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
-                result = .failure(LiveDataError.invalidStatus)
+            guard let http = response as? HTTPURLResponse else {
+                outcome = .failure(LiveDataError.invalidResponse)
+                return
+            }
+
+            httpStatusCode = http.statusCode
+            guard (200..<300).contains(http.statusCode) else {
+                outcome = .failure(LiveDataError.invalidStatus(http.statusCode))
                 return
             }
 
             guard let data else {
-                result = .failure(LiveDataError.emptyResponse)
+                outcome = .failure(LiveDataError.emptyResponse)
                 return
             }
 
             do {
-                let decoder = JSONDecoder()
-                let payload = try decoder.decode(LivePayload.self, from: data)
+                let payload = try JSONDecoder().decode(LivePayload.self, from: data)
                 guard !payload.supermarkets.isEmpty else {
-                    result = .failure(LiveDataError.noSupermarkets)
+                    outcome = .failure(LiveDataError.noSupermarkets)
                     return
                 }
-                result = .success(payload)
+                outcome = .success(payload)
             } catch {
-                result = .failure(error)
+                outcome = .failure(error)
             }
         }.resume()
 
-        _ = semaphore.wait(timeout: .now() + config.timeout + 1)
+        let waitResult = group.wait(timeout: .now() + config.timeout + 1)
+        let completedAt = Date()
 
-        switch result {
-        case .success(let payload):
-            return payload
-        case .failure(let error):
-            print("[LiveSupermarketDataService] Failed to load live data: \(error)")
-            return LivePayload.empty
-        case .none:
-            print("[LiveSupermarketDataService] Timed out loading live data.")
-            return LivePayload.empty
+        switch (waitResult, outcome) {
+        case (_, .success(let payload)):
+            let marker = payload.metadata?.debugMarker
+            print("[LiveSupermarketDataService][response] status=\(httpStatusCode ?? -1) decoded=true supermarkets=\(payload.supermarkets.count) marker=\(marker ?? "n/a")")
+            return LiveLoadReport(
+                payload: payload,
+                diagnostics: Diagnostics(
+                    liveURL: config.url,
+                    requestedAt: requestedAt,
+                    completedAt: completedAt,
+                    httpStatusCode: httpStatusCode,
+                    supermarketCount: payload.supermarkets.count,
+                    errorDescription: nil,
+                    backendMarker: marker
+                )
+            )
+        case (_, .failure(let error)):
+            let message = error.localizedDescription
+            print("[LiveSupermarketDataService][response] status=\(httpStatusCode ?? -1) decoded=false supermarkets=0 error=\(message)")
+            return LiveLoadReport(
+                payload: .empty,
+                diagnostics: Diagnostics(
+                    liveURL: config.url,
+                    requestedAt: requestedAt,
+                    completedAt: completedAt,
+                    httpStatusCode: httpStatusCode,
+                    supermarketCount: 0,
+                    errorDescription: message,
+                    backendMarker: nil
+                )
+            )
+        case (.timedOut, .none):
+            let message = LiveDataError.timedOut.localizedDescription
+            print("[LiveSupermarketDataService][response] status=\(httpStatusCode ?? -1) decoded=false supermarkets=0 error=\(message)")
+            return LiveLoadReport(
+                payload: .empty,
+                diagnostics: Diagnostics(
+                    liveURL: config.url,
+                    requestedAt: requestedAt,
+                    completedAt: completedAt,
+                    httpStatusCode: httpStatusCode,
+                    supermarketCount: 0,
+                    errorDescription: message,
+                    backendMarker: nil
+                )
+            )
+        case (_, .none):
+            let message = LiveDataError.unknown.localizedDescription
+            print("[LiveSupermarketDataService][response] status=\(httpStatusCode ?? -1) decoded=false supermarkets=0 error=\(message)")
+            return LiveLoadReport(
+                payload: .empty,
+                diagnostics: Diagnostics(
+                    liveURL: config.url,
+                    requestedAt: requestedAt,
+                    completedAt: completedAt,
+                    httpStatusCode: httpStatusCode,
+                    supermarketCount: 0,
+                    errorDescription: message,
+                    backendMarker: nil
+                )
+            )
         }
     }
 }
 
-private enum LiveDataError: Error {
-    case invalidStatus
+private struct LiveLoadReport {
+    let payload: LivePayload
+    let diagnostics: LiveSupermarketDataService.Diagnostics
+}
+
+private enum LiveDataError: LocalizedError {
+    case invalidResponse
+    case invalidStatus(Int)
     case emptyResponse
     case noSupermarkets
+    case timedOut
+    case unknown
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse: return "Live request returned a non-HTTP response."
+        case .invalidStatus(let code): return "Live request failed with HTTP status \(code)."
+        case .emptyResponse: return "Live request returned no body."
+        case .noSupermarkets: return "Live payload decoded but contained zero supermarkets."
+        case .timedOut: return "Live request timed out before completion."
+        case .unknown: return "Live request failed for an unknown reason."
+        }
+    }
 }
 
 private struct LivePayload: Decodable {
     let supermarkets: [LiveSupermarket]
+    let metadata: LiveCatalogMetadata?
 
-    static let empty = LivePayload(supermarkets: [])
+    static let empty = LivePayload(supermarkets: [], metadata: nil)
+}
+
+private struct LiveCatalogMetadata: Decodable {
+    let source: String?
+    let debugMarker: String?
+    let generatedAt: String?
 }
 
 private struct LiveSupermarket: Decodable {

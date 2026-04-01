@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter
@@ -33,10 +34,19 @@ class CatalogSupermarket(BaseModel):
     products: list[CatalogProduct]
 
 
+class CatalogMetadata(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source: str
+    debugMarker: str
+    generatedAt: str
+
+
 class CatalogResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     supermarkets: list[CatalogSupermarket]
+    metadata: CatalogMetadata
 
 
 CATALOG = CatalogResponse(
@@ -77,10 +87,23 @@ CATALOG = CatalogResponse(
                 CatalogProduct(name="Sainsbury's British Chicken Breast", category=GroceryCategory.chickenBreast, subcategory="fresh", price=Decimal("5.95"), size="650g", brand="Sainsbury's", isOwnBrand=True, isPremium=False, isOrganic=False, unitDescription="per kg", unitValue=Decimal("9.154"), tags=["chicken", "meat", "fresh"]),
             ],
         ),
-    ]
+    ],
+    metadata=CatalogMetadata(
+        source="live-backend",
+        debugMarker="LIVE_CATALOG_V1",
+        generatedAt=datetime.now(UTC).isoformat(),
+    ),
 )
 
 
 @router.get('/catalog', response_model=CatalogResponse)
 def catalog() -> CatalogResponse:
-    return CATALOG
+    return CATALOG.model_copy(
+        update={
+            "metadata": CatalogMetadata(
+                source="live-backend",
+                debugMarker="LIVE_CATALOG_V1",
+                generatedAt=datetime.now(UTC).isoformat(),
+            )
+        }
+    )
