@@ -47,7 +47,9 @@ def init_db() -> None:
                 normalized_unit TEXT NOT NULL,
                 normalized_size_value REAL,
                 tags TEXT NOT NULL,
-                searchable_text TEXT NOT NULL
+                searchable_text TEXT NOT NULL,
+                token_fingerprint TEXT NOT NULL DEFAULT '',
+                canonical_aliases TEXT NOT NULL DEFAULT ''
             );
 
             CREATE TABLE IF NOT EXISTS product_mappings (
@@ -86,5 +88,53 @@ def init_db() -> None:
                 endpoint TEXT NOT NULL,
                 created_at TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS search_quality_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                query TEXT NOT NULL,
+                normalized_query TEXT NOT NULL,
+                endpoint TEXT NOT NULL,
+                top_score REAL NOT NULL,
+                weak_match INTEGER NOT NULL,
+                miss INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS basket_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                basket_key TEXT NOT NULL,
+                supermarket_count INTEGER NOT NULL,
+                total REAL NOT NULL,
+                unavailable_items INTEGER NOT NULL DEFAULT 0,
+                metadata_json TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS price_drop_alert_candidates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                raw_product_id INTEGER NOT NULL,
+                previous_price REAL NOT NULL,
+                latest_price REAL NOT NULL,
+                change_ratio REAL NOT NULL,
+                status TEXT NOT NULL DEFAULT 'candidate',
+                detected_at TEXT NOT NULL,
+                FOREIGN KEY(raw_product_id) REFERENCES raw_retailer_products(id)
+            );
             """
         )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_price_snapshots_raw_time ON price_snapshots(raw_product_id, captured_at DESC)"
+        )
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_canonical_intent_category ON canonical_products(intent_key, category)"
+        )
+        _ensure_column(conn, "canonical_products", "token_fingerprint", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "canonical_products", "canonical_aliases", "TEXT NOT NULL DEFAULT ''")
+        conn.commit()
+
+
+def _ensure_column(conn: sqlite3.Connection, table: str, column: str, definition: str) -> None:
+    cols = conn.execute(f"PRAGMA table_info({table})").fetchall()
+    if any(row["name"] == column for row in cols):
+        return
+    conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")

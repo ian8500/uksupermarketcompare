@@ -25,6 +25,7 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
     updated_raw = 0
     inserted_canonical = 0
     inserted_price_snapshots = 0
+    inserted_price_drop_candidates = 0
 
     with get_connection() as conn:
         for provider in providers:
@@ -55,13 +56,27 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                 ).fetchone()
                 if canonical_row:
                     canonical_id = canonical_row[0]
+                    conn.execute(
+                        """
+                        UPDATE canonical_products
+                        SET searchable_text = ?, tags = ?, canonical_aliases = ?, token_fingerprint = ?
+                        WHERE id = ?
+                        """,
+                        (
+                            product.searchable_text,
+                            ",".join(product.normalized_tags),
+                            ",".join(product.canonical_aliases),
+                            product.token_fingerprint,
+                            canonical_id,
+                        ),
+                    )
                 else:
                     canonical_id = conn.execute(
                         """
                         INSERT INTO canonical_products(
                             canonical_name, intent_key, category, normalized_brand,
-                            normalized_unit, normalized_size_value, tags, searchable_text
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                            normalized_unit, normalized_size_value, tags, searchable_text, token_fingerprint, canonical_aliases
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             product.normalized_name,
@@ -72,6 +87,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                             product.normalized_size.normalized_value,
                             ",".join(product.normalized_tags),
                             product.searchable_text,
+                            product.token_fingerprint,
+                            ",".join(product.canonical_aliases),
                         ),
                     ).lastrowid
                     inserted_canonical += 1
@@ -148,6 +165,18 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                 new_price = float(product.raw.price)
                 new_unit_value = float(product.raw.unit_value)
                 if not latest or latest["price"] != new_price or latest["unit_value"] != new_unit_value:
+                    if latest and latest["price"] > 0 and new_price < latest["price"]:
+                        change_ratio = round((latest["price"] - new_price) / latest["price"], 4)
+                        if change_ratio >= 0.05:
+                            conn.execute(
+                                """
+                                INSERT INTO price_drop_alert_candidates(
+                                    raw_product_id, previous_price, latest_price, change_ratio, status, detected_at
+                                ) VALUES(?, ?, ?, ?, ?, ?)
+                                """,
+                                (raw_product_id, latest["price"], new_price, change_ratio, "candidate", now),
+                            )
+                            inserted_price_drop_candidates += 1
                     conn.execute(
                         """
                         INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, captured_at)
@@ -172,12 +201,13 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
             )
         conn.commit()
     logger.info(
-        "Import finished providers=%d inserted_raw=%d updated_raw=%d inserted_canonical=%d inserted_price_snapshots=%d",
+        "Import finished providers=%d inserted_raw=%d updated_raw=%d inserted_canonical=%d inserted_price_snapshots=%d inserted_price_drop_candidates=%d",
         len(providers),
         inserted_raw,
         updated_raw,
         inserted_canonical,
         inserted_price_snapshots,
+        inserted_price_drop_candidates,
     )
 
     return {
@@ -186,4 +216,5 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
         "updated_raw": updated_raw,
         "inserted_canonical": inserted_canonical,
         "inserted_price_snapshots": inserted_price_snapshots,
+        "inserted_price_drop_candidates": inserted_price_drop_candidates,
     }

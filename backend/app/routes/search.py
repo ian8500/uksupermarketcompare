@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict
 
-from app.services.diagnostics import record_search_event
+from app.services.diagnostics import record_search_event, record_search_quality_event
 from app.services.normalization import normalize_product_name
 from app.services.search_service import autocomplete_catalog, search_catalog
 
@@ -67,6 +67,15 @@ def search(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50
     ranked = search_catalog(q, limit=limit)
     normalized_query = normalize_product_name(q)
     record_search_event(query=q, normalized_query=normalized_query, result_count=len(ranked), endpoint="/search")
+    top_score = ranked[0].score if ranked else 0.0
+    record_search_quality_event(
+        query=q,
+        normalized_query=normalized_query,
+        endpoint="/search",
+        top_score=top_score,
+        weak_match=bool(ranked and top_score < 0.65),
+        miss=not ranked,
+    )
     logger.info("search endpoint q=%r normalized=%r total=%d", q, normalized_query, len(ranked))
     return SearchResponse(
         query=q,
@@ -104,6 +113,15 @@ def autocomplete(q: str = Query(..., min_length=1), limit: int = Query(8, ge=1, 
         normalized_query=normalized_query,
         result_count=len(suggestions),
         endpoint="/autocomplete",
+    )
+    top_score = suggestions[0].score if suggestions else 0.0
+    record_search_quality_event(
+        query=q,
+        normalized_query=normalized_query,
+        endpoint="/autocomplete",
+        top_score=top_score,
+        weak_match=bool(suggestions and top_score < 0.65),
+        miss=not suggestions,
     )
     logger.info("autocomplete endpoint q=%r normalized=%r total=%d", q, normalized_query, len(suggestions))
     return AutocompleteResponse(query=q, total=len(suggestions), suggestions=suggestions)

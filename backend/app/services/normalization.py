@@ -64,6 +64,17 @@ def normalize_text(text: str) -> str:
     return " ".join(cleaned.split())
 
 
+def tokenize_text(text: str) -> list[str]:
+    return [token for token in normalize_text(text).split() if token]
+
+
+def token_fingerprint(*chunks: str) -> str:
+    tokens: set[str] = set()
+    for chunk in chunks:
+        tokens.update(tokenize_text(chunk))
+    return "|".join(sorted(tokens))
+
+
 def normalize_brand(brand: str) -> str:
     base = normalize_text(brand)
     return BRAND_NORMALIZATION.get(base, base)

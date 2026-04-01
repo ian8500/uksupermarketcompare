@@ -17,6 +17,27 @@ def record_search_event(*, query: str, normalized_query: str, result_count: int,
         conn.commit()
 
 
+def record_search_quality_event(
+    *,
+    query: str,
+    normalized_query: str,
+    endpoint: str,
+    top_score: float,
+    weak_match: bool,
+    miss: bool,
+) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            """
+            INSERT INTO search_quality_events(
+                query, normalized_query, endpoint, top_score, weak_match, miss, created_at
+            ) VALUES(?, ?, ?, ?, ?, ?, ?)
+            """,
+            (query, normalized_query, endpoint, top_score, int(weak_match), int(miss), datetime.now(UTC).isoformat()),
+        )
+        conn.commit()
+
+
 def catalog_diagnostics() -> dict:
     with get_connection() as conn:
         per_market_rows = conn.execute(
@@ -33,12 +54,16 @@ def catalog_diagnostics() -> dict:
         categories = conn.execute(
             "SELECT DISTINCT category FROM canonical_products WHERE TRIM(category) <> '' ORDER BY category"
         ).fetchall()
+        snapshot_rows = conn.execute("SELECT COUNT(*) AS count FROM price_snapshots").fetchone()["count"]
+        alert_candidates = conn.execute("SELECT COUNT(*) AS count FROM price_drop_alert_candidates").fetchone()["count"]
 
     return {
         "productsPerSupermarket": [{"supermarket": row["supermarket"], "products": row["products"]} for row in per_market_rows],
         "canonicalProducts": canonical_count,
         "mappings": mapping_count,
         "categoriesCovered": [row["category"] for row in categories],
+        "priceSnapshots": int(snapshot_rows or 0),
+        "priceDropAlertCandidates": int(alert_candidates or 0),
     }
 
 
@@ -60,6 +85,15 @@ def search_diagnostics() -> dict:
             ORDER BY endpoint
             """
         ).fetchall()
+        quality = conn.execute(
+            """
+            SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN weak_match = 1 THEN 1 ELSE 0 END) AS weak_matches,
+                AVG(top_score) AS avg_top_score
+            FROM search_quality_events
+            """
+        ).fetchone()
 
     total_queries = int(totals["total_queries"] or 0)
     miss_queries = int(totals["miss_queries"] or 0)
@@ -69,6 +103,8 @@ def search_diagnostics() -> dict:
         "totalQueries": total_queries,
         "missQueries": miss_queries,
         "missRate": miss_rate,
+        "weakMatches": int(quality["weak_matches"] or 0),
+        "avgTopScore": round(float(quality["avg_top_score"] or 0.0), 4),
         "byEndpoint": [
             {
                 "endpoint": row["endpoint"],

@@ -22,6 +22,8 @@ class CatalogDiagnosticsResponse(BaseModel):
     canonicalProducts: int
     mappings: int
     categoriesCovered: list[str]
+    priceSnapshots: int
+    priceDropAlertCandidates: int
 
 
 class EndpointSearchDiagnostics(BaseModel):
@@ -38,6 +40,8 @@ class SearchDiagnosticsResponse(BaseModel):
     totalQueries: int
     missQueries: int
     missRate: float
+    weakMatches: int
+    avgTopScore: float
     byEndpoint: list[EndpointSearchDiagnostics]
 
 

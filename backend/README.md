@@ -2,6 +2,29 @@
 
 This backend now serves the Swift app's live catalog payload with the exact JSON structure expected by `LiveSupermarketDataService`.
 
+## Platform milestone: scalable supermarket data backend
+
+This milestone moves the backend from a seeded prototype toward a normalized, provider-driven platform:
+
+- **Provider architecture layers are explicit**:
+  - `providers/*` for retailer feed adapters
+  - `ingestion.py` for import orchestration + canonical mapping + snapshot writes
+  - `catalog_store.py` / `search_service.py` for serving read models
+- **Canonical product scale support is improved**:
+  - canonical rows now retain `canonical_aliases` and `token_fingerprint` for higher-quality matching across retailer naming variations
+  - stronger normalization/tokenization helpers support large-catalog matching
+- **Search/autocomplete hardening**:
+  - ranking uses canonical aliases + token fingerprints + mapping confidence
+  - quality telemetry captures misses and weak top matches
+  - app-facing `/search` and `/autocomplete` response contracts remain unchanged
+- **Price history + alert groundwork**:
+  - snapshot indexing for larger history datasets
+  - `price_drop_alert_candidates` table with automatic candidate creation when imports detect meaningful price drops
+  - `basket_history` table added as foundational structure for future saved basket evolution
+- **Observability improvements**:
+  - diagnostics now include `priceSnapshots`, `priceDropAlertCandidates`, `weakMatches`, and `avgTopScore`
+  - new milestone contract tests validate these backend/platform structures
+
 ## Endpoints
 
 - `GET /health`
@@ -219,6 +242,8 @@ Returns a compact health snapshot:
 - `canonicalProducts`: canonical intent rows
 - `mappings`: raw-to-canonical mapping rows
 - `categoriesCovered`: distinct canonical categories currently represented
+- `priceSnapshots`: current recorded snapshot count
+- `priceDropAlertCandidates`: candidates identified for future price-drop notifications
 
 Use this to quickly spot import issues (for example, a retailer showing `0` products or unexpectedly low mappings).
 
@@ -229,6 +254,8 @@ Telemetry from `/search` + `/autocomplete` requests:
 - `totalQueries`
 - `missQueries` (queries with `0` results)
 - `missRate`
+- `weakMatches` (requests where top score was below quality threshold)
+- `avgTopScore` across requests
 - `byEndpoint` split (`/search` vs `/autocomplete`)
 
 This gives a basic measurable signal of search health and potential intent-gaps.
@@ -246,6 +273,13 @@ This gives a basic measurable signal of search health and potential intent-gaps.
 3. Verify `/search` and `/autocomplete` contract tests pass.
 4. Hit `/diagnostics/catalog` and confirm expected non-zero counts.
 5. Hit `/search` with known miss terms, then confirm `/diagnostics/search` miss metrics update.
+
+## What remains before broader real-world data integration
+
+1. Add live provider implementations (API, file drops, or crawling inputs) behind existing provider contracts.
+2. Introduce async/batch ingestion workers and operational retry/idempotency controls for large feed updates.
+3. Promote search telemetry to dashboarding/alerts (e.g., weak-match spikes by retailer/category).
+4. Build first user-facing workflows for price-drop alerts and basket-history trend views backed by the new schema.
 
 ## Swift setup
 
