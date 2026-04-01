@@ -5,27 +5,17 @@ struct BasketComparisonResultsView: View {
     @ObservedObject var viewModel: BasketComparisonResultsViewModel
     @State private var didSave = false
     @State private var revealSections = false
+    @State private var highlightedStrategyID: String?
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: BrandMetrics.spacingLG) {
                 BrandHeader(title: "Premium basket decision", subtitle: "Clear outcomes, practical plan, confident checkout.")
                 DataSourceBadgeView(status: coordinator.dataSourceStatus)
-                BrandCard {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Your selected plan total")
-                            .font(BrandTypography.caption.weight(.semibold))
-                            .foregroundStyle(BrandPalette.textSecondary)
-                        AnimatedCurrencyText(value: viewModel.result.selectedBasket.total)
-                            .font(BrandTypography.hero)
-                            .foregroundStyle(BrandPalette.navy)
-                        HStack(spacing: 8) {
-                            BrandChip(text: "Save \(viewModel.result.savingsVsMostExpensive.asGBP()) vs highest", tint: BrandPalette.success)
-                            BrandChip(text: "\(viewModel.selectedStoresUsed.count) store(s)", tint: BrandPalette.blue)
-                            BrandChip(text: viewModel.selectedModeTitle, tint: BrandPalette.red)
-                        }
-                    }
-                }
+
+                heroResultCard
+                    .opacity(revealSections ? 1 : 0)
+                    .offset(y: revealSections ? 0 : 12)
 
                 section("Decision cards") {
                     decisionSummaryCards
@@ -87,7 +77,7 @@ struct BasketComparisonResultsView: View {
                             }
                         }
 
-                        ForEach(viewModel.purchasePlanByStore) { group in
+                        ForEach(Array(viewModel.purchasePlanByStore.enumerated()), id: \.element.id) { index, group in
                             BrandCard {
                                 VStack(alignment: .leading, spacing: 10) {
                                     HStack(alignment: .top) {
@@ -128,6 +118,9 @@ struct BasketComparisonResultsView: View {
                                     }
                                 }
                             }
+                            .opacity(revealSections ? 1 : 0)
+                            .offset(y: revealSections ? 0 : 8)
+                            .animation(.easeOut(duration: 0.35).delay(0.08 * Double(index + 1)), value: revealSections)
                         }
                     }
                 }
@@ -251,8 +244,11 @@ struct BasketComparisonResultsView: View {
 
     private var decisionSummaryCards: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ForEach(viewModel.strategyCards) { card in
+            ForEach(Array(viewModel.strategyCards.enumerated()), id: \.element.id) { index, card in
                 premiumDecisionCard(card: card)
+                    .opacity(revealSections ? 1 : 0)
+                    .offset(y: revealSections ? 0 : 10)
+                    .animation(.easeOut(duration: 0.3).delay(0.06 * Double(index + 1)), value: revealSections)
             }
         }
     }
@@ -270,8 +266,10 @@ struct BasketComparisonResultsView: View {
 
     private func premiumDecisionCard(card: BasketComparisonResultsViewModel.StrategyCard) -> some View {
         let tint = card.tint == "green" ? BrandPalette.success : card.tint == "blue" ? BrandPalette.blue : card.tint == "navy" ? BrandPalette.navy : BrandPalette.red
+        let isHighlighted = highlightedStrategyID == card.id || (highlightedStrategyID == nil && card.isSelected)
+
         return BrandCard {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: BrandMetrics.spacingSM) {
                 HStack {
                     Text(card.title.uppercased())
                     if card.isSelected {
@@ -281,8 +279,19 @@ struct BasketComparisonResultsView: View {
                 }
                     .font(BrandTypography.caption.weight(.semibold))
                     .foregroundStyle(tint)
+                HStack(spacing: BrandMetrics.spacingXS) {
+                    if card.title.contains("Cheapest") {
+                        BrandBadge(text: "Cheapest", tint: BrandPalette.success)
+                    }
+                    if card.title.contains("Convenience") {
+                        BrandBadge(text: "Fastest", tint: BrandPalette.blue)
+                    }
+                    if card.storesUsed.count == 1 {
+                        BrandBadge(text: "1 store", tint: BrandPalette.navy)
+                    }
+                }
                 Text(card.total.asGBP())
-                    .font(BrandTypography.title)
+                    .font(BrandTypography.hero)
                     .foregroundStyle(tint)
                 Text("Stores used: \(card.storesUsed.isEmpty ? "None" : card.storesUsed.joined(separator: ", "))")
                     .font(BrandTypography.caption)
@@ -295,10 +304,59 @@ struct BasketComparisonResultsView: View {
                     .foregroundStyle(BrandPalette.textSecondary)
             }
         }
+        .overlay {
+            RoundedRectangle(cornerRadius: BrandMetrics.cardRadius, style: .continuous)
+                .stroke(isHighlighted ? tint.opacity(0.5) : .clear, lineWidth: 2)
+        }
+        .scaleEffect(isHighlighted ? 1 : 0.985)
+        .onTapGesture {
+            highlightedStrategyID = card.id
+            HapticFeedbackService.tap()
+        }
+        .animation(.spring(response: 0.28, dampingFraction: 0.85), value: isHighlighted)
     }
 
     private func isCheapestSingleStore(_ total: SupermarketBasketTotal) -> Bool {
         viewModel.result.cheapestSingleStore?.supermarket.id == total.supermarket.id
+    }
+}
+
+private extension BasketComparisonResultsView {
+    var heroResultCard: some View {
+        VStack(alignment: .leading, spacing: BrandMetrics.spacingSM) {
+            Text("Best shop this week")
+                .font(BrandTypography.section)
+                .foregroundStyle(.white.opacity(0.92))
+            AnimatedCurrencyText(value: viewModel.result.selectedBasket.total)
+                .font(BrandTypography.display)
+                .foregroundStyle(.white)
+
+            Text("Your selected checkout strategy: \(viewModel.selectedModeTitle)")
+                .font(BrandTypography.body.weight(.medium))
+                .foregroundStyle(.white.opacity(0.94))
+
+            HStack(spacing: 8) {
+                BrandChip(text: "Save \(viewModel.result.savingsVsMostExpensive.asGBP()) vs alternative", tint: .white)
+                BrandChip(text: "\(viewModel.selectedStoresUsed.count) store(s)", tint: .white)
+            }
+        }
+        .padding(BrandMetrics.spacingLG)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: BrandMetrics.cardRadius, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [BrandPalette.red, BrandPalette.blue],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: BrandMetrics.cardRadius, style: .continuous)
+                .stroke(.white.opacity(0.22), lineWidth: 1)
+        )
+        .shadow(color: BrandPalette.blue.opacity(0.28), radius: 16, y: 9)
     }
 }
 
@@ -310,8 +368,9 @@ private struct AnimatedCurrencyText: View {
     var body: some View {
         Text(Decimal(displayedValue).asGBP())
             .contentTransition(.numericText(value: displayedValue))
+            .opacity(displayedValue == 0 ? 0.5 : 1)
             .onAppear {
-                withAnimation(.easeOut(duration: 0.5)) {
+                withAnimation(.easeOut(duration: 0.75)) {
                     displayedValue = (value as NSDecimalNumber).doubleValue
                 }
             }

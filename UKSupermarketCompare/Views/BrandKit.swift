@@ -14,11 +14,23 @@ enum BrandPalette {
 }
 
 enum BrandTypography {
+    static let display = Font.system(size: 42, weight: .heavy, design: .rounded)
     static let hero = Font.system(size: 34, weight: .bold, design: .rounded)
     static let title = Font.system(.title3, design: .rounded).weight(.semibold)
     static let section = Font.system(.headline, design: .rounded).weight(.semibold)
     static let body = Font.system(.body, design: .rounded)
     static let caption = Font.system(.caption, design: .rounded)
+}
+
+enum BrandMetrics {
+    static let spacingXS: CGFloat = 6
+    static let spacingSM: CGFloat = 10
+    static let spacingMD: CGFloat = 16
+    static let spacingLG: CGFloat = 22
+    static let cardRadius: CGFloat = 20
+    static let controlRadius: CGFloat = 16
+    static let cardShadowRadius: CGFloat = 14
+    static let cardShadowYOffset: CGFloat = 7
 }
 
 struct BrandLogoMark: View {
@@ -102,9 +114,9 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
             .font(BrandTypography.section)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .padding(.vertical, 15)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: BrandMetrics.controlRadius, style: .continuous)
                     .fill(
                         LinearGradient(
                             colors: [BrandPalette.red, BrandPalette.blue],
@@ -114,7 +126,8 @@ struct BrandPrimaryButtonStyle: ButtonStyle {
                     )
             )
             .opacity(configuration.isPressed ? 0.9 : 1)
-            .scaleEffect(configuration.isPressed ? 0.99 : 1)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
+            .shadow(color: BrandPalette.blue.opacity(configuration.isPressed ? 0.14 : 0.2), radius: 10, y: 5)
     }
 }
 
@@ -126,14 +139,15 @@ struct BrandSecondaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
             .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: BrandMetrics.controlRadius, style: .continuous)
                     .fill(.white)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                RoundedRectangle(cornerRadius: BrandMetrics.controlRadius, style: .continuous)
                     .stroke(BrandPalette.blue.opacity(0.35), lineWidth: 1.5)
             )
             .opacity(configuration.isPressed ? 0.9 : 1)
+            .scaleEffect(configuration.isPressed ? 0.985 : 1)
     }
 }
 
@@ -159,14 +173,14 @@ struct BrandCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(16)
+            .padding(BrandMetrics.spacingMD)
             .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                RoundedRectangle(cornerRadius: BrandMetrics.cardRadius, style: .continuous)
                     .fill(.white)
-                    .shadow(color: BrandPalette.blue.opacity(0.10), radius: 12, x: 0, y: 6)
+                    .shadow(color: BrandPalette.blue.opacity(0.10), radius: BrandMetrics.cardShadowRadius, x: 0, y: BrandMetrics.cardShadowYOffset)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                RoundedRectangle(cornerRadius: BrandMetrics.cardRadius, style: .continuous)
                     .stroke(BrandPalette.blue.opacity(0.08), lineWidth: 1)
             )
     }
@@ -276,6 +290,10 @@ enum HapticFeedbackService {
 
     static func bestOptionSelected() {
         impact(.rigid)
+    }
+
+    static func tap() {
+        impact(.soft)
     }
 
     private static func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
