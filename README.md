@@ -51,15 +51,51 @@ Set an environment variable in your Xcode Run scheme:
 
 - `LIVE_SUPERMARKET_DATA_URL=http://localhost:8000/catalog`
 
-The Swift decoder expects supermarket/product keys exactly as today; it safely ignores extra fields.
-The backend now includes a metadata marker (`LIVE_CATALOG_V1`) in `/catalog` responses so you can prove live data is being served.
+The Swift decoder expects `products[].category` to be one of these exact raw values:
+`milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
+
+The `/catalog` response includes `metadata.debugMarker` so you can verify live payloads are being used (`LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH`).
+
+Example payload shape:
+
+```json
+{
+  "supermarkets": [
+    {
+      "name": "Tesco",
+      "description": "...",
+      "products": [
+        {
+          "name": "Tesco British Semi Skimmed Milk",
+          "category": "milk",
+          "subcategory": "milk",
+          "price": 1.55,
+          "size": "2L",
+          "brand": "Tesco",
+          "isOwnBrand": true,
+          "isPremium": false,
+          "isOrganic": false,
+          "unitDescription": "per litre",
+          "unitValue": 0.775,
+          "tags": ["milk", "semi skimmed", "daily staple"]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "source": "backend.catalog",
+    "debugMarker": "LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH",
+    "generatedAt": "2026-04-01T00:00:00Z"
+  }
+}
+```
 
 ## Safe live-mode testing checklist
 
 1. Start backend locally (`backend/README.md` has commands).
 2. Set `LIVE_SUPERMARKET_DATA_URL` in the scheme.
 3. Run app and verify badge shows `LIVE DATA`.
-4. Open **Data Source Debug** and confirm marker `LIVE_CATALOG_V1`.
+4. Open **Data Source Debug** and confirm marker `LIVE_CATALOG_V2_SWIFT_CATEGORY_MATCH`.
 5. Stop backend (or break URL), relaunch app, and verify badge shows `LIVE FAILED → USING MOCK` plus the captured error.
 
 ## Project structure
