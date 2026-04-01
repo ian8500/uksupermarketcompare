@@ -60,28 +60,47 @@ Categories are constrained to the Swift `GroceryCategory` raw values:
 
 `milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
 
+## Stage 3 Step 2: provider architecture + import pipeline
 
-## Stage 3 data architecture (normalized catalog foundation)
+### Providers
 
-The backend now includes a persistent normalized data model (SQLite for local dev, compatible with production SQL databases via SQLAlchemy):
+Retailer ingestion now uses provider abstractions in `app/services/providers/`:
 
-- **Retailer**: supermarket identity and metadata.
-- **RawRetailerProduct**: exact source item from each retailer feed (name/size/brand/subcategory preserved).
-- **CanonicalProduct**: normalized comparable product intent (canonical name/category/normalized size + tags).
-- **ProductMapping**: links each raw retailer product to a canonical product with confidence/method metadata.
-- **PriceSnapshot**: time-based product prices for future historical pricing and trend analysis.
-- **SearchSynonym**: alias dictionary for search and matching normalization.
+- `TescoProvider`
+- `AsdaProvider`
+- `SainsburysProvider`
 
-A normalization layer (`app/services/normalization.py`) standardizes:
+Each provider currently reads structured local import files from `app/data/imports/*.json`, then performs normalization and canonical intent-key generation through `app/services/normalization.py`. This keeps local development deterministic while remaining ready for future live feed adapters (the same provider contract can load from APIs, S3 feeds, etc).
 
-- product names and synonyms (`beanz` -> `baked beans`, `yoghurt` -> `yogurt`)
-- brand forms (`Kelloggs` -> `kellogg's`)
-- sizes/units (`kg`->`g`, `l`->`ml`)
-- tags
-- inferred canonical category/intent
-- generated searchable text fields for matching and retrieval
+### Ingestion workflow
 
-`/catalog` remains backward-compatible for the Swift app, while now reading from the persisted normalized model (with seed fallback behavior preserved).
+Use the import command:
+
+```bash
+cd backend
+python -m scripts.import_catalog
+```
+
+Optional reset-import per retailer:
+
+```bash
+python -m scripts.import_catalog --replace
+```
+
+Behavior:
+
+- idempotent raw import matching (`retailer + source_product_id/name/brand/size`)
+- canonical de-duplication via normalized `intent_key`
+- mapping upsert for each raw product
+- price snapshots only inserted when price/unit value changed
+
+### Refresh local product data
+
+1. Edit `app/data/imports/tesco.json`, `asda.json`, or `sainsburys.json`.
+2. Re-run `python -m scripts.import_catalog`.
+3. Restart API if needed and verify `GET /catalog`.
+
+The seeded/import catalog now contains a substantially larger mixed product base (own-brand, branded, premium, and multiple size/variant combinations across all three supermarkets).
 
 ## Run locally (port 8000)
 

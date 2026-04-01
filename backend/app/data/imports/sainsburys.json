@@ -1,0 +1,711 @@
+{
+  "name": "Sainsbury's",
+  "description": "Mainstream UK grocer known for quality own-brand tiers.",
+  "products": [
+    {
+      "sourceProductId": "sainsburys-milk-1",
+      "name": "Sainsbury's Semi Skimmed Milk",
+      "subcategory": "semi-skimmed",
+      "price": "1.60",
+      "size": "2L",
+      "brand": "Sainsbury's",
+      "unitDescription": "per litre",
+      "unitValue": "0.775",
+      "tags": [
+        "milk",
+        "semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-milk-2",
+      "name": "Sainsbury's Whole Milk",
+      "subcategory": "whole",
+      "price": "1.55",
+      "size": "2L",
+      "brand": "Sainsbury's",
+      "unitDescription": "per litre",
+      "unitValue": "0.750",
+      "tags": [
+        "milk",
+        "whole",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-milk-3",
+      "name": "Sainsbury's Skimmed Milk",
+      "subcategory": "skimmed",
+      "price": "1.57",
+      "size": "2L",
+      "brand": "Sainsbury's",
+      "unitDescription": "per litre",
+      "unitValue": "0.760",
+      "tags": [
+        "milk",
+        "skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-milk-4",
+      "name": "Sainsbury's Organic Semi Skimmed Milk",
+      "subcategory": "organic-semi-skimmed",
+      "price": "2.50",
+      "size": "2L",
+      "brand": "Sainsbury's",
+      "unitDescription": "per litre",
+      "unitValue": "1.225",
+      "tags": [
+        "milk",
+        "organic semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-milk-5",
+      "name": "Oatly Barista Oat Milk",
+      "subcategory": "barista-oat",
+      "price": "1.85",
+      "size": "1L",
+      "brand": "Oatly",
+      "unitDescription": "per litre",
+      "unitValue": "1.800",
+      "tags": [
+        "milk",
+        "barista oat",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-milk-6",
+      "name": "Cravendale Filtered Whole Milk",
+      "subcategory": "whole",
+      "price": "2.35",
+      "size": "2L",
+      "brand": "Cravendale",
+      "unitDescription": "per litre",
+      "unitValue": "1.125",
+      "tags": [
+        "milk",
+        "premium",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-1",
+      "name": "Sainsbury's Soft White Bread",
+      "subcategory": "white-sliced",
+      "price": "1.05",
+      "size": "800g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per loaf",
+      "unitValue": "1.050",
+      "tags": [
+        "bread",
+        "white-sliced",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-2",
+      "name": "Sainsbury's Wholemeal Bread",
+      "subcategory": "wholemeal",
+      "price": "1.25",
+      "size": "800g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per loaf",
+      "unitValue": "1.250",
+      "tags": [
+        "bread",
+        "wholemeal",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-3",
+      "name": "Sainsbury's Seeded Farmhouse Bread",
+      "subcategory": "seeded",
+      "price": "1.75",
+      "size": "800g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per loaf",
+      "unitValue": "1.750",
+      "tags": [
+        "bread",
+        "seeded",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-4",
+      "name": "Sainsbury's Sourdough Loaf",
+      "subcategory": "sourdough",
+      "price": "2.20",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per loaf",
+      "unitValue": "2.200",
+      "tags": [
+        "bread",
+        "sourdough",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-5",
+      "name": "Sainsbury's Brioche Burger Buns",
+      "subcategory": "buns",
+      "price": "1.90",
+      "size": "6 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per pack",
+      "unitValue": "1.900",
+      "tags": [
+        "bread",
+        "buns",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bread-6",
+      "name": "Warburtons Toastie Bread",
+      "subcategory": "toastie",
+      "price": "1.55",
+      "size": "800g",
+      "brand": "Warburtons",
+      "unitDescription": "per loaf",
+      "unitValue": "1.550",
+      "tags": [
+        "bread",
+        "toastie",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-eggs-1",
+      "name": "Sainsbury's Free Range Eggs",
+      "subcategory": "free-range",
+      "price": "2.45",
+      "size": "12 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per egg",
+      "unitValue": "0.196",
+      "tags": [
+        "eggs",
+        "free range",
+        "protein"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-eggs-2",
+      "name": "Sainsbury's Corn Fed Eggs",
+      "subcategory": "premium-eggs",
+      "price": "3.75",
+      "size": "6 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per egg",
+      "unitValue": "0.608",
+      "tags": [
+        "eggs",
+        "premium",
+        "free range"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-butter-3",
+      "name": "Sainsbury's Salted Butter",
+      "subcategory": "salted",
+      "price": "2.15",
+      "size": "250g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "salted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-butter-4",
+      "name": "Sainsbury's Unsalted Butter",
+      "subcategory": "unsalted",
+      "price": "2.15",
+      "size": "250g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "unsalted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-pasta-5",
+      "name": "Sainsbury's Penne Pasta",
+      "subcategory": "penne",
+      "price": "0.99",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "penne",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-pasta-6",
+      "name": "Sainsbury's Fusilli Pasta",
+      "subcategory": "fusilli",
+      "price": "0.99",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "fusilli",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-pasta-7",
+      "name": "Sainsbury's Wholewheat Spaghetti",
+      "subcategory": "spaghetti",
+      "price": "1.30",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "pasta",
+        "spaghetti",
+        "wholewheat"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-beans-8",
+      "name": "Sainsbury's Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.65",
+      "size": "420g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.131",
+      "tags": [
+        "beans",
+        "baked beans",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-beans-9",
+      "name": "Sainsbury's Reduced Sugar Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.95",
+      "size": "415g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.205",
+      "tags": [
+        "beans",
+        "baked beans",
+        "reduced sugar"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-bananas-10",
+      "name": "Sainsbury's Fairtrade Bananas",
+      "subcategory": "fresh-fruit",
+      "price": "1.30",
+      "size": "5 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per banana",
+      "unitValue": "0.240",
+      "tags": [
+        "banana",
+        "fruit",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-chicken-11",
+      "name": "Sainsbury's Chicken Breast Fillets",
+      "subcategory": "fresh-chicken",
+      "price": "5.60",
+      "size": "650g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per kg",
+      "unitValue": "8.460",
+      "tags": [
+        "chicken breast",
+        "protein",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cereal-12",
+      "name": "Sainsbury's Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "1.30",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cereal-13",
+      "name": "Sainsbury's Granola Berry Crunch",
+      "subcategory": "granola",
+      "price": "2.60",
+      "size": "450g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.556",
+      "tags": [
+        "cereal",
+        "granola",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cereal-14",
+      "name": "Sainsbury's Malted Wheats",
+      "subcategory": "wheat-biscuits",
+      "price": "1.45",
+      "size": "750g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.180",
+      "tags": [
+        "cereal",
+        "wheat biscuits",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cheese-15",
+      "name": "Sainsbury's Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.45",
+      "size": "350g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.671",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cheese-16",
+      "name": "Sainsbury's Extra Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.75",
+      "size": "300g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.883",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-cheese-17",
+      "name": "Sainsbury's Mozzarella",
+      "subcategory": "mozzarella",
+      "price": "1.95",
+      "size": "200g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.925",
+      "tags": [
+        "cheese",
+        "mozzarella",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-tomatoes-18",
+      "name": "Sainsbury's Salad Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "1.09",
+      "size": "330g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.300",
+      "tags": [
+        "tomatoes",
+        "salad",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-tomatoes-19",
+      "name": "Sainsbury's Cherry Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "1.30",
+      "size": "300g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.400",
+      "tags": [
+        "tomatoes",
+        "cherry",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-tomatoes-20",
+      "name": "Sainsbury's Vine Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "2.10",
+      "size": "300g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.667",
+      "tags": [
+        "tomatoes",
+        "vine",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-rice-21",
+      "name": "Sainsbury's Easy Cook Long Grain Rice",
+      "subcategory": "long-grain",
+      "price": "1.50",
+      "size": "1kg",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.140",
+      "tags": [
+        "rice",
+        "long grain",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-rice-22",
+      "name": "Sainsbury's Basmati Rice",
+      "subcategory": "basmati",
+      "price": "2.05",
+      "size": "1kg",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.195",
+      "tags": [
+        "rice",
+        "basmati",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-rice-23",
+      "name": "Sainsbury's Microwave Basmati Rice",
+      "subcategory": "microwave",
+      "price": "1.00",
+      "size": "250g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.360",
+      "tags": [
+        "rice",
+        "microwave",
+        "ready"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-yogurt-24",
+      "name": "Sainsbury's Greek Style Yogurt",
+      "subcategory": "greek",
+      "price": "1.75",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.330",
+      "tags": [
+        "yogurt",
+        "greek",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-yogurt-25",
+      "name": "Sainsbury's Natural Yogurt",
+      "subcategory": "natural",
+      "price": "1.50",
+      "size": "500g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.280",
+      "tags": [
+        "yogurt",
+        "natural",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-yogurt-26",
+      "name": "Sainsbury's Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.50",
+      "size": "450g",
+      "brand": "Sainsbury's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.533",
+      "tags": [
+        "yogurt",
+        "organic",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-apples-27",
+      "name": "Sainsbury's Gala Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.45",
+      "size": "6 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per apple",
+      "unitValue": "0.225",
+      "tags": [
+        "apples",
+        "gala",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-apples-28",
+      "name": "Sainsbury's Pink Lady Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.70",
+      "size": "6 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per apple",
+      "unitValue": "0.267",
+      "tags": [
+        "apples",
+        "pink lady",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-apples-29",
+      "name": "Sainsbury's Braeburn Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.55",
+      "size": "6 pack",
+      "brand": "Sainsbury's",
+      "unitDescription": "per apple",
+      "unitValue": "0.242",
+      "tags": [
+        "apples",
+        "braeburn",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-1",
+      "name": "Heinz Baked Beanz",
+      "subcategory": "tinned-beans",
+      "price": "1.48",
+      "size": "415g",
+      "brand": "Heinz",
+      "unitDescription": "per 100g",
+      "unitValue": "0.337",
+      "tags": [
+        "beans",
+        "beanz",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-2",
+      "name": "Kellogg's Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "3.03",
+      "size": "450g",
+      "brand": "Kellogg's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.656",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-3",
+      "name": "Cathedral City Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "3.73",
+      "size": "350g",
+      "brand": "Cathedral City",
+      "unitDescription": "per 100g",
+      "unitValue": "1.043",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-4",
+      "name": "Tilda Pure Basmati Rice",
+      "subcategory": "basmati",
+      "price": "4.03",
+      "size": "1kg",
+      "brand": "Tilda",
+      "unitDescription": "per 100g",
+      "unitValue": "0.395",
+      "tags": [
+        "rice",
+        "basmati",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-5",
+      "name": "Yeo Valley Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.93",
+      "size": "450g",
+      "brand": "Yeo Valley",
+      "unitDescription": "per 100g",
+      "unitValue": "0.633",
+      "tags": [
+        "yogurt",
+        "organic",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "sainsburys-brand-6",
+      "name": "Napolina Chopped Tomatoes",
+      "subcategory": "tinned-tomatoes",
+      "price": "1.18",
+      "size": "400g",
+      "brand": "Napolina",
+      "unitDescription": "per 100g",
+      "unitValue": "0.275",
+      "tags": [
+        "tomatoes",
+        "tinned",
+        "branded"
+      ]
+    }
+  ]
+}
