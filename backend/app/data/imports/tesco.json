@@ -1,0 +1,711 @@
+{
+  "name": "Tesco",
+  "description": "Large UK chain with broad own-brand and branded ranges.",
+  "products": [
+    {
+      "sourceProductId": "tesco-milk-1",
+      "name": "Tesco Semi Skimmed Milk",
+      "subcategory": "semi-skimmed",
+      "price": "1.55",
+      "size": "2L",
+      "brand": "Tesco",
+      "unitDescription": "per litre",
+      "unitValue": "0.775",
+      "tags": [
+        "milk",
+        "semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-milk-2",
+      "name": "Tesco Whole Milk",
+      "subcategory": "whole",
+      "price": "1.50",
+      "size": "2L",
+      "brand": "Tesco",
+      "unitDescription": "per litre",
+      "unitValue": "0.750",
+      "tags": [
+        "milk",
+        "whole",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-milk-3",
+      "name": "Tesco Skimmed Milk",
+      "subcategory": "skimmed",
+      "price": "1.52",
+      "size": "2L",
+      "brand": "Tesco",
+      "unitDescription": "per litre",
+      "unitValue": "0.760",
+      "tags": [
+        "milk",
+        "skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-milk-4",
+      "name": "Tesco Organic Semi Skimmed Milk",
+      "subcategory": "organic-semi-skimmed",
+      "price": "2.45",
+      "size": "2L",
+      "brand": "Tesco",
+      "unitDescription": "per litre",
+      "unitValue": "1.225",
+      "tags": [
+        "milk",
+        "organic semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-milk-5",
+      "name": "Oatly Barista Oat Milk",
+      "subcategory": "barista-oat",
+      "price": "1.80",
+      "size": "1L",
+      "brand": "Oatly",
+      "unitDescription": "per litre",
+      "unitValue": "1.800",
+      "tags": [
+        "milk",
+        "barista oat",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-milk-6",
+      "name": "Cravendale Filtered Whole Milk",
+      "subcategory": "whole",
+      "price": "2.25",
+      "size": "2L",
+      "brand": "Cravendale",
+      "unitDescription": "per litre",
+      "unitValue": "1.125",
+      "tags": [
+        "milk",
+        "premium",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-1",
+      "name": "Tesco Soft White Bread",
+      "subcategory": "white-sliced",
+      "price": "0.95",
+      "size": "800g",
+      "brand": "Tesco",
+      "unitDescription": "per loaf",
+      "unitValue": "0.950",
+      "tags": [
+        "bread",
+        "white-sliced",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-2",
+      "name": "Tesco Wholemeal Bread",
+      "subcategory": "wholemeal",
+      "price": "1.15",
+      "size": "800g",
+      "brand": "Tesco",
+      "unitDescription": "per loaf",
+      "unitValue": "1.150",
+      "tags": [
+        "bread",
+        "wholemeal",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-3",
+      "name": "Tesco Seeded Farmhouse Bread",
+      "subcategory": "seeded",
+      "price": "1.65",
+      "size": "800g",
+      "brand": "Tesco",
+      "unitDescription": "per loaf",
+      "unitValue": "1.650",
+      "tags": [
+        "bread",
+        "seeded",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-4",
+      "name": "Tesco Sourdough Loaf",
+      "subcategory": "sourdough",
+      "price": "2.10",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per loaf",
+      "unitValue": "2.100",
+      "tags": [
+        "bread",
+        "sourdough",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-5",
+      "name": "Tesco Brioche Burger Buns",
+      "subcategory": "buns",
+      "price": "1.80",
+      "size": "6 pack",
+      "brand": "Tesco",
+      "unitDescription": "per pack",
+      "unitValue": "1.800",
+      "tags": [
+        "bread",
+        "buns",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bread-6",
+      "name": "Warburtons Toastie Bread",
+      "subcategory": "toastie",
+      "price": "1.55",
+      "size": "800g",
+      "brand": "Warburtons",
+      "unitDescription": "per loaf",
+      "unitValue": "1.550",
+      "tags": [
+        "bread",
+        "toastie",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-eggs-1",
+      "name": "Tesco Free Range Eggs",
+      "subcategory": "free-range",
+      "price": "2.35",
+      "size": "12 pack",
+      "brand": "Tesco",
+      "unitDescription": "per egg",
+      "unitValue": "0.196",
+      "tags": [
+        "eggs",
+        "free range",
+        "protein"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-eggs-2",
+      "name": "Tesco Corn Fed Eggs",
+      "subcategory": "premium-eggs",
+      "price": "3.65",
+      "size": "6 pack",
+      "brand": "Tesco",
+      "unitDescription": "per egg",
+      "unitValue": "0.608",
+      "tags": [
+        "eggs",
+        "premium",
+        "free range"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-butter-3",
+      "name": "Tesco Salted Butter",
+      "subcategory": "salted",
+      "price": "2.05",
+      "size": "250g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "salted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-butter-4",
+      "name": "Tesco Unsalted Butter",
+      "subcategory": "unsalted",
+      "price": "2.05",
+      "size": "250g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "unsalted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-pasta-5",
+      "name": "Tesco Penne Pasta",
+      "subcategory": "penne",
+      "price": "0.89",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "penne",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-pasta-6",
+      "name": "Tesco Fusilli Pasta",
+      "subcategory": "fusilli",
+      "price": "0.89",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "fusilli",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-pasta-7",
+      "name": "Tesco Wholewheat Spaghetti",
+      "subcategory": "spaghetti",
+      "price": "1.20",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "pasta",
+        "spaghetti",
+        "wholewheat"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-beans-8",
+      "name": "Tesco Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.55",
+      "size": "420g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.131",
+      "tags": [
+        "beans",
+        "baked beans",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-beans-9",
+      "name": "Tesco Reduced Sugar Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.85",
+      "size": "415g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.205",
+      "tags": [
+        "beans",
+        "baked beans",
+        "reduced sugar"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-bananas-10",
+      "name": "Tesco Fairtrade Bananas",
+      "subcategory": "fresh-fruit",
+      "price": "1.20",
+      "size": "5 pack",
+      "brand": "Tesco",
+      "unitDescription": "per banana",
+      "unitValue": "0.240",
+      "tags": [
+        "banana",
+        "fruit",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-chicken-11",
+      "name": "Tesco Chicken Breast Fillets",
+      "subcategory": "fresh-chicken",
+      "price": "5.50",
+      "size": "650g",
+      "brand": "Tesco",
+      "unitDescription": "per kg",
+      "unitValue": "8.460",
+      "tags": [
+        "chicken breast",
+        "protein",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cereal-12",
+      "name": "Tesco Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "1.20",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cereal-13",
+      "name": "Tesco Granola Berry Crunch",
+      "subcategory": "granola",
+      "price": "2.50",
+      "size": "450g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.556",
+      "tags": [
+        "cereal",
+        "granola",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cereal-14",
+      "name": "Tesco Malted Wheats",
+      "subcategory": "wheat-biscuits",
+      "price": "1.35",
+      "size": "750g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.180",
+      "tags": [
+        "cereal",
+        "wheat biscuits",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cheese-15",
+      "name": "Tesco Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.35",
+      "size": "350g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.671",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cheese-16",
+      "name": "Tesco Extra Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.65",
+      "size": "300g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.883",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-cheese-17",
+      "name": "Tesco Mozzarella",
+      "subcategory": "mozzarella",
+      "price": "1.85",
+      "size": "200g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.925",
+      "tags": [
+        "cheese",
+        "mozzarella",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-tomatoes-18",
+      "name": "Tesco Salad Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "0.99",
+      "size": "330g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.300",
+      "tags": [
+        "tomatoes",
+        "salad",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-tomatoes-19",
+      "name": "Tesco Cherry Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "1.20",
+      "size": "300g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.400",
+      "tags": [
+        "tomatoes",
+        "cherry",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-tomatoes-20",
+      "name": "Tesco Vine Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "2.00",
+      "size": "300g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.667",
+      "tags": [
+        "tomatoes",
+        "vine",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-rice-21",
+      "name": "Tesco Easy Cook Long Grain Rice",
+      "subcategory": "long-grain",
+      "price": "1.40",
+      "size": "1kg",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.140",
+      "tags": [
+        "rice",
+        "long grain",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-rice-22",
+      "name": "Tesco Basmati Rice",
+      "subcategory": "basmati",
+      "price": "1.95",
+      "size": "1kg",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.195",
+      "tags": [
+        "rice",
+        "basmati",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-rice-23",
+      "name": "Tesco Microwave Basmati Rice",
+      "subcategory": "microwave",
+      "price": "0.90",
+      "size": "250g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.360",
+      "tags": [
+        "rice",
+        "microwave",
+        "ready"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-yogurt-24",
+      "name": "Tesco Greek Style Yogurt",
+      "subcategory": "greek",
+      "price": "1.65",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.330",
+      "tags": [
+        "yogurt",
+        "greek",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-yogurt-25",
+      "name": "Tesco Natural Yogurt",
+      "subcategory": "natural",
+      "price": "1.40",
+      "size": "500g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.280",
+      "tags": [
+        "yogurt",
+        "natural",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-yogurt-26",
+      "name": "Tesco Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.40",
+      "size": "450g",
+      "brand": "Tesco",
+      "unitDescription": "per 100g",
+      "unitValue": "0.533",
+      "tags": [
+        "yogurt",
+        "organic",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-apples-27",
+      "name": "Tesco Gala Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.35",
+      "size": "6 pack",
+      "brand": "Tesco",
+      "unitDescription": "per apple",
+      "unitValue": "0.225",
+      "tags": [
+        "apples",
+        "gala",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-apples-28",
+      "name": "Tesco Pink Lady Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.60",
+      "size": "6 pack",
+      "brand": "Tesco",
+      "unitDescription": "per apple",
+      "unitValue": "0.267",
+      "tags": [
+        "apples",
+        "pink lady",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-apples-29",
+      "name": "Tesco Braeburn Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.45",
+      "size": "6 pack",
+      "brand": "Tesco",
+      "unitDescription": "per apple",
+      "unitValue": "0.242",
+      "tags": [
+        "apples",
+        "braeburn",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-1",
+      "name": "Heinz Baked Beanz",
+      "subcategory": "tinned-beans",
+      "price": "1.40",
+      "size": "415g",
+      "brand": "Heinz",
+      "unitDescription": "per 100g",
+      "unitValue": "0.337",
+      "tags": [
+        "beans",
+        "beanz",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-2",
+      "name": "Kellogg's Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "2.95",
+      "size": "450g",
+      "brand": "Kellogg's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.656",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-3",
+      "name": "Cathedral City Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "3.65",
+      "size": "350g",
+      "brand": "Cathedral City",
+      "unitDescription": "per 100g",
+      "unitValue": "1.043",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-4",
+      "name": "Tilda Pure Basmati Rice",
+      "subcategory": "basmati",
+      "price": "3.95",
+      "size": "1kg",
+      "brand": "Tilda",
+      "unitDescription": "per 100g",
+      "unitValue": "0.395",
+      "tags": [
+        "rice",
+        "basmati",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-5",
+      "name": "Yeo Valley Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.85",
+      "size": "450g",
+      "brand": "Yeo Valley",
+      "unitDescription": "per 100g",
+      "unitValue": "0.633",
+      "tags": [
+        "yogurt",
+        "organic",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "tesco-brand-6",
+      "name": "Napolina Chopped Tomatoes",
+      "subcategory": "tinned-tomatoes",
+      "price": "1.10",
+      "size": "400g",
+      "brand": "Napolina",
+      "unitDescription": "per 100g",
+      "unitValue": "0.275",
+      "tags": [
+        "tomatoes",
+        "tinned",
+        "branded"
+      ]
+    }
+  ]
+}

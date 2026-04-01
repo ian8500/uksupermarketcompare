@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from decimal import Decimal
-
 from app.models import GroceryCategory
+from app.services.normalization import normalize_brand
+from app.services.providers import AsdaProvider, SainsburysProvider, TescoProvider
 
 COMMON_KEYWORD_MAP: dict[GroceryCategory, list[str]] = {
     GroceryCategory.milk: ["milk", "semi skimmed", "whole", "skimmed", "dairy"],
@@ -22,81 +22,28 @@ COMMON_KEYWORD_MAP: dict[GroceryCategory, list[str]] = {
 }
 
 
-SEEDED_SUPERMARKETS: list[dict] = [
-    {
-        "name": "Tesco",
-        "description": "Large UK chain with broad own-brand and branded ranges.",
+def _seed_market(provider):
+    return {
+        "name": provider.name,
+        "description": provider.description,
         "products": [
-            {"name": "Tesco British Semi Skimmed Milk", "category": GroceryCategory.milk, "subcategory": "semi-skimmed", "price": Decimal("1.55"), "size": "2L", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per litre", "unitValue": Decimal("0.775"), "tags": ["milk", "semi skimmed", "dairy"]},
-            {"name": "Cravendale Filtered Whole Milk", "category": GroceryCategory.milk, "subcategory": "whole", "price": Decimal("2.25"), "size": "2L", "brand": "Cravendale", "isOwnBrand": False, "isPremium": True, "isOrganic": False, "unitDescription": "per litre", "unitValue": Decimal("1.125"), "tags": ["milk", "whole", "branded"]},
-            {"name": "Yeo Valley Organic Semi Skimmed Milk", "category": GroceryCategory.milk, "subcategory": "semi-skimmed", "price": Decimal("2.45"), "size": "2L", "brand": "Yeo Valley", "isOwnBrand": False, "isPremium": True, "isOrganic": True, "unitDescription": "per litre", "unitValue": Decimal("1.225"), "tags": ["milk", "semi skimmed", "organic"]},
-            {"name": "Tesco Soft White Bread", "category": GroceryCategory.bread, "subcategory": "white-sliced", "price": Decimal("0.95"), "size": "800g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per loaf", "unitValue": Decimal("0.95"), "tags": ["bread", "white", "bakery"]},
-            {"name": "Warburtons Toastie Bread", "category": GroceryCategory.bread, "subcategory": "thick-white", "price": Decimal("1.55"), "size": "800g", "brand": "Warburtons", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per loaf", "unitValue": Decimal("1.55"), "tags": ["bread", "toast", "sliced"]},
-            {"name": "Tesco Free Range Eggs", "category": GroceryCategory.eggs, "subcategory": "free-range", "price": Decimal("2.35"), "size": "12 pack", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per egg", "unitValue": Decimal("0.196"), "tags": ["eggs", "free range", "protein"]},
-            {"name": "Clarence Court Burford Brown Eggs", "category": GroceryCategory.eggs, "subcategory": "premium-eggs", "price": Decimal("3.95"), "size": "6 pack", "brand": "Clarence Court", "isOwnBrand": False, "isPremium": True, "isOrganic": False, "unitDescription": "per egg", "unitValue": Decimal("0.658"), "tags": ["eggs", "premium", "free range"]},
-            {"name": "Tesco Salted Butter", "category": GroceryCategory.butter, "subcategory": "salted", "price": Decimal("2.05"), "size": "250g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.82"), "tags": ["butter", "salted", "dairy"]},
-            {"name": "Lurpak Slightly Salted Butter", "category": GroceryCategory.butter, "subcategory": "salted", "price": Decimal("2.75"), "size": "250g", "brand": "Lurpak", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("1.10"), "tags": ["butter", "branded", "spread"]},
-            {"name": "Tesco Penne Pasta", "category": GroceryCategory.pasta, "subcategory": "penne", "price": Decimal("0.89"), "size": "500g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.178"), "tags": ["pasta", "penne", "dry goods"]},
-            {"name": "Barilla Spaghetti", "category": GroceryCategory.pasta, "subcategory": "spaghetti", "price": Decimal("1.75"), "size": "500g", "brand": "Barilla", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.35"), "tags": ["pasta", "spaghetti", "italian"]},
-            {"name": "Tesco Baked Beans", "category": GroceryCategory.bakedBeans, "subcategory": "tinned-beans", "price": Decimal("0.55"), "size": "420g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.131"), "tags": ["beans", "baked beans", "tin"]},
-            {"name": "Heinz Baked Beanz", "category": GroceryCategory.bakedBeans, "subcategory": "tinned-beans", "price": Decimal("1.40"), "size": "415g", "brand": "Heinz", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.337"), "tags": ["beans", "beanz", "tin"]},
-            {"name": "Tesco Fairtrade Bananas", "category": GroceryCategory.bananas, "subcategory": "fresh-fruit", "price": Decimal("1.20"), "size": "5 pack", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per banana", "unitValue": Decimal("0.24"), "tags": ["banana", "fruit", "fresh"]},
-            {"name": "Tesco Chicken Breast Fillets", "category": GroceryCategory.chickenBreast, "subcategory": "fresh-chicken", "price": Decimal("5.50"), "size": "650g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per kg", "unitValue": Decimal("8.46"), "tags": ["chicken breast", "protein", "fresh"]},
-            {"name": "Tesco Corn Flakes", "category": GroceryCategory.cereal, "subcategory": "corn-flakes", "price": Decimal("1.20"), "size": "500g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.24"), "tags": ["cereal", "corn flakes", "breakfast"]},
-            {"name": "Kellogg's Corn Flakes", "category": GroceryCategory.cereal, "subcategory": "corn-flakes", "price": Decimal("2.95"), "size": "450g", "brand": "Kellogg's", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.656"), "tags": ["cereal", "corn flakes", "branded"]},
-            {"name": "Tesco Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("2.35"), "size": "350g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.671"), "tags": ["cheese", "cheddar", "dairy"]},
-            {"name": "Cathedral City Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("3.65"), "size": "350g", "brand": "Cathedral City", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("1.043"), "tags": ["cheese", "cheddar", "branded"]},
-            {"name": "Tesco Salad Tomatoes", "category": GroceryCategory.tomatoes, "subcategory": "fresh-tomatoes", "price": Decimal("0.99"), "size": "330g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.30"), "tags": ["tomatoes", "salad", "fresh"]},
-            {"name": "Tesco Easy Cook Long Grain Rice", "category": GroceryCategory.rice, "subcategory": "long-grain", "price": Decimal("1.40"), "size": "1kg", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.14"), "tags": ["rice", "long grain", "cupboard"]},
-            {"name": "Tilda Basmati Rice", "category": GroceryCategory.rice, "subcategory": "basmati", "price": Decimal("3.95"), "size": "1kg", "brand": "Tilda", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.395"), "tags": ["rice", "basmati", "branded"]},
-            {"name": "Tesco Greek Style Yogurt", "category": GroceryCategory.yogurt, "subcategory": "greek", "price": Decimal("1.65"), "size": "500g", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.33"), "tags": ["yogurt", "greek", "dairy"]},
-            {"name": "Tesco Gala Apples", "category": GroceryCategory.apples, "subcategory": "fresh-apples", "price": Decimal("1.35"), "size": "6 pack", "brand": "Tesco", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per apple", "unitValue": Decimal("0.225"), "tags": ["apples", "gala", "fruit"]},
+            {
+                "name": row.raw.name,
+                "category": row.category,
+                "subcategory": row.raw.subcategory,
+                "price": row.raw.price,
+                "size": row.raw.size,
+                "brand": row.raw.brand,
+                "isOwnBrand": row.normalized_brand == normalize_brand(provider.name),
+                "isPremium": "premium" in row.searchable_text or "organic" in row.searchable_text,
+                "isOrganic": "organic" in row.searchable_text,
+                "unitDescription": row.raw.unit_description,
+                "unitValue": row.raw.unit_value,
+                "tags": row.raw.tags,
+            }
+            for row in provider.normalize_products()
         ],
-    },
-    {
-        "name": "ASDA",
-        "description": "Value-focused supermarket with extensive essentials range.",
-        "products": [
-            {"name": "ASDA Whole Milk", "category": GroceryCategory.milk, "subcategory": "whole", "price": Decimal("1.45"), "size": "2L", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per litre", "unitValue": Decimal("0.725"), "tags": ["milk", "whole", "dairy"]},
-            {"name": "Cravendale Fresh Semi Skimmed Milk", "category": GroceryCategory.milk, "subcategory": "semi-skimmed", "price": Decimal("2.30"), "size": "2L", "brand": "Cravendale", "isOwnBrand": False, "isPremium": True, "isOrganic": False, "unitDescription": "per litre", "unitValue": Decimal("1.15"), "tags": ["milk", "semi skimmed", "branded"]},
-            {"name": "ASDA Soft White Bread", "category": GroceryCategory.bread, "subcategory": "white-sliced", "price": Decimal("0.85"), "size": "800g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per loaf", "unitValue": Decimal("0.85"), "tags": ["bread", "white", "value"]},
-            {"name": "ASDA Free Range Eggs", "category": GroceryCategory.eggs, "subcategory": "free-range", "price": Decimal("2.25"), "size": "12 pack", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per egg", "unitValue": Decimal("0.188"), "tags": ["eggs", "free range", "protein"]},
-            {"name": "ASDA Salted Butter", "category": GroceryCategory.butter, "subcategory": "salted", "price": Decimal("1.99"), "size": "250g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.796"), "tags": ["butter", "salted", "dairy"]},
-            {"name": "ASDA Fusilli Pasta", "category": GroceryCategory.pasta, "subcategory": "fusilli", "price": Decimal("0.85"), "size": "500g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.17"), "tags": ["pasta", "fusilli", "dry goods"]},
-            {"name": "Heinz Baked Beanz", "category": GroceryCategory.bakedBeans, "subcategory": "tinned-beans", "price": Decimal("1.40"), "size": "415g", "brand": "Heinz", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.337"), "tags": ["beans", "beanz", "tin"]},
-            {"name": "ASDA Baked Beans", "category": GroceryCategory.bakedBeans, "subcategory": "tinned-beans", "price": Decimal("0.54"), "size": "420g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.129"), "tags": ["baked beans", "beans", "cupboard"]},
-            {"name": "ASDA Bananas", "category": GroceryCategory.bananas, "subcategory": "fresh-fruit", "price": Decimal("1.05"), "size": "5 pack", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per banana", "unitValue": Decimal("0.21"), "tags": ["banana", "fruit", "fresh"]},
-            {"name": "ASDA Chicken Breast Fillets", "category": GroceryCategory.chickenBreast, "subcategory": "fresh-chicken", "price": Decimal("4.95"), "size": "650g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per kg", "unitValue": Decimal("7.62"), "tags": ["chicken breast", "protein", "fresh"]},
-            {"name": "ASDA Malted Wheats", "category": GroceryCategory.cereal, "subcategory": "wheat-biscuits", "price": Decimal("1.35"), "size": "750g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.18"), "tags": ["cereal", "wheat biscuits", "breakfast"]},
-            {"name": "Kellogg's Crunchy Nut", "category": GroceryCategory.cereal, "subcategory": "sweet-cereal", "price": Decimal("3.25"), "size": "460g", "brand": "Kellogg's", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.707"), "tags": ["cereal", "branded", "breakfast"]},
-            {"name": "ASDA Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("2.10"), "size": "350g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.60"), "tags": ["cheese", "cheddar", "dairy"]},
-            {"name": "Cathedral City Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("3.70"), "size": "350g", "brand": "Cathedral City", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("1.057"), "tags": ["cheese", "cheddar", "branded"]},
-            {"name": "ASDA Cherry Tomatoes", "category": GroceryCategory.tomatoes, "subcategory": "fresh-tomatoes", "price": Decimal("1.15"), "size": "300g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.383"), "tags": ["tomatoes", "cherry", "salad"]},
-            {"name": "ASDA Basmati Rice", "category": GroceryCategory.rice, "subcategory": "basmati", "price": Decimal("1.90"), "size": "1kg", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.19"), "tags": ["rice", "basmati", "cupboard"]},
-            {"name": "ASDA Greek Yogurt", "category": GroceryCategory.yogurt, "subcategory": "greek", "price": Decimal("1.50"), "size": "500g", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.30"), "tags": ["yogurt", "greek", "dairy"]},
-            {"name": "ASDA Pink Lady Apples", "category": GroceryCategory.apples, "subcategory": "fresh-apples", "price": Decimal("1.60"), "size": "6 pack", "brand": "ASDA", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per apple", "unitValue": Decimal("0.267"), "tags": ["apples", "pink lady", "fruit"]},
-        ],
-    },
-    {
-        "name": "Sainsbury's",
-        "description": "Mainstream UK grocer known for quality own-brand tiers.",
-        "products": [
-            {"name": "Sainsbury's British Semi Skimmed Milk", "category": GroceryCategory.milk, "subcategory": "semi-skimmed", "price": Decimal("1.60"), "size": "2L", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per litre", "unitValue": Decimal("0.80"), "tags": ["milk", "semi skimmed", "dairy"]},
-            {"name": "Sainsbury's Organic Semi Skimmed Milk", "category": GroceryCategory.milk, "subcategory": "semi-skimmed", "price": Decimal("2.50"), "size": "2L", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": True, "isOrganic": True, "unitDescription": "per litre", "unitValue": Decimal("1.25"), "tags": ["milk", "semi skimmed", "organic"]},
-            {"name": "Sainsbury's Wholemeal Bread", "category": GroceryCategory.bread, "subcategory": "wholemeal", "price": Decimal("1.20"), "size": "800g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per loaf", "unitValue": Decimal("1.20"), "tags": ["bread", "wholemeal", "bakery"]},
-            {"name": "Sainsbury's Free Range Eggs", "category": GroceryCategory.eggs, "subcategory": "free-range", "price": Decimal("2.49"), "size": "12 pack", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per egg", "unitValue": Decimal("0.208"), "tags": ["eggs", "free range", "protein"]},
-            {"name": "Sainsbury's Salted Butter", "category": GroceryCategory.butter, "subcategory": "salted", "price": Decimal("2.15"), "size": "250g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.86"), "tags": ["butter", "salted", "dairy"]},
-            {"name": "Sainsbury's Penne Pasta", "category": GroceryCategory.pasta, "subcategory": "penne", "price": Decimal("0.95"), "size": "500g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.19"), "tags": ["pasta", "penne", "dry goods"]},
-            {"name": "Sainsbury's Baked Beans", "category": GroceryCategory.bakedBeans, "subcategory": "tinned-beans", "price": Decimal("0.60"), "size": "420g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.143"), "tags": ["baked beans", "beans", "tin"]},
-            {"name": "Sainsbury's Bananas", "category": GroceryCategory.bananas, "subcategory": "fresh-fruit", "price": Decimal("1.25"), "size": "5 pack", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per banana", "unitValue": Decimal("0.25"), "tags": ["banana", "fruit", "fresh"]},
-            {"name": "Sainsbury's Chicken Breast Fillets", "category": GroceryCategory.chickenBreast, "subcategory": "fresh-chicken", "price": Decimal("5.35"), "size": "650g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per kg", "unitValue": Decimal("8.23"), "tags": ["chicken breast", "protein", "fresh"]},
-            {"name": "Sainsbury's Fruit & Fibre Cereal", "category": GroceryCategory.cereal, "subcategory": "fruit-cereal", "price": Decimal("1.95"), "size": "750g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.26"), "tags": ["cereal", "fruit fibre", "breakfast"]},
-            {"name": "Sainsbury's Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("2.65"), "size": "350g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.757"), "tags": ["cheese", "cheddar", "dairy"]},
-            {"name": "Pilgrims Choice Mature Cheddar", "category": GroceryCategory.cheese, "subcategory": "cheddar", "price": Decimal("3.75"), "size": "350g", "brand": "Pilgrims Choice", "isOwnBrand": False, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("1.071"), "tags": ["cheese", "cheddar", "branded"]},
-            {"name": "Sainsbury's Vine Tomatoes", "category": GroceryCategory.tomatoes, "subcategory": "fresh-tomatoes", "price": Decimal("2.00"), "size": "300g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": True, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.667"), "tags": ["tomatoes", "vine", "salad"]},
-            {"name": "Sainsbury's Basmati Rice", "category": GroceryCategory.rice, "subcategory": "basmati", "price": Decimal("2.25"), "size": "1kg", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.225"), "tags": ["rice", "basmati", "cupboard"]},
-            {"name": "Sainsbury's Greek Yogurt", "category": GroceryCategory.yogurt, "subcategory": "greek", "price": Decimal("1.70"), "size": "500g", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per 100g", "unitValue": Decimal("0.34"), "tags": ["yogurt", "greek", "dairy"]},
-            {"name": "Sainsbury's Royal Gala Apples", "category": GroceryCategory.apples, "subcategory": "fresh-apples", "price": Decimal("1.50"), "size": "6 pack", "brand": "Sainsbury's", "isOwnBrand": True, "isPremium": False, "isOrganic": False, "unitDescription": "per apple", "unitValue": Decimal("0.25"), "tags": ["apples", "gala", "fruit"]},
-        ],
-    },
-]
+    }
+
+
+SEEDED_SUPERMARKETS: list[dict] = [_seed_market(TescoProvider()), _seed_market(AsdaProvider()), _seed_market(SainsburysProvider())]

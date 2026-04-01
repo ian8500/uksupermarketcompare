@@ -1,118 +1,19 @@
 from __future__ import annotations
 
-from datetime import datetime, UTC
 from decimal import Decimal
 
 from app.db import get_connection
 from app.models import GroceryCategory
-from app.services.normalization import (
-    build_searchable_text,
-    infer_category,
-    normalize_brand,
-    normalize_product_name,
-    normalize_size,
-    normalize_tags,
-)
-from app.services.seed_catalog import SEEDED_SUPERMARKETS
+from app.services.ingestion import import_catalog_data
+from app.services.normalization import normalize_brand
 
 
 def ensure_seed_data() -> None:
     with get_connection() as conn:
         retailer_count = conn.execute("SELECT COUNT(*) FROM retailers").fetchone()[0]
-        if retailer_count > 0:
-            return
-
-        for market in SEEDED_SUPERMARKETS:
-            cur = conn.execute(
-                "INSERT INTO retailers(name, description) VALUES(?, ?)",
-                (market["name"], market["description"]),
-            )
-            retailer_id = cur.lastrowid
-
-            for product in market["products"]:
-                normalized_name = normalize_product_name(product["name"])
-                normalized_brand = normalize_brand(product["brand"])
-                normalized_tags = normalize_tags(product["tags"])
-                normalized_size = normalize_size(product["size"])
-                inferred_category = infer_category(product["name"], product["tags"])
-                intent_key = f"{inferred_category.value}:{normalized_name}:{normalized_size.normalized_value or ''}{normalized_size.normalized_unit or ''}"
-
-                canonical_row = conn.execute(
-                    "SELECT id FROM canonical_products WHERE intent_key = ?",
-                    (intent_key,),
-                ).fetchone()
-                if canonical_row:
-                    canonical_id = canonical_row[0]
-                else:
-                    cur = conn.execute(
-                        """
-                        INSERT INTO canonical_products(
-                            canonical_name, intent_key, category, normalized_brand,
-                            normalized_unit, normalized_size_value, tags, searchable_text
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-                        """,
-                        (
-                            normalized_name,
-                            intent_key,
-                            inferred_category.value,
-                            normalized_brand,
-                            normalized_size.normalized_unit or "",
-                            normalized_size.normalized_value,
-                            ",".join(normalized_tags),
-                            build_searchable_text(product["name"], product["brand"], product["size"], product["tags"]),
-                        ),
-                    )
-                    canonical_id = cur.lastrowid
-
-                cur = conn.execute(
-                    """
-                    INSERT INTO raw_retailer_products(
-                        retailer_id, source_name, source_brand, source_size, source_subcategory,
-                        searchable_text, created_at
-                    ) VALUES(?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        retailer_id,
-                        product["name"],
-                        product["brand"],
-                        product["size"],
-                        product["subcategory"],
-                        build_searchable_text(product["name"], product["brand"], product["size"], product["tags"]),
-                        datetime.now(UTC).isoformat(),
-                    ),
-                )
-                raw_product_id = cur.lastrowid
-
-                conn.execute(
-                    "INSERT INTO product_mappings(raw_product_id, canonical_product_id, confidence, method) VALUES(?, ?, ?, ?)",
-                    (raw_product_id, canonical_id, 1.0, "seed-normalized"),
-                )
-                conn.execute(
-                    """
-                    INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, captured_at)
-                    VALUES(?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        raw_product_id,
-                        float(Decimal(product["price"])),
-                        "GBP",
-                        product["unitDescription"],
-                        float(Decimal(product["unitValue"])),
-                        datetime.now(UTC).isoformat(),
-                    ),
-                )
-
-        for synonym, canonical in {
-            "beanz": "baked beans",
-            "yoghurt": "yogurt",
-            "loaf": "bread",
-            "fillets": "fillet",
-        }.items():
-            conn.execute(
-                "INSERT INTO search_synonyms(synonym, canonical_term, term_type) VALUES(?, ?, ?) ",
-                (synonym, canonical, "catalog"),
-            )
-        conn.commit()
+    if retailer_count > 0:
+        return
+    import_catalog_data()
 
 
 def load_catalog_rows() -> list[dict]:

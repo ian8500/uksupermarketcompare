@@ -1,0 +1,711 @@
+{
+  "name": "ASDA",
+  "description": "Value-focused supermarket with extensive essentials range.",
+  "products": [
+    {
+      "sourceProductId": "asda-milk-1",
+      "name": "ASDA Semi Skimmed Milk",
+      "subcategory": "semi-skimmed",
+      "price": "1.55",
+      "size": "2L",
+      "brand": "ASDA",
+      "unitDescription": "per litre",
+      "unitValue": "0.775",
+      "tags": [
+        "milk",
+        "semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-milk-2",
+      "name": "ASDA Whole Milk",
+      "subcategory": "whole",
+      "price": "1.50",
+      "size": "2L",
+      "brand": "ASDA",
+      "unitDescription": "per litre",
+      "unitValue": "0.750",
+      "tags": [
+        "milk",
+        "whole",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-milk-3",
+      "name": "ASDA Skimmed Milk",
+      "subcategory": "skimmed",
+      "price": "1.52",
+      "size": "2L",
+      "brand": "ASDA",
+      "unitDescription": "per litre",
+      "unitValue": "0.760",
+      "tags": [
+        "milk",
+        "skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-milk-4",
+      "name": "ASDA Organic Semi Skimmed Milk",
+      "subcategory": "organic-semi-skimmed",
+      "price": "2.45",
+      "size": "2L",
+      "brand": "ASDA",
+      "unitDescription": "per litre",
+      "unitValue": "1.225",
+      "tags": [
+        "milk",
+        "organic semi skimmed",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-milk-5",
+      "name": "Oatly Barista Oat Milk",
+      "subcategory": "barista-oat",
+      "price": "1.80",
+      "size": "1L",
+      "brand": "Oatly",
+      "unitDescription": "per litre",
+      "unitValue": "1.800",
+      "tags": [
+        "milk",
+        "barista oat",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-milk-6",
+      "name": "Cravendale Filtered Whole Milk",
+      "subcategory": "whole",
+      "price": "2.25",
+      "size": "2L",
+      "brand": "Cravendale",
+      "unitDescription": "per litre",
+      "unitValue": "1.125",
+      "tags": [
+        "milk",
+        "premium",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-1",
+      "name": "ASDA Soft White Bread",
+      "subcategory": "white-sliced",
+      "price": "0.95",
+      "size": "800g",
+      "brand": "ASDA",
+      "unitDescription": "per loaf",
+      "unitValue": "0.950",
+      "tags": [
+        "bread",
+        "white-sliced",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-2",
+      "name": "ASDA Wholemeal Bread",
+      "subcategory": "wholemeal",
+      "price": "1.15",
+      "size": "800g",
+      "brand": "ASDA",
+      "unitDescription": "per loaf",
+      "unitValue": "1.150",
+      "tags": [
+        "bread",
+        "wholemeal",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-3",
+      "name": "ASDA Seeded Farmhouse Bread",
+      "subcategory": "seeded",
+      "price": "1.65",
+      "size": "800g",
+      "brand": "ASDA",
+      "unitDescription": "per loaf",
+      "unitValue": "1.650",
+      "tags": [
+        "bread",
+        "seeded",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-4",
+      "name": "ASDA Sourdough Loaf",
+      "subcategory": "sourdough",
+      "price": "2.10",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per loaf",
+      "unitValue": "2.100",
+      "tags": [
+        "bread",
+        "sourdough",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-5",
+      "name": "ASDA Brioche Burger Buns",
+      "subcategory": "buns",
+      "price": "1.80",
+      "size": "6 pack",
+      "brand": "ASDA",
+      "unitDescription": "per pack",
+      "unitValue": "1.800",
+      "tags": [
+        "bread",
+        "buns",
+        "bakery"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bread-6",
+      "name": "Warburtons Toastie Bread",
+      "subcategory": "toastie",
+      "price": "1.55",
+      "size": "800g",
+      "brand": "Warburtons",
+      "unitDescription": "per loaf",
+      "unitValue": "1.550",
+      "tags": [
+        "bread",
+        "toastie",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-eggs-1",
+      "name": "ASDA Free Range Eggs",
+      "subcategory": "free-range",
+      "price": "2.35",
+      "size": "12 pack",
+      "brand": "ASDA",
+      "unitDescription": "per egg",
+      "unitValue": "0.196",
+      "tags": [
+        "eggs",
+        "free range",
+        "protein"
+      ]
+    },
+    {
+      "sourceProductId": "asda-eggs-2",
+      "name": "ASDA Corn Fed Eggs",
+      "subcategory": "premium-eggs",
+      "price": "3.65",
+      "size": "6 pack",
+      "brand": "ASDA",
+      "unitDescription": "per egg",
+      "unitValue": "0.608",
+      "tags": [
+        "eggs",
+        "premium",
+        "free range"
+      ]
+    },
+    {
+      "sourceProductId": "asda-butter-3",
+      "name": "ASDA Salted Butter",
+      "subcategory": "salted",
+      "price": "2.05",
+      "size": "250g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "salted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-butter-4",
+      "name": "ASDA Unsalted Butter",
+      "subcategory": "unsalted",
+      "price": "2.05",
+      "size": "250g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.820",
+      "tags": [
+        "butter",
+        "unsalted",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-pasta-5",
+      "name": "ASDA Penne Pasta",
+      "subcategory": "penne",
+      "price": "0.89",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "penne",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "asda-pasta-6",
+      "name": "ASDA Fusilli Pasta",
+      "subcategory": "fusilli",
+      "price": "0.89",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.178",
+      "tags": [
+        "pasta",
+        "fusilli",
+        "dry goods"
+      ]
+    },
+    {
+      "sourceProductId": "asda-pasta-7",
+      "name": "ASDA Wholewheat Spaghetti",
+      "subcategory": "spaghetti",
+      "price": "1.20",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "pasta",
+        "spaghetti",
+        "wholewheat"
+      ]
+    },
+    {
+      "sourceProductId": "asda-beans-8",
+      "name": "ASDA Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.55",
+      "size": "420g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.131",
+      "tags": [
+        "beans",
+        "baked beans",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "asda-beans-9",
+      "name": "ASDA Reduced Sugar Baked Beans",
+      "subcategory": "tinned-beans",
+      "price": "0.85",
+      "size": "415g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.205",
+      "tags": [
+        "beans",
+        "baked beans",
+        "reduced sugar"
+      ]
+    },
+    {
+      "sourceProductId": "asda-bananas-10",
+      "name": "ASDA Fairtrade Bananas",
+      "subcategory": "fresh-fruit",
+      "price": "1.20",
+      "size": "5 pack",
+      "brand": "ASDA",
+      "unitDescription": "per banana",
+      "unitValue": "0.240",
+      "tags": [
+        "banana",
+        "fruit",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "asda-chicken-11",
+      "name": "ASDA Chicken Breast Fillets",
+      "subcategory": "fresh-chicken",
+      "price": "5.50",
+      "size": "650g",
+      "brand": "ASDA",
+      "unitDescription": "per kg",
+      "unitValue": "8.460",
+      "tags": [
+        "chicken breast",
+        "protein",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cereal-12",
+      "name": "ASDA Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "1.20",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.240",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cereal-13",
+      "name": "ASDA Granola Berry Crunch",
+      "subcategory": "granola",
+      "price": "2.50",
+      "size": "450g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.556",
+      "tags": [
+        "cereal",
+        "granola",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cereal-14",
+      "name": "ASDA Malted Wheats",
+      "subcategory": "wheat-biscuits",
+      "price": "1.35",
+      "size": "750g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.180",
+      "tags": [
+        "cereal",
+        "wheat biscuits",
+        "breakfast"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cheese-15",
+      "name": "ASDA Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.35",
+      "size": "350g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.671",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cheese-16",
+      "name": "ASDA Extra Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "2.65",
+      "size": "300g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.883",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "asda-cheese-17",
+      "name": "ASDA Mozzarella",
+      "subcategory": "mozzarella",
+      "price": "1.85",
+      "size": "200g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.925",
+      "tags": [
+        "cheese",
+        "mozzarella",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-tomatoes-18",
+      "name": "ASDA Salad Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "0.99",
+      "size": "330g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.300",
+      "tags": [
+        "tomatoes",
+        "salad",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "asda-tomatoes-19",
+      "name": "ASDA Cherry Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "1.20",
+      "size": "300g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.400",
+      "tags": [
+        "tomatoes",
+        "cherry",
+        "fresh"
+      ]
+    },
+    {
+      "sourceProductId": "asda-tomatoes-20",
+      "name": "ASDA Vine Tomatoes",
+      "subcategory": "fresh-tomatoes",
+      "price": "2.00",
+      "size": "300g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.667",
+      "tags": [
+        "tomatoes",
+        "vine",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "asda-rice-21",
+      "name": "ASDA Easy Cook Long Grain Rice",
+      "subcategory": "long-grain",
+      "price": "1.40",
+      "size": "1kg",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.140",
+      "tags": [
+        "rice",
+        "long grain",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "asda-rice-22",
+      "name": "ASDA Basmati Rice",
+      "subcategory": "basmati",
+      "price": "1.95",
+      "size": "1kg",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.195",
+      "tags": [
+        "rice",
+        "basmati",
+        "cupboard"
+      ]
+    },
+    {
+      "sourceProductId": "asda-rice-23",
+      "name": "ASDA Microwave Basmati Rice",
+      "subcategory": "microwave",
+      "price": "0.90",
+      "size": "250g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.360",
+      "tags": [
+        "rice",
+        "microwave",
+        "ready"
+      ]
+    },
+    {
+      "sourceProductId": "asda-yogurt-24",
+      "name": "ASDA Greek Style Yogurt",
+      "subcategory": "greek",
+      "price": "1.65",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.330",
+      "tags": [
+        "yogurt",
+        "greek",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-yogurt-25",
+      "name": "ASDA Natural Yogurt",
+      "subcategory": "natural",
+      "price": "1.40",
+      "size": "500g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.280",
+      "tags": [
+        "yogurt",
+        "natural",
+        "dairy"
+      ]
+    },
+    {
+      "sourceProductId": "asda-yogurt-26",
+      "name": "ASDA Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.40",
+      "size": "450g",
+      "brand": "ASDA",
+      "unitDescription": "per 100g",
+      "unitValue": "0.533",
+      "tags": [
+        "yogurt",
+        "organic",
+        "premium"
+      ]
+    },
+    {
+      "sourceProductId": "asda-apples-27",
+      "name": "ASDA Gala Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.35",
+      "size": "6 pack",
+      "brand": "ASDA",
+      "unitDescription": "per apple",
+      "unitValue": "0.225",
+      "tags": [
+        "apples",
+        "gala",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "asda-apples-28",
+      "name": "ASDA Pink Lady Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.60",
+      "size": "6 pack",
+      "brand": "ASDA",
+      "unitDescription": "per apple",
+      "unitValue": "0.267",
+      "tags": [
+        "apples",
+        "pink lady",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "asda-apples-29",
+      "name": "ASDA Braeburn Apples",
+      "subcategory": "fresh-apples",
+      "price": "1.45",
+      "size": "6 pack",
+      "brand": "ASDA",
+      "unitDescription": "per apple",
+      "unitValue": "0.242",
+      "tags": [
+        "apples",
+        "braeburn",
+        "fruit"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-1",
+      "name": "Heinz Baked Beanz",
+      "subcategory": "tinned-beans",
+      "price": "1.40",
+      "size": "415g",
+      "brand": "Heinz",
+      "unitDescription": "per 100g",
+      "unitValue": "0.337",
+      "tags": [
+        "beans",
+        "beanz",
+        "tin"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-2",
+      "name": "Kellogg's Corn Flakes",
+      "subcategory": "corn-flakes",
+      "price": "2.95",
+      "size": "450g",
+      "brand": "Kellogg's",
+      "unitDescription": "per 100g",
+      "unitValue": "0.656",
+      "tags": [
+        "cereal",
+        "corn flakes",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-3",
+      "name": "Cathedral City Mature Cheddar",
+      "subcategory": "cheddar",
+      "price": "3.65",
+      "size": "350g",
+      "brand": "Cathedral City",
+      "unitDescription": "per 100g",
+      "unitValue": "1.043",
+      "tags": [
+        "cheese",
+        "cheddar",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-4",
+      "name": "Tilda Pure Basmati Rice",
+      "subcategory": "basmati",
+      "price": "3.95",
+      "size": "1kg",
+      "brand": "Tilda",
+      "unitDescription": "per 100g",
+      "unitValue": "0.395",
+      "tags": [
+        "rice",
+        "basmati",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-5",
+      "name": "Yeo Valley Organic Greek Yogurt",
+      "subcategory": "greek",
+      "price": "2.85",
+      "size": "450g",
+      "brand": "Yeo Valley",
+      "unitDescription": "per 100g",
+      "unitValue": "0.633",
+      "tags": [
+        "yogurt",
+        "organic",
+        "branded"
+      ]
+    },
+    {
+      "sourceProductId": "asda-brand-6",
+      "name": "Napolina Chopped Tomatoes",
+      "subcategory": "tinned-tomatoes",
+      "price": "1.10",
+      "size": "400g",
+      "brand": "Napolina",
+      "unitDescription": "per 100g",
+      "unitValue": "0.275",
+      "tags": [
+        "tomatoes",
+        "tinned",
+        "branded"
+      ]
+    }
+  ]
+}
