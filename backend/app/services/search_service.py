@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class SearchCandidate:
+    product_row_id: int
+    source_product_id: str | None
     retailer: str
     retailer_description: str
     product_name: str
@@ -22,6 +24,10 @@ class SearchCandidate:
     price: float
     unit_description: str
     unit_value: float
+    promo_price: float | None
+    image_url: str | None
+    category_tags: list[str]
+    last_updated: str | None
     raw_searchable_text: str
     canonical_name: str
     canonical_searchable_text: str
@@ -48,6 +54,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
         rows = conn.execute(
             """
             SELECT
+              raw.id AS raw_product_id,
+              raw.source_product_id,
               r.name AS retailer_name,
               r.description AS retailer_description,
               raw.source_name,
@@ -64,7 +72,11 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
               pm.confidence AS mapping_confidence,
               ps.price,
               ps.unit_description,
-              ps.unit_value
+              ps.unit_value,
+              ps.promo_price,
+              raw.image_url,
+              raw.category_tags,
+              raw.last_updated
             FROM raw_retailer_products raw
             JOIN retailers r ON r.id = raw.retailer_id
             JOIN product_mappings pm ON pm.raw_product_id = raw.id
@@ -81,6 +93,8 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
 
     return [
         SearchCandidate(
+            product_row_id=int(row["raw_product_id"]),
+            source_product_id=row["source_product_id"],
             retailer=row["retailer_name"],
             retailer_description=row["retailer_description"],
             product_name=row["source_name"],
@@ -92,6 +106,10 @@ def _latest_catalog_candidates() -> list[SearchCandidate]:
             price=float(row["price"]),
             unit_description=row["unit_description"],
             unit_value=float(row["unit_value"]),
+            promo_price=float(row["promo_price"]) if row["promo_price"] is not None else None,
+            image_url=row["image_url"] or None,
+            category_tags=[tag for tag in (row["category_tags"] or "").split(",") if tag],
+            last_updated=row["last_updated"] or None,
             raw_searchable_text=row["raw_searchable_text"],
             canonical_name=row["canonical_name"],
             canonical_searchable_text=row["canonical_searchable_text"],

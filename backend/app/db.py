@@ -33,6 +33,9 @@ def init_db() -> None:
                 source_size TEXT NOT NULL,
                 source_subcategory TEXT NOT NULL,
                 raw_payload TEXT,
+                image_url TEXT NOT NULL DEFAULT "",
+                category_tags TEXT NOT NULL DEFAULT "",
+                last_updated TEXT NOT NULL DEFAULT "",
                 searchable_text TEXT NOT NULL,
                 created_at TEXT NOT NULL,
                 FOREIGN KEY(retailer_id) REFERENCES retailers(id)
@@ -69,6 +72,7 @@ def init_db() -> None:
                 currency TEXT NOT NULL,
                 unit_description TEXT NOT NULL,
                 unit_value REAL NOT NULL,
+                promo_price REAL,
                 captured_at TEXT NOT NULL,
                 FOREIGN KEY(raw_product_id) REFERENCES raw_retailer_products(id)
             );
@@ -130,6 +134,10 @@ def init_db() -> None:
         )
         _ensure_column(conn, "canonical_products", "token_fingerprint", "TEXT NOT NULL DEFAULT ''")
         _ensure_column(conn, "canonical_products", "canonical_aliases", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "raw_retailer_products", "image_url", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "raw_retailer_products", "category_tags", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "raw_retailer_products", "last_updated", "TEXT NOT NULL DEFAULT ''")
+        _ensure_column(conn, "price_snapshots", "promo_price", "REAL")
         conn.commit()
 
 

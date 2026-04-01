@@ -115,10 +115,18 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                     conn.execute(
                         """
                         UPDATE raw_retailer_products
-                        SET source_subcategory = ?, searchable_text = ?, created_at = ?
+                        SET source_subcategory = ?, searchable_text = ?, image_url = ?, category_tags = ?, last_updated = ?, created_at = ?
                         WHERE id = ?
                         """,
-                        (product.raw.subcategory, product.searchable_text, now, raw_product_id),
+                        (
+                            product.raw.subcategory,
+                            product.searchable_text,
+                            product.raw.image_url or "",
+                            ",".join(product.normalized_tags),
+                            product.raw.last_updated or now,
+                            now,
+                            raw_product_id,
+                        ),
                     )
                     updated_raw += 1
                 else:
@@ -126,8 +134,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                         """
                         INSERT INTO raw_retailer_products(
                             retailer_id, source_product_id, source_name, source_brand, source_size, source_subcategory,
-                            searchable_text, created_at
-                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+                            image_url, category_tags, last_updated, searchable_text, created_at
+                        ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         """,
                         (
                             retailer_id,
@@ -136,6 +144,9 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                             product.raw.brand,
                             product.raw.size,
                             product.raw.subcategory,
+                            product.raw.image_url or "",
+                            ",".join(product.normalized_tags),
+                            product.raw.last_updated or now,
                             product.searchable_text,
                             now,
                         ),
@@ -156,7 +167,7 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
 
                 latest = conn.execute(
                     """
-                    SELECT price, unit_value FROM price_snapshots
+                    SELECT price, unit_value, promo_price FROM price_snapshots
                     WHERE raw_product_id = ?
                     ORDER BY captured_at DESC LIMIT 1
                     """,
@@ -164,7 +175,8 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                 ).fetchone()
                 new_price = float(product.raw.price)
                 new_unit_value = float(product.raw.unit_value)
-                if not latest or latest["price"] != new_price or latest["unit_value"] != new_unit_value:
+                new_promo_price = float(product.raw.promo_price) if product.raw.promo_price is not None else None
+                if not latest or latest["price"] != new_price or latest["unit_value"] != new_unit_value or latest["promo_price"] != new_promo_price:
                     if latest and latest["price"] > 0 and new_price < latest["price"]:
                         change_ratio = round((latest["price"] - new_price) / latest["price"], 4)
                         if change_ratio >= 0.05:
@@ -179,10 +191,10 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                             inserted_price_drop_candidates += 1
                     conn.execute(
                         """
-                        INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, captured_at)
-                        VALUES(?, ?, ?, ?, ?, ?)
+                        INSERT INTO price_snapshots(raw_product_id, price, currency, unit_description, unit_value, promo_price, captured_at)
+                        VALUES(?, ?, ?, ?, ?, ?, ?)
                         """,
-                        (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, now),
+                        (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, new_promo_price, now),
                     )
                     inserted_price_snapshots += 1
             logger.info(

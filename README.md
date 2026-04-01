@@ -167,3 +167,8 @@ Backend strategy payloads include these modes and metadata:
 - human-readable explanation and trade-off summary.
 
 This extends compare payloads while preserving `/catalog` contract compatibility and current live catalog data flow.
+
+
+## Backend live data milestone
+
+See `backend/README.md` for live Tesco provider configuration, import commands, API endpoints (`/autocomplete`, `/search`, `/product/{id}`, `/compare`, `/catalog`), and follow-up work for ASDA/Sainsbury's.
