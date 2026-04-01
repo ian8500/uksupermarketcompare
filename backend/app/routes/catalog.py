@@ -1,9 +1,11 @@
+from datetime import datetime, UTC
 from decimal import Decimal
 from typing import Literal
 
 from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict
 
+from app.services.catalog_store import load_catalog_rows
 from app.services.seed_catalog import SEEDED_SUPERMARKETS
 
 router = APIRouter()
@@ -67,28 +69,49 @@ class CatalogResponse(BaseModel):
     metadata: CatalogMetadata
 
 
-CATALOG = CatalogResponse(
-    supermarkets=[
+def _fallback_catalog_supermarkets() -> list[CatalogSupermarket]:
+    return [
         CatalogSupermarket(
             name=market["name"],
             description=market["description"],
-            products=[
-                CatalogProduct(
-                    **{**product, "category": product["category"].value},
-                )
-                for product in market["products"]
-            ],
+            products=[CatalogProduct(**{**product, "category": product["category"].value}) for product in market["products"]],
         )
         for market in SEEDED_SUPERMARKETS
-    ],
-    metadata=CatalogMetadata(
-        source="backend.catalog",
-        debugMarker="LIVE_CATALOG_V3_MATCHING_INTELLIGENCE",
-        generatedAt="2026-04-01T00:00:00Z",
-    ),
-)
+    ]
+
+
+def _build_catalog_response() -> CatalogResponse:
+    try:
+        db_rows = load_catalog_rows()
+    except Exception:
+        db_rows = []
+
+    supermarkets = (
+        [
+            CatalogSupermarket(
+                name=market["name"],
+                description=market["description"],
+                products=[CatalogProduct(**{**product, "category": product["category"].value}) for product in market["products"]],
+            )
+            for market in db_rows
+        ]
+        if db_rows
+        else _fallback_catalog_supermarkets()
+    )
+
+    return CatalogResponse(
+        supermarkets=supermarkets,
+        metadata=CatalogMetadata(
+            source="backend.catalog",
+            debugMarker="LIVE_CATALOG_V3_MATCHING_INTELLIGENCE",
+            generatedAt=datetime.now(UTC).isoformat(),
+        ),
+    )
+
+
+CATALOG = _build_catalog_response()
 
 
 @router.get('/catalog', response_model=CatalogResponse)
 def catalog() -> CatalogResponse:
-    return CATALOG
+    return _build_catalog_response()

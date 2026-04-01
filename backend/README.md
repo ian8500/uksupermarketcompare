@@ -60,6 +60,29 @@ Categories are constrained to the Swift `GroceryCategory` raw values:
 
 `milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
 
+
+## Stage 3 data architecture (normalized catalog foundation)
+
+The backend now includes a persistent normalized data model (SQLite for local dev, compatible with production SQL databases via SQLAlchemy):
+
+- **Retailer**: supermarket identity and metadata.
+- **RawRetailerProduct**: exact source item from each retailer feed (name/size/brand/subcategory preserved).
+- **CanonicalProduct**: normalized comparable product intent (canonical name/category/normalized size + tags).
+- **ProductMapping**: links each raw retailer product to a canonical product with confidence/method metadata.
+- **PriceSnapshot**: time-based product prices for future historical pricing and trend analysis.
+- **SearchSynonym**: alias dictionary for search and matching normalization.
+
+A normalization layer (`app/services/normalization.py`) standardizes:
+
+- product names and synonyms (`beanz` -> `baked beans`, `yoghurt` -> `yogurt`)
+- brand forms (`Kelloggs` -> `kellogg's`)
+- sizes/units (`kg`->`g`, `l`->`ml`)
+- tags
+- inferred canonical category/intent
+- generated searchable text fields for matching and retrieval
+
+`/catalog` remains backward-compatible for the Swift app, while now reading from the persisted normalized model (with seed fallback behavior preserved).
+
 ## Run locally (port 8000)
 
 ```bash
