@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum BrandPalette {
     static let red = Color(red: 0.84, green: 0.14, blue: 0.23)
@@ -224,5 +225,68 @@ struct BrandScreenBackground: ViewModifier {
 extension View {
     func brandScreenBackground() -> some View {
         modifier(BrandScreenBackground())
+    }
+}
+
+
+private struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = -0.7
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { proxy in
+                    LinearGradient(
+                        colors: [.clear, .white.opacity(0.45), .clear],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(width: proxy.size.width * 0.7)
+                    .offset(x: proxy.size.width * phase)
+                }
+                .mask(content)
+            )
+            .onAppear {
+                withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
+                    phase = 1.1
+                }
+            }
+    }
+}
+
+extension View {
+    func shimmering() -> some View {
+        modifier(ShimmerModifier())
+    }
+}
+
+
+enum HapticFeedbackService {
+    static func addItem() {
+        impact(.light)
+    }
+
+    static func compareBasket() {
+        impact(.medium)
+    }
+
+    static func saveBasket() {
+        notify(.success)
+    }
+
+    static func bestOptionSelected() {
+        impact(.rigid)
+    }
+
+    private static func impact(_ style: UIImpactFeedbackGenerator.FeedbackStyle) {
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+
+    private static func notify(_ type: UINotificationFeedbackGenerator.FeedbackType) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.prepare()
+        generator.notificationOccurred(type)
     }
 }

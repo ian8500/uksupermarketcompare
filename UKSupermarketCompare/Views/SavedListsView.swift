@@ -21,6 +21,7 @@ struct SavedListsView: View {
                             }
                             .buttonStyle(BrandPrimaryButtonStyle())
                         }
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                 }
 
@@ -54,6 +55,12 @@ struct SavedListsView: View {
                                         Text(lastComparedLabel(for: list))
                                             .font(BrandTypography.caption)
                                             .foregroundStyle(BrandPalette.textSecondary)
+                                        HStack(spacing: 6) {
+                                            BrandBadge(text: "Ready to rerun", tint: BrandPalette.success)
+                                            if list.lastComparedAt != nil {
+                                                BrandBadge(text: "Compared", tint: BrandPalette.blue)
+                                            }
+                                        }
                                     }
                                     Spacer()
                                     Button {
@@ -78,6 +85,7 @@ struct SavedListsView: View {
                                 }
                             }
                         }
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                 }
             }
@@ -85,6 +93,7 @@ struct SavedListsView: View {
         }
         .brandScreenBackground()
         .navigationTitle("Saved Lists")
+        .animation(.spring(response: 0.3, dampingFraction: 0.86), value: viewModel.savedLists.count)
     }
 
     private func lastComparedLabel(for list: ShoppingList) -> String {

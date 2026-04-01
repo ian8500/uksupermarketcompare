@@ -13,6 +13,7 @@ protocol BackendAutocompleteServing {
 final class BackendAutocompleteService: BackendAutocompleteServing {
     private let session: URLSession
     private let autocompleteURL: URL
+    private let cache = SearchSuggestionCache.shared
 
     init?(session: URLSession = .shared) {
         let environment = ProcessInfo.processInfo.environment
@@ -32,7 +33,12 @@ final class BackendAutocompleteService: BackendAutocompleteServing {
     }
 
     func autocomplete(query: String, limit: Int) async throws -> [GrocerySuggestion] {
-        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
+        let normalized = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else { return [] }
+
+        if let cached = await cache.suggestions(for: normalized), !cached.isEmpty {
+            return Array(cached.prefix(limit))
+        }
 
         var components = URLComponents(url: autocompleteURL, resolvingAgainstBaseURL: false)
         components?.queryItems = [
@@ -54,7 +60,9 @@ final class BackendAutocompleteService: BackendAutocompleteServing {
         }
 
         let payload = try JSONDecoder().decode(AutocompleteResponse.self, from: data)
-        return payload.suggestions.map { $0.asSuggestion }
+        let suggestions = payload.suggestions.map { $0.asSuggestion }
+        await cache.store(suggestions, for: normalized)
+        return Array(suggestions.prefix(limit))
     }
 }
 
@@ -213,5 +221,58 @@ private struct BackendAutocompleteSuggestion: Decodable {
             score: Int(score * 1_000),
             origin: .backend
         )
+    }
+}
+
+
+actor SearchSuggestionCache {
+    static let shared = SearchSuggestionCache()
+
+    private struct Entry {
+        let suggestions: [GrocerySuggestion]
+        let createdAt: Date
+    }
+
+    private var storage: [String: Entry] = [:]
+    private let ttl: TimeInterval = 60 * 4
+
+    func suggestions(for query: String) -> [GrocerySuggestion]? {
+        let key = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard let entry = storage[key] else { return nil }
+        if Date().timeIntervalSince(entry.createdAt) > ttl {
+            storage[key] = nil
+            return nil
+        }
+        return entry.suggestions
+    }
+
+    func store(_ suggestions: [GrocerySuggestion], for query: String) {
+        let key = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        storage[key] = Entry(suggestions: suggestions, createdAt: Date())
+    }
+}
+
+actor BasketComparisonCache {
+    static let shared = BasketComparisonCache()
+
+    private struct Entry {
+        let result: BasketOptimisationResult
+        let createdAt: Date
+    }
+
+    private var storage: [String: Entry] = [:]
+    private let ttl: TimeInterval = 60 * 3
+
+    func result(for key: String) -> BasketOptimisationResult? {
+        guard let entry = storage[key] else { return nil }
+        if Date().timeIntervalSince(entry.createdAt) > ttl {
+            storage[key] = nil
+            return nil
+        }
+        return entry.result
+    }
+
+    func store(_ result: BasketOptimisationResult, for key: String) {
+        storage[key] = Entry(result: result, createdAt: Date())
     }
 }
