@@ -58,8 +58,22 @@ enum MatchQuality: Int, Codable, Hashable, Comparable {
     var label: String {
         switch self {
         case .exact: return "Exact"
-        case .acceptableEquivalent: return "Equivalent"
-        case .weakSubstitute: return "Substitute"
+        case .acceptableEquivalent: return "Close match"
+        case .weakSubstitute: return "Approximate"
+        }
+    }
+}
+
+enum ProductMatchType: String, Codable, Hashable {
+    case exact
+    case close
+    case approximate
+
+    var badgeLabel: String {
+        switch self {
+        case .exact: return "Exact"
+        case .close: return "Close match"
+        case .approximate: return "Approximate"
         }
     }
 }
@@ -190,6 +204,9 @@ struct ProductCandidate: Identifiable, Codable, Hashable {
     let confidence: Decimal
     let weightedUnitValue: Decimal
     let isValid: Bool
+    let matchType: ProductMatchType
+    let matchExplanation: String
+    let selectionReason: String
     let reasons: [String]
 }
 
@@ -204,9 +221,22 @@ struct ItemSelectionResult: Identifiable, Codable, Hashable {
     let totalPrice: Decimal
     let matchQuality: MatchQuality
     let confidence: Decimal
+    let matchType: ProductMatchType
+    let matchExplanation: String
+    let selectionReason: String
     let reasons: [String]
 
-    init(intent: GroceryIntent, supermarket: Supermarket, product: SupermarketProduct, matchQuality: MatchQuality, confidence: Decimal, reasons: [String]) {
+    init(
+        intent: GroceryIntent,
+        supermarket: Supermarket,
+        product: SupermarketProduct,
+        matchQuality: MatchQuality,
+        confidence: Decimal,
+        matchType: ProductMatchType,
+        matchExplanation: String,
+        selectionReason: String,
+        reasons: [String]
+    ) {
         self.id = UUID()
         self.intent = intent
         self.supermarket = supermarket
@@ -217,6 +247,9 @@ struct ItemSelectionResult: Identifiable, Codable, Hashable {
         self.totalPrice = product.price * Decimal(intent.quantity)
         self.matchQuality = matchQuality
         self.confidence = confidence
+        self.matchType = matchType
+        self.matchExplanation = matchExplanation
+        self.selectionReason = selectionReason
         self.reasons = reasons
     }
 }

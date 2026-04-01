@@ -161,6 +161,9 @@ final class BasketOptimiserService: BasketOptimising {
                     product: best.product,
                     matchQuality: best.matchQuality,
                     confidence: best.confidence,
+                    matchType: best.matchType,
+                    matchExplanation: best.matchExplanation,
+                    selectionReason: best.selectionReason,
                     reasons: best.reasons
                 )
             )
@@ -192,12 +195,12 @@ final class BasketOptimiserService: BasketOptimising {
         if preferences.organicOnly && !product.isOrganic { return nil }
 
         var quality: MatchQuality = .weakSubstitute
-        var score = Decimal(0.20)
+        var score = Decimal(0.0)
         var reasons: [String] = []
 
         if product.category == intent.category {
             quality = .exact
-            score += 0.45
+            score += 0.18
             reasons.append("Exact category match for \(intent.category.displayName.lowercased()).")
         }
 
@@ -207,11 +210,26 @@ final class BasketOptimiserService: BasketOptimising {
         let tokenHits = Array(intentTokens.intersection(productTokens)).sorted()
 
         if !tokenHits.isEmpty {
-            score += Decimal(min(tokenHits.count, 4)) * 0.09
+            score += Decimal(min(tokenHits.count, 5)) * 0.07
             reasons.append("Matched tokens: \(tokenHits.prefix(4).joined(separator: ", ")).")
             if quality == .weakSubstitute {
                 quality = .acceptableEquivalent
             }
+        }
+
+        let nameScore = Decimal(string: String(format: "%.3f", similarity(intent.normalizedInput, product.name.lowercased()))) ?? 0
+        score += nameScore * 0.32
+        reasons.append("Name similarity score: \(nameScore).")
+
+        let sizeScore = sizeSimilarity(intent: intent.normalizedInput, candidateSize: product.size)
+        score += sizeScore * 0.22
+        if sizeScore <= 0.1 {
+            reasons.append("Large size mismatch detected.")
+            if quality == .exact { quality = .acceptableEquivalent }
+        } else if sizeScore < 1 {
+            reasons.append("Near size range match accepted.")
+        } else {
+            reasons.append("Requested size range matched.")
         }
 
         switch preferences.brandPreference {
@@ -220,14 +238,14 @@ final class BasketOptimiserService: BasketOptimising {
                 score += 0.10
                 reasons.append("Own-brand preference matched.")
             } else {
-                score -= 0.06
+                score -= 0.10
             }
         case .brandedPreferred:
             if !product.isOwnBrand {
                 score += 0.10
                 reasons.append("Branded preference matched.")
             } else {
-                score -= 0.06
+                score -= 0.10
             }
         case .brandedOnly:
             if product.isOwnBrand {
@@ -241,8 +259,8 @@ final class BasketOptimiserService: BasketOptimising {
         }
 
         if preferences.avoidPremium && product.isPremium {
-            score -= 0.15
-            reasons.append("Premium item penalised due to preference.")
+            score -= 0.20
+            reasons.append("Price sanity penalty: premium item deprioritised.")
             if quality == .exact {
                 quality = .acceptableEquivalent
             }
@@ -251,6 +269,10 @@ final class BasketOptimiserService: BasketOptimising {
         if product.isOrganic {
             score += 0.03
             reasons.append("Organic option available.")
+        }
+        if product.price > 25 {
+            score -= 0.08
+            reasons.append("Price sanity check reduced confidence for unusually high price.")
         }
 
         if product.price <= 0 || product.unitValue <= 0 { return nil }
@@ -265,7 +287,9 @@ final class BasketOptimiserService: BasketOptimising {
             reasons.append("Rejected due to low confidence score \(finalScore).")
             return nil
         }
-        reasons.append("Compared using unit price (\(product.unitDescription)).")
+        reasons.append("Compared using weighted name/category/size/brand/price checks.")
+
+        let matchType: ProductMatchType = finalScore >= 0.85 && quality == .exact ? .exact : (finalScore >= 0.60 ? .close : .approximate)
 
         return ProductCandidate(
             id: UUID(),
@@ -276,8 +300,44 @@ final class BasketOptimiserService: BasketOptimising {
             confidence: finalScore,
             weightedUnitValue: weightedUnit,
             isValid: true,
+            matchType: matchType,
+            matchExplanation: reasons.first ?? "Chosen as strongest available candidate.",
+            selectionReason: "Selected as top-ranked option from scored candidates.",
             reasons: reasons
         )
+    }
+
+    private func similarity(_ lhs: String, _ rhs: String) -> Double {
+        let left = Set(lhs.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+        let right = Set(rhs.split(whereSeparator: { !$0.isLetter && !$0.isNumber }).map(String.init))
+        guard !left.isEmpty || !right.isEmpty else { return 0 }
+        let overlap = left.intersection(right).count
+        return Double(overlap) / Double(max(left.count, right.count))
+    }
+
+    private func sizeSimilarity(intent: String, candidateSize: String) -> Decimal {
+        func parse(_ text: String) -> (Double, String)? {
+            let lower = text.lowercased().replacingOccurrences(of: " ", with: "")
+            for unit in ["kg", "g", "ml", "l"] {
+                guard let range = lower.range(of: unit) else { continue }
+                let prefix = lower[..<range.lowerBound]
+                let numeric = prefix.filter { $0.isNumber || $0 == "." }
+                if let value = Double(numeric) {
+                    return (value, unit)
+                }
+            }
+            return nil
+        }
+        guard
+            let requested = parse(intent),
+            let candidate = parse(candidateSize),
+            requested.1 == candidate.1,
+            requested.0 > 0
+        else { return 0.35 }
+        let ratio = candidate.0 / requested.0
+        if ratio >= 0.9 && ratio <= 1.1 { return 1.0 }
+        if ratio >= 0.7 && ratio <= 1.3 { return 0.7 }
+        return 0.1
     }
 
     private func expandedTokens(from values: [String]) -> Set<String> {

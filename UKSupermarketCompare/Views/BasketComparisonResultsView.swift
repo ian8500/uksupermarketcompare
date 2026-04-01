@@ -97,10 +97,16 @@ struct BasketComparisonResultsView: View {
                                             VStack(alignment: .leading, spacing: 4) {
                                                 Text("\(selection.quantity)x \(selection.product.name)")
                                                     .font(BrandTypography.body)
-                                                Text("\(selection.intent.userInput) • \(selection.matchQuality.label) match • confidence \(Int((selection.confidence as NSDecimalNumber).doubleValue * 100))%")
+                                                HStack(spacing: 6) {
+                                                    BrandBadge(text: selection.matchType.badgeLabel, tint: selection.matchType == .exact ? BrandPalette.success : (selection.matchType == .close ? BrandPalette.blue : BrandPalette.warning))
+                                                    Text("confidence \(Int((selection.confidence as NSDecimalNumber).doubleValue * 100))%")
+                                                        .font(BrandTypography.caption)
+                                                        .foregroundStyle(BrandPalette.textSecondary)
+                                                }
+                                                Text("\(selection.intent.userInput) • \(selection.matchExplanation)")
                                                     .font(BrandTypography.caption)
                                                     .foregroundStyle(BrandPalette.textSecondary)
-                                                Text(viewModel.decisionExplanation(for: selection))
+                                                Text(selection.selectionReason)
                                                     .font(BrandTypography.caption)
                                                     .foregroundStyle(BrandPalette.textSecondary)
                                             }
