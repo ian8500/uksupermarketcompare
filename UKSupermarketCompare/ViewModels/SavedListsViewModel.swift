@@ -24,4 +24,8 @@ final class SavedListsViewModel: ObservableObject {
     func update(_ list: ShoppingList) {
         store.update(list: list)
     }
+
+    func rerun(_ list: ShoppingList) {
+        store.markCompared(listID: list.id)
+    }
 }

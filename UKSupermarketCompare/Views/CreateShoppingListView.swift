@@ -2,6 +2,11 @@ import SwiftUI
 
 struct CreateShoppingListView: View {
     @ObservedObject var viewModel: CreateShoppingListViewModel
+    @FocusState private var focusedField: Field?
+
+    private enum Field {
+        case itemName
+    }
 
     var body: some View {
         ScrollView {
@@ -22,31 +27,57 @@ struct CreateShoppingListView: View {
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
                         sectionTitle("Add Item")
-                        TextField("Item name", text: $viewModel.itemName)
-                            .padding(12)
-                            .background(BrandPalette.cloud)
-                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(BrandPalette.blue)
+                            TextField("Search groceries, e.g. 2 milk", text: $viewModel.itemName)
+                                .focused($focusedField, equals: .itemName)
+                                .submitLabel(.done)
+                                .onSubmit { viewModel.addItem() }
+                            if !viewModel.itemName.isEmpty {
+                                Button {
+                                    viewModel.itemName = ""
+                                    focusedField = .itemName
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(BrandPalette.textSecondary)
+                                }
+                            }
+                        }
+                        .padding(12)
+                        .background(BrandPalette.cloud)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(BrandPalette.blue.opacity(0.2), lineWidth: 1)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
 
                         if !viewModel.suggestions.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(viewModel.suggestions.prefix(8)) { suggestion in
-                                        Button {
-                                            viewModel.applySuggestion(suggestion)
-                                        } label: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Suggestions")
+                                    .font(BrandTypography.caption.weight(.semibold))
+                                    .foregroundStyle(BrandPalette.textSecondary)
+                                ForEach(viewModel.suggestions.prefix(6)) { suggestion in
+                                    Button {
+                                        viewModel.addSuggestion(suggestion)
+                                        focusedField = .itemName
+                                    } label: {
+                                        HStack {
                                             VStack(alignment: .leading, spacing: 2) {
                                                 Text(suggestion.item.displayName)
                                                 Text(suggestion.hintText)
                                                     .font(BrandTypography.caption)
+                                                    .foregroundStyle(BrandPalette.textSecondary)
                                             }
-                                            .foregroundStyle(BrandPalette.navy)
-                                            .padding(.horizontal, 10)
-                                            .padding(.vertical, 8)
-                                            .background(BrandPalette.blue.opacity(0.10))
-                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            Spacer()
+                                            Image(systemName: "plus.circle.fill")
+                                                .foregroundStyle(BrandPalette.blue)
                                         }
-                                        .buttonStyle(.plain)
+                                        .padding(10)
+                                        .background(BrandPalette.blue.opacity(0.08))
+                                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                                     }
+                                    .buttonStyle(.plain)
                                 }
                             }
                         }
@@ -61,13 +92,12 @@ struct CreateShoppingListView: View {
 
                         Button("Add Item") {
                             viewModel.addItem()
+                            focusedField = .itemName
                         }
                         .buttonStyle(BrandSecondaryButtonStyle())
                         .disabled(!viewModel.canAddItem)
                     }
                 }
-
-
 
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
@@ -90,7 +120,10 @@ struct CreateShoppingListView: View {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 8) {
                                     ForEach(viewModel.recentItems.prefix(10), id: \.self) { item in
-                                        Button(item) { viewModel.addRecentItem(item) }
+                                        Button(item) {
+                                            viewModel.addRecentItem(item)
+                                            focusedField = .itemName
+                                        }
                                             .buttonStyle(.bordered)
                                             .tint(BrandPalette.blue)
                                     }
@@ -125,10 +158,12 @@ struct CreateShoppingListView: View {
                                     VStack(alignment: .leading, spacing: 4) {
                                         Text(item.name)
                                             .font(BrandTypography.body)
-                                        BrandChip(text: "Qty \(item.quantity)", tint: BrandPalette.red)
+                                        Text("Quantity")
+                                            .font(BrandTypography.caption)
+                                            .foregroundStyle(BrandPalette.textSecondary)
                                     }
                                     Spacer()
-                                    itemQuantityStepper(for: item.id)
+                                    itemQuantityStepper(for: item.id, quantity: item.quantity)
                                     Button {
                                         viewModel.deleteItem(at: IndexSet(integer: index))
                                     } label: {
@@ -174,11 +209,25 @@ struct CreateShoppingListView: View {
         .clipShape(Capsule())
     }
 
-    private func itemQuantityStepper(for itemID: UUID) -> some View {
+    private func itemQuantityStepper(for itemID: UUID, quantity: Int) -> some View {
         HStack(spacing: 8) {
             stepperButton(systemImage: "minus") {
                 viewModel.updateQuantity(for: itemID, delta: -1)
             }
+            TextField(
+                "Qty",
+                value: Binding(
+                    get: { quantity },
+                    set: { viewModel.setQuantity(for: itemID, to: $0) }
+                ),
+                format: .number
+            )
+            .keyboardType(.numberPad)
+            .multilineTextAlignment(.center)
+            .frame(width: 44)
+            .padding(.vertical, 4)
+            .background(BrandPalette.cloud)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             stepperButton(systemImage: "plus") {
                 viewModel.updateQuantity(for: itemID, delta: 1)
             }

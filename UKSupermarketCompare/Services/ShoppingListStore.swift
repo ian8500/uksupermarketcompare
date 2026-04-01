@@ -27,6 +27,12 @@ final class ShoppingListStore: ObservableObject {
         persist()
     }
 
+    func markCompared(listID: UUID, comparedAt: Date = Date()) {
+        guard let index = savedLists.firstIndex(where: { $0.id == listID }) else { return }
+        savedLists[index].lastComparedAt = comparedAt
+        persist()
+    }
+
     func duplicate(listID: UUID) {
         guard let original = savedLists.first(where: { $0.id == listID }) else { return }
         let duplicated = ShoppingList(

@@ -9,7 +9,8 @@ final class CreateShoppingListViewModel: ObservableObject {
     @Published private(set) var items: [ShoppingItem] = []
     @Published private(set) var suggestions: [GrocerySuggestion] = []
 
-    let weeklyEssentials = ["Milk", "Bread", "Eggs", "Butter", "Bananas", "Rice"]
+    let weeklyEssentials = ["Milk", "Bread", "Eggs", "Bananas", "Butter", "Pasta"]
+    private let popularItems = ["milk", "bread", "eggs", "bananas", "butter", "pasta", "cheese", "chicken", "rice", "tomatoes"]
 
     private let coordinator: AppCoordinatorViewModel
     private let catalogService: GroceryCatalogServing
@@ -37,6 +38,11 @@ final class CreateShoppingListViewModel: ObservableObject {
         quantity = max(1, suggestion.item.defaultQuantityStep)
     }
 
+    func addSuggestion(_ suggestion: GrocerySuggestion) {
+        applySuggestion(suggestion)
+        addItem()
+    }
+
     func addItem() {
         guard canAddItem else { return }
         let parsed = parseQuantityPrefix(from: itemName)
@@ -62,14 +68,14 @@ final class CreateShoppingListViewModel: ObservableObject {
         addItem()
     }
 
-    func quickAddSuggestion(_ suggestion: GrocerySuggestion) {
-        applySuggestion(suggestion)
-        addItem()
-    }
-
     func updateQuantity(for itemID: UUID, delta: Int) {
         guard let index = items.firstIndex(where: { $0.id == itemID }) else { return }
         items[index].quantity = max(1, items[index].quantity + delta)
+    }
+
+    func setQuantity(for itemID: UUID, to quantity: Int) {
+        guard let index = items.firstIndex(where: { $0.id == itemID }) else { return }
+        items[index].quantity = min(99, max(1, quantity))
     }
 
     func deleteItem(at offsets: IndexSet) {
@@ -85,7 +91,9 @@ final class CreateShoppingListViewModel: ObservableObject {
     }
 
     private func refreshSuggestions() {
-        suggestions = catalogService.suggestions(for: parseQuantityPrefix(from: itemName).name, limit: 8)
+        let query = parseQuantityPrefix(from: itemName).name
+        let base = catalogService.suggestions(for: query, limit: 40)
+        suggestions = rankSuggestions(base, query: query).prefix(8).map { $0 }
     }
 
     private func parseQuantityPrefix(from raw: String) -> (name: String, quantity: Int?) {
@@ -98,5 +106,64 @@ final class CreateShoppingListViewModel: ObservableObject {
         let remainder = tokens.dropFirst().joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
         guard !remainder.isEmpty else { return (cleaned, nil) }
         return (remainder, min(parsedQty, 99))
+    }
+
+    private func rankSuggestions(_ candidates: [GrocerySuggestion], query: String) -> [GrocerySuggestion] {
+        let normalizedQuery = normalize(query)
+        let queryTokens = normalizedQuery.split(separator: " ").map(String.init)
+
+        return candidates
+            .map { suggestion in
+                let itemName = normalize(suggestion.item.displayName)
+                let groceryIntentBoost = suggestion.item.category.lowercased().contains("grocery") ? 60 : 0
+                let recentBoost = recentItems.firstIndex(where: { normalize($0) == itemName }).map { max(8, 70 - ($0 * 7)) } ?? 0
+                let popularityBoost = popularItems.contains(where: { itemName.contains($0) }) ? 32 : 0
+                let exactBoost = itemName == normalizedQuery ? 260 : 0
+
+                let fuzzyBoost: Int = {
+                    guard !normalizedQuery.isEmpty else { return 0 }
+                    if itemName.contains(normalizedQuery) { return 30 }
+                    let distances = itemName.split(separator: " ").map(String.init).map { levenshteinDistance($0, normalizedQuery) }
+                    if distances.contains(where: { $0 <= 1 && normalizedQuery.count > 3 }) { return 24 }
+                    return 0
+                }()
+
+                let partialTokenBoost = queryTokens.reduce(into: 0) { total, token in
+                    if itemName.hasPrefix(token) { total += 40 }
+                    else if itemName.contains(token) { total += 16 }
+                }
+
+                let adjustedScore = suggestion.score + groceryIntentBoost + recentBoost + popularityBoost + exactBoost + fuzzyBoost + partialTokenBoost
+                return GrocerySuggestion(id: suggestion.id, item: suggestion.item, score: adjustedScore)
+            }
+            .sorted {
+                if $0.score == $1.score {
+                    return $0.item.displayName < $1.item.displayName
+                }
+                return $0.score > $1.score
+            }
+    }
+
+    private func normalize(_ value: String) -> String {
+        value.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func levenshteinDistance(_ lhs: String, _ rhs: String) -> Int {
+        if lhs == rhs { return 0 }
+        if lhs.isEmpty { return rhs.count }
+        if rhs.isEmpty { return lhs.count }
+        let a = Array(lhs)
+        let b = Array(rhs)
+        var previous = Array(0...b.count)
+
+        for (i, charA) in a.enumerated() {
+            var current = [i + 1]
+            for (j, charB) in b.enumerated() {
+                let substitutionCost = charA == charB ? 0 : 1
+                current.append(min(previous[j + 1] + 1, current[j] + 1, previous[j] + substitutionCost))
+            }
+            previous = current
+        }
+        return previous[b.count]
     }
 }
