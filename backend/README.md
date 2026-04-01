@@ -1,36 +1,69 @@
 # UKSupermarketCompare FastAPI Backend
 
-This backend provides the first live API for the iOS app.
+This backend now serves the Swift app's live catalog payload with the exact JSON structure expected by `LiveSupermarketDataService`.
 
 ## Endpoints
 
 - `GET /health`
-- `POST /compare`
+- `GET /catalog`
+- `POST /compare` *(existing mock comparison route retained; app can ignore for now)*
 
-`/compare` returns realistic mock comparison data using the same JSON field names used by the Swift Codable models.
+## `/catalog` response shape
 
-## Run locally
+`/catalog` returns:
+
+```json
+{
+  "supermarkets": [
+    {
+      "name": "Tesco",
+      "description": "string",
+      "products": [
+        {
+          "name": "string",
+          "category": "milk",
+          "subcategory": "string",
+          "price": 1.55,
+          "size": "string",
+          "brand": "string",
+          "isOwnBrand": true,
+          "isPremium": false,
+          "isOrganic": false,
+          "unitDescription": "string",
+          "unitValue": 0.775,
+          "tags": ["string"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+Categories are constrained to the Swift `GroceryCategory` raw values:
+
+`milk`, `bread`, `eggs`, `butter`, `pasta`, `bakedBeans`, `bananas`, `chickenBreast`, `cereal`, `cheese`, `tomatoes`, `rice`, `yogurt`, `apples`, `unknown`.
+
+## Run locally (port 8000)
 
 ```bash
 cd backend
 python -m venv .venv
 source .venv/bin/activate
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-API base URL while running locally:
+Open:
 
-- `http://localhost:8000`
+- API root: `http://localhost:8000`
+- Health: `http://localhost:8000/health`
+- Catalog: `http://localhost:8000/catalog`
+- Swagger docs: `http://localhost:8000/docs`
 
-Swagger docs:
+## Swift setup
 
-- `http://localhost:8000/docs`
+Set the Xcode Run environment variable:
 
-## iOS wiring
+- `LIVE_SUPERMARKET_DATA_URL=http://<your-machine-ip>:8000/catalog`
 
-Set your app's live API endpoint to:
-
-- `http://<your-machine-ip>:8000/compare`
-
-If testing directly from Simulator on the same Mac, `localhost` also works.
+If running in the iOS Simulator on the same Mac, `http://localhost:8000/catalog` is fine.
