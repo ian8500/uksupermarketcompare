@@ -67,6 +67,39 @@ struct CreateShoppingListView: View {
                     }
                 }
 
+
+
+                BrandCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        sectionTitle("Weekly essentials")
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(viewModel.weeklyEssentials, id: \.self) { item in
+                                    Button(item) { viewModel.quickAddEssential(item) }
+                                        .buttonStyle(BrandSecondaryButtonStyle())
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if !viewModel.recentItems.isEmpty {
+                    BrandCard {
+                        VStack(alignment: .leading, spacing: 10) {
+                            sectionTitle("Recent items")
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(viewModel.recentItems.prefix(10), id: \.self) { item in
+                                        Button(item) { viewModel.addRecentItem(item) }
+                                            .buttonStyle(.bordered)
+                                            .tint(BrandPalette.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 BrandCard {
                     VStack(alignment: .leading, spacing: 10) {
                         sectionTitle("Current Basket")

@@ -35,7 +35,7 @@ def test_common_seed_items_are_matchable_across_all_supermarkets():
 
 
 def test_quantity_scales_selection_totals():
-    response = build_comparison(_request(("milk", 2)))
+    response = build_comparison(_request(("2x milk", 1)))
     selected = response.result.selectedBasket.selections[0]
 
     assert selected.quantity == 2
@@ -62,6 +62,7 @@ def test_matching_logs_include_match_and_candidate_reasons(caplog):
     assert "match supermarket=Tesco item=milk" in logs
     assert "candidates=" in logs
     assert "no-match supermarket=Tesco item=unfindable mystery item" in logs
+    assert "analytics event=compare_completed" in logs
 
 
 def test_mixed_basket_honours_max_supermarket_limit():

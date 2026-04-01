@@ -7,17 +7,20 @@ from uuid import uuid4
 
 from app.models import (
     BasketOptimisationResult,
+    BasketSummaryCard,
     CompareRequest,
     CompareResponse,
     GroceryCategory,
     ItemSelectionResult,
     MatchQuality,
     MixedBasketResult,
+    SavingsExplanation,
     Supermarket,
     SupermarketBasketTotal,
     SupermarketProduct,
     build_intent,
 )
+from app.services.item_parser import parse_item_input
 from app.services.seed_catalog import COMMON_KEYWORD_MAP, SEEDED_SUPERMARKETS
 
 logger = logging.getLogger(__name__)
@@ -247,9 +250,36 @@ def _build_mixed_basket(intents, totals: list[SupermarketBasketTotal], max_super
     )
 
 
+
+
+def _best_convenience_basket(intents, totals: list[SupermarketBasketTotal]) -> MixedBasketResult:
+    if not totals:
+        return MixedBasketResult(selections=[], unavailableItems=intents, total=Decimal("0.00"), missingItemsExplanation=_missing_explanation(intents))
+
+    best_total = None
+    best_score = None
+    for candidate in totals:
+        # convenience strongly prioritises complete baskets at one store
+        penalty = Decimal(len(candidate.unavailableItems)) * Decimal("5.00")
+        score = candidate.total + penalty
+        if best_score is None or score < best_score:
+            best_score = score
+            best_total = candidate
+
+    assert best_total is not None
+    return MixedBasketResult(
+        selections=best_total.selections,
+        unavailableItems=best_total.unavailableItems,
+        total=best_total.total,
+        missingItemsExplanation=best_total.missingItemsExplanation,
+    )
+
 def build_comparison(request: CompareRequest) -> CompareResponse:
     product_map = _seeded_product_map()
-    intents = [_intent_from_item(item.name, item.quantity) for item in request.shoppingList.items]
+    intents = []
+    for item in request.shoppingList.items:
+        parsed = parse_item_input(item.name, fallback_quantity=item.quantity)
+        intents.append(_intent_from_item(parsed.name, parsed.quantity))
 
     totals = []
     for supermarket in request.supermarkets:
@@ -261,6 +291,7 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
 
     max_supermarkets = request.maxSupermarkets if getattr(request, "maxSupermarkets", None) else None
     mixed = _build_mixed_basket(intents, totals, max_supermarkets=max_supermarkets)
+    convenience = _best_convenience_basket(intents, totals)
 
     selected = mixed if request.comparisonMode.value == "cheapestPossible" else MixedBasketResult(
         selections=cheapest_single.selections if cheapest_single else [],
@@ -275,17 +306,31 @@ def build_comparison(request: CompareRequest) -> CompareResponse:
         supermarketTotals=totals,
         cheapestSingleStore=cheapest_single,
         mixedBasket=mixed,
+        bestConvenienceBasket=convenience,
         selectedBasket=selected,
         comparisonMode=request.comparisonMode,
         preferences=request.preferences,
+        maxSupermarkets=max_supermarkets,
+        summaryCards=[
+            BasketSummaryCard(title="Cheapest mixed basket", total=mixed.total, subtitle="Lowest total across stores"),
+            BasketSummaryCard(title="Cheapest single-store basket", total=cheapest_single.total if cheapest_single else Decimal("0.00"), subtitle=cheapest_single.supermarket.name if cheapest_single else "No complete store"),
+            BasketSummaryCard(title="Best convenience option", total=convenience.total, subtitle="Fewest missing items at one store"),
+        ],
     )
 
     most_expensive_total = totals[-1].total if totals else Decimal("0.00")
     savings_vs_most_expensive = most_expensive_total - selected.total
     savings_vs_cheapest_single = (cheapest_single.total - selected.total) if cheapest_single else Decimal("0.00")
 
+    logger.info("analytics event=compare_completed items=%s supermarkets=%s selected_total=%s mixed_total=%s convenience_total=%s", len(request.shoppingList.items), len(request.supermarkets), selected.total, mixed.total, convenience.total)
+
     return CompareResponse(
         result=result,
         savingsVsMostExpensive=savings_vs_most_expensive,
         savingsVsCheapestSingleStore=savings_vs_cheapest_single,
+        savingsExplanation=SavingsExplanation(
+            amountVsMostExpensive=savings_vs_most_expensive,
+            amountVsCheapestSingleStore=savings_vs_cheapest_single,
+            explanation=f"Selected basket saves £{savings_vs_most_expensive:.2f} vs most expensive and £{savings_vs_cheapest_single:.2f} vs cheapest single-store.",
+        ),
     )

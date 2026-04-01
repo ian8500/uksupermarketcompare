@@ -142,6 +142,22 @@ class MixedBasketResult(BaseModel):
     missingItemsExplanation: str = "All requested items were matched."
 
 
+class BasketSummaryCard(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str
+    total: Decimal
+    subtitle: str
+
+
+class SavingsExplanation(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    amountVsMostExpensive: Decimal
+    amountVsCheapestSingleStore: Decimal
+    explanation: str
+
+
 class BasketOptimisationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -150,10 +166,12 @@ class BasketOptimisationResult(BaseModel):
     supermarketTotals: List[SupermarketBasketTotal]
     cheapestSingleStore: Optional[SupermarketBasketTotal]
     mixedBasket: MixedBasketResult
+    bestConvenienceBasket: MixedBasketResult
     selectedBasket: MixedBasketResult
     comparisonMode: BasketComparisonMode
     preferences: BasketUserPreferences
     maxSupermarkets: int | None = None
+    summaryCards: List[BasketSummaryCard] = []
 
 
 class CompareRequest(BaseModel):
@@ -172,6 +190,37 @@ class CompareResponse(BaseModel):
     result: BasketOptimisationResult
     savingsVsMostExpensive: Decimal = Field(default=Decimal("0.00"))
     savingsVsCheapestSingleStore: Decimal = Field(default=Decimal("0.00"))
+    savingsExplanation: SavingsExplanation
+
+
+class SavedBasketRecord(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: UUID
+    shoppingList: ShoppingList
+    lastResult: Optional[BasketOptimisationResult] = None
+
+
+class SavedBasketUpsertRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    shoppingList: ShoppingList
+
+
+class SavedBasketRerunRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    supermarkets: List[Supermarket]
+    comparisonMode: BasketComparisonMode
+    preferences: BasketUserPreferences
+    maxSupermarkets: int | None = None
+
+
+class ParsedItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str
+    quantity: int
 
 
 def build_intent(item_name: str, quantity: int, category: GroceryCategory, keywords: list[str]) -> GroceryIntent:
