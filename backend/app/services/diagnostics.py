@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Literal
 
 from app.db import get_connection
+
+FreshnessStatus = Literal["healthy", "stale", "critical", "failed"]
 
 
 def record_search_event(*, query: str, normalized_query: str, result_count: int, endpoint: str) -> None:
@@ -214,13 +217,23 @@ def retailer_freshness_diagnostics() -> list[dict[str, str | int | None]]:
                     LIMIT 1
                 ) AS last_status,
                 (
+                    SELECT ir.source_mode
+                    FROM import_runs ir
+                    WHERE ir.retailer = r.name
+                    ORDER BY ir.started_at DESC
+                    LIMIT 1
+                ) AS source_mode,
+                (
                     SELECT ir.completed_at
                     FROM import_runs ir
                     WHERE ir.retailer = r.name AND ir.status = 'success'
                     ORDER BY ir.completed_at DESC
                     LIMIT 1
-                ) AS last_success_at
+                ) AS last_success_at,
+                COUNT(raw.id) AS product_count
             FROM retailers r
+            LEFT JOIN raw_retailer_products raw ON raw.retailer_id = r.id
+            GROUP BY r.id, r.name
             ORDER BY r.name
             """
         ).fetchall()
@@ -229,21 +242,10 @@ def retailer_freshness_diagnostics() -> list[dict[str, str | int | None]]:
     for row in rows:
         last_success_at = row["last_success_at"]
         last_status = row["last_status"] or "unknown"
-        age_hours: int | None = None
-        if last_success_at:
-            success_dt = datetime.fromisoformat(last_success_at.replace("Z", "+00:00"))
-            age_hours = int((now - success_dt).total_seconds() // 3600)
-
-        if last_status == "failed" and (age_hours is None or age_hours > 24):
-            freshness = "failed"
-        elif age_hours is None:
-            freshness = "critical"
-        elif age_hours <= 24:
-            freshness = "healthy"
-        elif age_hours <= 72:
-            freshness = "stale"
-        else:
-            freshness = "critical"
+        source_mode = row["source_mode"] or "unknown"
+        age_hours, freshness = _classify_retailer_freshness(
+            now=now, last_success_at=last_success_at, last_status=last_status
+        )
 
         payload.append(
             {
@@ -252,7 +254,32 @@ def retailer_freshness_diagnostics() -> list[dict[str, str | int | None]]:
                 "ageHours": age_hours,
                 "lastAttemptAt": row["last_attempt_at"],
                 "lastSuccessAt": last_success_at,
+                "lastSuccessTimestamp": last_success_at,
                 "lastImportStatus": last_status,
+                "sourceMode": source_mode,
+                "productCount": int(row["product_count"] or 0),
             }
         )
     return payload
+
+
+def _classify_retailer_freshness(
+    *,
+    now: datetime,
+    last_success_at: str | None,
+    last_status: str,
+) -> tuple[int | None, FreshnessStatus]:
+    age_hours: int | None = None
+    if last_success_at:
+        success_dt = datetime.fromisoformat(last_success_at.replace("Z", "+00:00"))
+        age_hours = int((now - success_dt).total_seconds() // 3600)
+
+    if last_status == "failed" and (age_hours is None or age_hours > 24):
+        return age_hours, "failed"
+    if age_hours is None:
+        return age_hours, "critical"
+    if age_hours <= 24:
+        return age_hours, "healthy"
+    if age_hours <= 72:
+        return age_hours, "stale"
+    return age_hours, "critical"
