@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+import logging
 from dataclasses import dataclass
 
 from app.models import GroceryCategory
@@ -45,6 +46,7 @@ CATEGORY_RULES: list[tuple[GroceryCategory, set[str]]] = [
 ]
 
 SIZE_PATTERN = re.compile(r"(?P<value>\d+(?:\.\d+)?)\s*(?P<unit>kg|g|l|ml|cl|pack)", flags=re.IGNORECASE)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -72,7 +74,9 @@ def normalize_product_name(name: str, synonyms: dict[str, str] | None = None) ->
     mapping = {**DEFAULT_SYNONYMS, **(synonyms or {})}
     for synonym, canonical in mapping.items():
         text = re.sub(rf"\b{re.escape(normalize_text(synonym))}\b", normalize_text(canonical), text)
-    return " ".join(text.split())
+    normalized = " ".join(text.split())
+    logger.debug("normalize_product_name input=%r normalized=%r synonyms=%d", name, normalized, len(mapping))
+    return normalized
 
 
 def normalize_tags(tags: list[str]) -> list[str]:
@@ -84,6 +88,7 @@ def normalize_size(size: str) -> NormalizedSize:
     normalized = size.strip().lower()
     match = SIZE_PATTERN.search(normalized)
     if not match:
+        logger.debug("normalize_size no-match size=%r", size)
         return NormalizedSize(original=size, value=None, unit=None, normalized_value=None, normalized_unit=None)
 
     value = float(match.group("value"))

@@ -1,23 +1,32 @@
 from __future__ import annotations
 
 from decimal import Decimal
+import logging
 
 from app.db import get_connection
 from app.models import GroceryCategory
 from app.services.ingestion import import_catalog_data
 from app.services.normalization import normalize_brand
 
+logger = logging.getLogger(__name__)
 
 def ensure_seed_data() -> None:
     with get_connection() as conn:
         retailer_count = conn.execute("SELECT COUNT(*) FROM retailers").fetchone()[0]
     if retailer_count > 0:
+        logger.info("Seed data already present retailers=%d", retailer_count)
         return
+    logger.info("Seeding catalog data from providers")
     import_catalog_data()
 
 
 def load_catalog_rows() -> list[dict]:
     with get_connection() as conn:
+        unmapped_count = conn.execute(
+            "SELECT COUNT(*) AS count FROM raw_retailer_products raw LEFT JOIN product_mappings pm ON pm.raw_product_id = raw.id WHERE pm.id IS NULL"
+        ).fetchone()["count"]
+        if unmapped_count:
+            logger.warning("Failed mappings detected while loading catalog missing_mappings=%d", unmapped_count)
         rows = conn.execute(
             """
             SELECT
@@ -70,4 +79,6 @@ def load_catalog_rows() -> list[dict]:
                 "tags": [tag for tag in row["tags"].split(",") if tag],
             }
         )
-    return list(by_market.values())
+    markets = list(by_market.values())
+    logger.info("Catalog rows loaded supermarkets=%d product_rows=%d", len(markets), len(rows))
+    return markets

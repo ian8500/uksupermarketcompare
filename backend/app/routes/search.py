@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict
 
+from app.services.diagnostics import record_search_event
 from app.services.normalization import normalize_product_name
 from app.services.search_service import autocomplete_catalog, search_catalog
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 class SearchResultItem(BaseModel):
@@ -61,9 +65,12 @@ class AutocompleteResponse(BaseModel):
 @router.get("/search", response_model=SearchResponse)
 def search(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50)) -> SearchResponse:
     ranked = search_catalog(q, limit=limit)
+    normalized_query = normalize_product_name(q)
+    record_search_event(query=q, normalized_query=normalized_query, result_count=len(ranked), endpoint="/search")
+    logger.info("search endpoint q=%r normalized=%r total=%d", q, normalized_query, len(ranked))
     return SearchResponse(
         query=q,
-        normalizedQuery=normalize_product_name(q),
+        normalizedQuery=normalized_query,
         total=len(ranked),
         results=[
             SearchResultItem(
@@ -91,4 +98,12 @@ def search(q: str = Query(..., min_length=1), limit: int = Query(20, ge=1, le=50
 @router.get("/autocomplete", response_model=AutocompleteResponse)
 def autocomplete(q: str = Query(..., min_length=1), limit: int = Query(8, ge=1, le=20)) -> AutocompleteResponse:
     suggestions = [AutocompleteSuggestion(**item) for item in autocomplete_catalog(q, limit=limit)]
+    normalized_query = normalize_product_name(q)
+    record_search_event(
+        query=q,
+        normalized_query=normalized_query,
+        result_count=len(suggestions),
+        endpoint="/autocomplete",
+    )
+    logger.info("autocomplete endpoint q=%r normalized=%r total=%d", q, normalized_query, len(suggestions))
     return AutocompleteResponse(query=q, total=len(suggestions), suggestions=suggestions)

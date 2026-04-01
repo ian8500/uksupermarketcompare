@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import logging
 
 from app.db import get_connection
 from app.services.providers import AsdaProvider, CatalogProvider, SainsburysProvider, TescoProvider
@@ -11,6 +12,7 @@ DEFAULT_SYNONYMS: dict[str, str] = {
     "loaf": "bread",
     "fillets": "fillet",
 }
+logger = logging.getLogger(__name__)
 
 
 def default_providers() -> list[CatalogProvider]:
@@ -26,6 +28,7 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
 
     with get_connection() as conn:
         for provider in providers:
+            logger.info("Starting import for provider=%s replace_existing=%s", provider.name, replace_existing)
             retailer_row = conn.execute("SELECT id FROM retailers WHERE name = ?", (provider.name,)).fetchone()
             if retailer_row:
                 retailer_id = retailer_row[0]
@@ -153,6 +156,14 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                         (raw_product_id, new_price, "GBP", product.raw.unit_description, new_unit_value, now),
                     )
                     inserted_price_snapshots += 1
+            logger.info(
+                "Completed import provider=%s inserted_raw=%d updated_raw=%d inserted_canonical=%d inserted_price_snapshots=%d",
+                provider.name,
+                inserted_raw,
+                updated_raw,
+                inserted_canonical,
+                inserted_price_snapshots,
+            )
 
         for synonym, canonical in DEFAULT_SYNONYMS.items():
             conn.execute(
@@ -160,6 +171,14 @@ def import_catalog_data(providers: list[CatalogProvider] | None = None, *, repla
                 (synonym, canonical, "catalog"),
             )
         conn.commit()
+    logger.info(
+        "Import finished providers=%d inserted_raw=%d updated_raw=%d inserted_canonical=%d inserted_price_snapshots=%d",
+        len(providers),
+        inserted_raw,
+        updated_raw,
+        inserted_canonical,
+        inserted_price_snapshots,
+    )
 
     return {
         "providers": len(providers),

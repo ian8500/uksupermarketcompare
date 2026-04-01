@@ -77,5 +77,14 @@ def init_db() -> None:
                 canonical_term TEXT NOT NULL,
                 term_type TEXT NOT NULL
             );
+
+            CREATE TABLE IF NOT EXISTS search_telemetry (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                query TEXT NOT NULL,
+                normalized_query TEXT NOT NULL,
+                result_count INTEGER NOT NULL,
+                endpoint TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
             """
         )
