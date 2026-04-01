@@ -35,6 +35,14 @@ class MatchQuality(int, Enum):
 class BasketComparisonMode(str, Enum):
     cheapestPossible = "cheapestPossible"
     cheapestSingleStoreOnly = "cheapestSingleStoreOnly"
+    bestConvenienceOption = "bestConvenienceOption"
+
+
+class BasketDecisionMode(str, Enum):
+    cheapestSingleStore = "cheapestSingleStore"
+    cheapestMixedBasket = "cheapestMixedBasket"
+    bestConvenienceOption = "bestConvenienceOption"
+    cheapestMixedBasketMaxTwoStores = "cheapestMixedBasketMaxTwoStores"
 
 
 class BrandPreference(str, Enum):
@@ -161,8 +169,36 @@ class MixedBasketResult(BaseModel):
     selections: List[ItemSelectionResult]
     unavailableItems: List[GroceryIntent]
     total: Decimal
+    storesUsed: int = 0
     missingItemsExplanation: str = "All requested items were matched."
     missingItemDetails: List[MissingItemDetail] = []
+
+
+class StoreAllocationSummary(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    storeName: str
+    itemCount: int
+    totalSpend: Decimal
+
+
+class PurchasePlan(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: BasketDecisionMode
+    basket: MixedBasketResult
+    allocation: List[StoreAllocationSummary]
+    unavailableItemsCount: int
+
+
+class BasketStrategyResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    mode: BasketDecisionMode
+    plan: PurchasePlan
+    wonBecause: str
+    tradeoffs: List[str] = []
+    score: Decimal
 
 
 class BasketSummaryCard(BaseModel):
@@ -195,6 +231,8 @@ class BasketOptimisationResult(BaseModel):
     preferences: BasketUserPreferences
     maxSupermarkets: int | None = None
     summaryCards: List[BasketSummaryCard] = []
+    strategyResults: List[BasketStrategyResult] = []
+    selectedStrategyMode: BasketDecisionMode | None = None
 
 
 class CompareRequest(BaseModel):
