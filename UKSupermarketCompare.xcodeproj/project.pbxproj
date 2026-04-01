@@ -34,6 +34,7 @@
 		A1B2C3D4E5F6071829300029 /* GroceryCatalogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829300125 /* GroceryCatalogService.swift */; };
 		A1B2C3D4E5F607182930002A /* AppDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829300127 /* AppDesignSystem.swift */; };
 		A1B2C3D4E5F607182930002B /* GroceryCatalogSeed.json in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829300126 /* GroceryCatalogSeed.json */; };
+		A1B2C3D4E5F607182930002C /* LiveSupermarketDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6071829300128 /* LiveSupermarketDataService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +66,7 @@
 		A1B2C3D4E5F6071829300125 /* GroceryCatalogService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroceryCatalogService.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6071829300126 /* GroceryCatalogSeed.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = GroceryCatalogSeed.json; sourceTree = "<group>"; };
 		A1B2C3D4E5F6071829300127 /* AppDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDesignSystem.swift; sourceTree = "<group>"; };
+		A1B2C3D4E5F6071829300128 /* LiveSupermarketDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveSupermarketDataService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,6 +143,7 @@
 				A1B2C3D4E5F6071829300108 /* BasketComparisonService.swift */,
 				A1B2C3D4E5F6071829300109 /* ShoppingListStore.swift */,
 				A1B2C3D4E5F6071829300125 /* GroceryCatalogService.swift */,
+				A1B2C3D4E5F6071829300128 /* LiveSupermarketDataService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -263,6 +266,7 @@
 				A1B2C3D4E5F6071829300028 /* GroceryCatalogItem.swift in Sources */,
 				A1B2C3D4E5F6071829300029 /* GroceryCatalogService.swift in Sources */,
 				A1B2C3D4E5F607182930002A /* AppDesignSystem.swift in Sources */,
+				A1B2C3D4E5F607182930002C /* LiveSupermarketDataService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
